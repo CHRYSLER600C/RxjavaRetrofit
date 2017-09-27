@@ -7,7 +7,7 @@ android {
         release {
             keyAlias 'invest'
             keyPassword 'invest'
-            storeFile file('E:/electricitySupplier/EMobile/Android/WithDraw/release.keystore')
+            storeFile file('../release.keystore')
             storePassword 'invest'
         }
     }
