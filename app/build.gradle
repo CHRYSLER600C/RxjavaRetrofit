@@ -1,0 +1,89 @@
+apply plugin: 'com.android.application'
+//添加应用apt插件(使用Dagger2)
+apply plugin: 'com.neenbedankt.android-apt'
+
+android {
+    signingConfigs { // 打正式包的签名配置
+        release {
+            keyAlias 'invest'
+            keyPassword 'invest'
+            storeFile file('E:/electricitySupplier/EMobile/Android/WithDraw/release.keystore')
+            storePassword 'invest'
+        }
+    }
+
+    compileSdkVersion 23
+    buildToolsVersion '25.0.0'
+
+    defaultConfig {
+        applicationId "com.born.frame"
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionCode 100
+        versionName "1.0.0"
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release   // 指定签名为release，否则不会签名
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+        }
+    }
+
+    // 自定义APK文件名
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            def fileName = "RxjavaRetrofit_V${defaultConfig.versionName}_${buildType.name}_${releaseTime()}()";
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                if ('release' == variant.buildType.name) {
+                    fileName += "-${defaultConfig.versionCode}.apk"
+                } else if ('debug' == variant.buildType.name) {
+                    fileName += "-${defaultConfig.versionCode}.apk"
+                }
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    }
+}
+
+//获取时间
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.2.0'
+    compile 'com.android.support:recyclerview-v7:23.2.0'
+
+    // RxJava && RxAndroid && RxBinding
+    compile 'io.reactivex:rxjava:1.1.0'
+    compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'com.jakewharton.rxbinding:rxbinding:1.0.0'
+
+    // Rxlifecycle
+    compile 'com.trello:rxlifecycle:0.3.1'
+    compile 'com.trello:rxlifecycle-components:0.3.1'
+
+    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta4'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.0-beta4'
+
+    compile 'com.google.code.gson:gson:2.6.2'
+    compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'org.apache.httpcomponents:httpcore:4.4.4' //EncodingUtils
+    compile 'com.squareup.picasso:picasso:2.5.2' //picasso
+
+    //Dagger
+    compile 'com.google.dagger:dagger:2.2'
+    apt 'com.google.dagger:dagger-compiler:2.2'
+
+    compile 'org.glassfish:javax.annotation:10.0-b28' //java注解
+
+    // LeakCanary
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<style>
+.button-class{
+    padding:20px;
+    display:block;
+    margin:0 auto;
+    margin-top:20px;
+    margin-bottom:20px;
+    font-size:40px;
+    font-weight:bold;
+    width="100%"
+}
+
+#text-container{
+    font-size:40px;
+    font-weight:bold;
+}
+
+#bottom-container {
+    position: absolute;
+    bottom: 0;
+    left:10%;
+    margin:0 auto;
+    margin-bottom:100px;
+}
+</style>
+
+<body>
+<p id="text-container"></p>
+
+<div id="bottom-container">
+
+    <input id="inputTest" type="text" name="firstname" value="Mickey"  class="button-class"/>
+    <button type="button" onclick="showToast()" class="button-class">Click for showing Toast Message
+    </button>
+    <button type="button"
+            onclick="window.handler.callAndroid('Html页面首先调用Android的callAndroid方法，然后Android又调用了JS的callJS方法')"
+            class="button-class">Js->Android->Js
+    </button>
+    <button type="button" onclick="giveCallbackToClient()" class="button-class">Click for Loading Text inWebView
+    </button>
+    <button type="button" onclick="clickPrompt()" class="button-class">点击调用Android代码</button>
+</div>
+
+<script>
+	function showToast(){
+		handler.handleMessage('This is a toast message from Javascript !!');  <!-- 回调Android的方法 -->
+	}
+
+	function giveCallbackToClient(){
+	    handler.setWebViewTextCallback();  <!-- 回调Android的方法 -->
+	}
+
+    function setText(text){
+    	document.getElementById('text-container').innerHTML=text;
+    	document.getElementById('inputTest').value=text;
+	}
+	function callJS(text){
+        alert(text);
+    }
+
+    function clickPrompt(){
+        var result=prompt("js://demo?arg1=111&arg2=222");
+        alert("demo " + result);
+    }
+</script>
+
+</body>
+</html>

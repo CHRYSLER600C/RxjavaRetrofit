@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@drawable/selector_underline_05dip"
+              android:orientation="horizontal"
+              android:padding="10dp">
+
+    <TextView
+        android:id="@+id/tvSelectName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textColor="@color/color_3"
+        android:textSize="16sp"/>
+
+    <LinearLayout
+        android:id="@+id/llSelectContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvSelectContent1"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:drawablePadding="5dip"
+            android:drawableRight="@drawable/ic_arrow_down"
+            android:gravity="right"
+            android:hint="请选择"
+            android:paddingRight="5dp"
+            android:textColor="@color/color_3"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tvSelectContent2"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:drawablePadding="5dip"
+            android:drawableRight="@drawable/ic_arrow_down"
+            android:gravity="right"
+            android:hint="请选择"
+            android:paddingRight="5dp"
+            android:textColor="@color/color_3"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tvSelectContent3"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:drawablePadding="5dip"
+            android:drawableRight="@drawable/ic_arrow_down"
+            android:gravity="right"
+            android:hint="请选择"
+            android:paddingRight="5dp"
+            android:textColor="@color/color_3"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvSelectUnit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textColor="@color/color_3"
+        android:textSize="16sp"/>
+</LinearLayout>
