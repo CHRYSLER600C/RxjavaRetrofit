@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
-//添加应用apt插件(使用Dagger2)
-apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'org.greenrobot.greendao' // apply plugin
+
 
 android {
     signingConfigs { // 打正式包的签名配置
@@ -12,39 +12,40 @@ android {
         }
     }
 
-    compileSdkVersion 23
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
-        applicationId "com.born.frame"
-        minSdkVersion 15
-        targetSdkVersion 22
+        applicationId "com.frame"
+        minSdkVersion 17
+        targetSdkVersion 28
         versionCode 100
         versionName "1.0.0"
     }
     buildTypes {
         release {
+            buildConfigField "boolean", "ISRELEASE", "true"
             signingConfig signingConfigs.release   // 指定签名为release，否则不会签名
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-
+        }
+        debug {
+            buildConfigField "boolean", "ISRELEASE", "false"
+            signingConfig signingConfigs.release   // 指定签名为release，否则不会签名
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
     // 自定义APK文件名
     applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            def outputFile = output.outputFile
-            def fileName = "RxjavaRetrofit_V${defaultConfig.versionName}_${buildType.name}_${releaseTime()}()";
-            if (outputFile != null && outputFile.name.endsWith('.apk')) {
-                if ('release' == variant.buildType.name) {
-                    fileName += "-${defaultConfig.versionCode}.apk"
-                } else if ('debug' == variant.buildType.name) {
-                    fileName += "-${defaultConfig.versionCode}.apk"
-                }
-                output.outputFile = new File(outputFile.parent, fileName)
-            }
+        variant.outputs.all {
+            outputFileName = "RxjavaRetrofit_V${defaultConfig.versionName}(${defaultConfig.versionCode})_${buildType.name}_${releaseTime()}().apk";
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -53,37 +54,73 @@ def releaseTime() {
     return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
 }
 
+greendao {
+    schemaVersion 1
+    targetGenDir 'src/main/java'
+    daoPackage 'com.frame.core.dao'
+}
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.2.0'
-    compile 'com.android.support:recyclerview-v7:23.2.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.12'
 
-    // RxJava && RxAndroid && RxBinding
-    compile 'io.reactivex:rxjava:1.1.0'
-    compile 'io.reactivex:rxandroid:1.1.0'
-    compile 'com.jakewharton.rxbinding:rxbinding:1.0.0'
+    //Base
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:cardview-v7:28.0.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
 
-    // Rxlifecycle
-    compile 'com.trello:rxlifecycle:0.3.1'
-    compile 'com.trello:rxlifecycle-components:0.3.1'
+    //Dagger2
+    implementation 'com.google.dagger:dagger:2.15'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.15'
 
-    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta4'
-    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.0-beta4'
+    //RxJava && RxAndroid && RxBinding && rxPermissions
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.6'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'com.jakewharton.rxbinding2:rxbinding:2.1.0'
+    implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.5'
 
-    compile 'com.google.code.gson:gson:2.6.2'
-    compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'org.apache.httpcomponents:httpcore:4.4.4' //EncodingUtils
-    compile 'com.squareup.picasso:picasso:2.5.2' //picasso
+    // Net
+    //Retrofit2
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    //Gson
+    implementation 'com.google.code.gson:gson:2.8.5'
+    //picasso
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    //SuperAdapter
+    implementation 'org.byteam.superadapter:superadapter:3.6.8'
 
-    //Dagger
-    compile 'com.google.dagger:dagger:2.2'
-    apt 'com.google.dagger:dagger-compiler:2.2'
+    // Utils
+    //Butterknife
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    //EncodingUtils
+    implementation 'org.apache.httpcomponents:httpcore:4.4.5'
+    //java注解
+    implementation 'org.glassfish:javax.annotation:10.0-b28'
+    //LeakCanary
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
+    //EventBus
+    implementation 'org.greenrobot:eventbus:3.1.1'
+    //AndroidUtilCode
+    implementation 'com.blankj:utilcode:1.23.5'
+    //GreenDao
+    implementation 'org.greenrobot:greendao:3.2.2' // add library
 
-    compile 'org.glassfish:javax.annotation:10.0-b28' //java注解
-
-    // LeakCanary
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.4'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    //UI
+    //状态栏
+    implementation 'com.githang:status-bar-compat:0.7'
+    //TabLayout
+    implementation 'com.flyco.tablayout:FlycoTabLayout_Lib:2.1.2@aar'
+    //Banner轮播图
+    implementation 'com.youth.banner:banner:1.4.10'
+    //smartrefresh
+    implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-20'
+    implementation 'com.scwang.smartrefresh:SmartRefreshHeader:1.1.0-alpha-20'
+    //VerticalTabLayout
+    implementation 'q.rorbin:VerticalTabLayout:1.2.5'
+    //流式布局
+    implementation 'com.hyman:flowlayout-lib:1.1.2'
 }

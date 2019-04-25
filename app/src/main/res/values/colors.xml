@@ -22,9 +22,13 @@
     <color name="color_7">#777777</color>
     <color name="color_8">#888888</color>
     <color name="color_9">#999999</color>
+    <color name="color_a">#aaaaaa</color>
+    <color name="color_b">#bbbbbb</color>
     <color name="color_c">#cccccc</color>
     <color name="color_ce">#cecece</color>
     <color name="color_d6">#d6d6d6</color>
+    <color name="color_e">#eeeeee</color>
+
 
     <color name="dialog_bg_color">#88000000</color><!-- 对话框背景颜色-->
     <color name="common_bg_color">#e7e7e7</color>  <!-- 通用背景颜色-->
@@ -32,5 +36,10 @@
     <color name="tab_text_color">#2686D3</color>   <!-- 首页tab的文字颜色-->
 
     <color name="picker_text_color">#fb5f3b</color><!-- Picker的文字颜色-->
+    <color name="common_btn_lightblue">#0077d9</color>
 
+    //other
+    <color name="comment_text">#5b5d5c</color>
+    <color name="shallow_green">#FF36BC9B</color>
+    <color name="shallow_grey">#FF757575</color>
 </resources>

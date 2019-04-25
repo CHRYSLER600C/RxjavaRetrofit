@@ -1,79 +1,72 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/rlTitleContainer"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/llTitleBar"
     android:layout_width="match_parent"
     android:layout_height="@dimen/title_height"
     android:background="@color/title_bg_color"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp" >
+    android:gravity="center_vertical">
 
     <LinearLayout
-        android:id="@+id/llLeftContainer"
+        android:id="@+id/llLeftBar"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:clickable="true"
-        android:minWidth="80dp"
-        android:orientation="horizontal" >
+        android:gravity="center_vertical"
+        android:minWidth="40dp"
+        android:orientation="horizontal"
+        android:paddingStart="10dp">
 
         <ImageView
             android:id="@+id/ivLeft"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
+            android:layout_height="28dp"
             android:contentDescription="@null"
-            android:minHeight="25dp"
-            android:minWidth="14dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_arrow_left" />
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_arrow_left"/>
 
         <TextView
             android:id="@+id/tvLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:textSize="16sp"/>
     </LinearLayout>
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_marginLeft="40dip"
-        android:layout_marginRight="40dip"
+        android:layout_weight="1"
         android:singleLine="true"
+        android:gravity="center"
         android:textColor="@android:color/white"
-        android:textSize="20sp" />
+        android:textSize="18sp"
+        tools:text="长长长长长长长长长长长长长长长长长长长长标题"/>
 
     <LinearLayout
-        android:id="@+id/llRightContainer"
+        android:id="@+id/llRightBar"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:layout_margin="10dp"
-        android:gravity="right"
-        android:minWidth="50dp"
-        android:orientation="horizontal" >
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="5dip"
+        android:paddingEnd="10dp">
 
         <TextView
             android:id="@+id/tvRight"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
+            android:singleLine="true"
             android:textColor="@android:color/white"
-            android:textSize="18sp" />
+            tools:text="其它"
+            android:textSize="16sp"/>
 
         <ImageView
             android:id="@+id/ivRight"
-            android:layout_width="wrap_content"
+            android:layout_width="20dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
             android:contentDescription="@null"
-            android:minHeight="13.5dp"
-            android:minWidth="20dp"
-            android:visibility="gone" />
+            android:visibility="gone"/>
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

@@ -32,5 +32,5 @@
         android:text="重新下载"
         android:textColor="@android:color/white"
         android:textSize="16sp"
-        android:visibility="gone"/>
+        android:visibility="visible"/>
 </LinearLayout>

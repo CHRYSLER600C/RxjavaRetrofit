@@ -47,7 +47,7 @@
             android:textSize="18sp"/>
     </LinearLayout>
 
-    <com.born.frame.view.pickerview.PickerView
+    <com.frame.view.pickerview.PickerView
         android:id="@+id/pickerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
