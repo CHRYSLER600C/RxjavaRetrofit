@@ -6,8 +6,8 @@ import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 
 import com.blankj.utilcode.util.ActivityUtils;
@@ -58,7 +58,7 @@ public class WxArticleDetailFragment extends BaseTitleFragment {
 
     @Override
     protected View setContentView(Bundle savedInstanceState) {
-        return View.inflate(mBaseActivity, R.layout.common_layout_srl_rv, null);
+        return View.inflate(mBActivity, R.layout.common_layout_srl_rv, null);
     }
 
     @Override
@@ -74,8 +74,8 @@ public class WxArticleDetailFragment extends BaseTitleFragment {
         }
         if (mCurrId == 0) return;
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mBaseActivity));
-        mRecyclerView.setAdapter(mSuperAdapter = getSuperAdapter(mBaseActivity, mList));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mBActivity));
+        mRecyclerView.setAdapter(mSuperAdapter = getSuperAdapter(mBActivity, mList));
 
         setSmartRefreshLayout();
     }
@@ -98,7 +98,7 @@ public class WxArticleDetailFragment extends BaseTitleFragment {
     }
 
     private void setSmartRefreshLayout() {
-        mSmartRefreshLayout.setRefreshFooter(new ClassicsFooter(mBaseActivity));
+        mSmartRefreshLayout.setRefreshFooter(new ClassicsFooter(mBActivity));
         mSmartRefreshLayout.setOnRefreshListener(refreshLayout -> {
             getNetData(mCurrId, mCurrPage = 1, false);
         });
@@ -137,8 +137,8 @@ public class WxArticleDetailFragment extends BaseTitleFragment {
     }
 
     private void getNetData(int id, int currPage, boolean isLoading) {
-        BaseActivity.doCommonGetImpl("wxarticle/list/" + id + "/" + currPage + "/json", null, new
-                ProgressObserver<DataClass>(mBaseActivity, isLoading, mSmartRefreshLayout) {
+        BaseActivity.doCommonGet("wxarticle/list/" + id + "/" + currPage + "/json", null, new
+                ProgressObserver<DataClass>(mBActivity, isLoading, mSmartRefreshLayout) {
                     @Override
                     public void onNext(DataClass dc) {
                         LinkedTreeMap<String, Object> data = JU.m(dc.object, "data");

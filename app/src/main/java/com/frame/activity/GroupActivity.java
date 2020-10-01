@@ -3,24 +3,22 @@ package com.frame.activity;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTabHost;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.PermissionUtils;
 import com.frame.R;
 import com.frame.common.CommonData;
 import com.frame.fragment.Tab1Fragment;
 import com.frame.fragment.Tab2Fragment;
 import com.frame.fragment.Tab3Fragment;
 import com.frame.fragment.Tab4Fragment;
-import com.frame.observers.RecycleObserver;
-import com.frame.utils.CommonUtil;
-import com.frame.utils.LogicUtil;
-import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.frame.utils.LU;
 
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentTabHost;
 import butterknife.BindView;
 
 public class GroupActivity extends BaseActivity {
@@ -45,15 +43,12 @@ public class GroupActivity extends BaseActivity {
         initControl();
 
         //申请多个权限
-        add2Disposable(new RxPermissions(this).request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_PHONE_STATE).subscribeWith(new RecycleObserver<Boolean>() {
-            @Override
-            public void onNext(Boolean granted) {
-                if (!granted) {    //至少有一个没通过
-                    CommonUtil.appSetting(mContext, false, false);
-                }
+        rxPermissionsRequest(isGranted -> {
+            if (PermissionUtils.isGranted(Manifest.permission.READ_PHONE_STATE)) {
+//                CommonData.IMEI = ObjectUtils.getOrDefault(PhoneUtils.getIMEI(), "");
             }
-        }));
+        }, Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
     }
 
     @Override
@@ -84,7 +79,7 @@ public class GroupActivity extends BaseActivity {
 //			public void onClick(View v) {
 //				if (!CommonData.IS_LOGIN) {
 //					mCurrentTag = TAB4;
-//					LogicUtil.gotoLogin(GroupActivity.this);
+//					LU.gotoLogin(GroupActivity.this);
 //				} else {
 //					switchTab(TAB4);
 //				}
@@ -106,7 +101,7 @@ public class GroupActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (System.currentTimeMillis() - mExitTime < 2000) {
-            LogicUtil.logout();
+            LU.logout();
             super.onBackPressed();
         } else {
             showToast("再点一次将退出程序！");

@@ -6,11 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.annotation.ColorInt;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.FloatRange;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.RecyclerView;
 import android.text.method.MovementMethod;
 import android.util.SparseArray;
 import android.view.View;
@@ -25,27 +20,33 @@ import android.widget.TextView;
 
 import com.blankj.utilcode.util.ConvertUtils;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.FloatRange;
+import androidx.core.view.ViewCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
 /**
  * Universal view holder.
  * Created by Cheney on 19/2/22.
  */
-public class CommonViewHolder {
+public class CommVHolder {
 
     private SparseArray<View> childViews = new SparseArray<>();
     public final View itemView;
 
-    CommonViewHolder(View itemView) {
+    CommVHolder(View itemView) {
         this.itemView = itemView;
     }
 
-    public static CommonViewHolder get(View convertView, View itemView) {
-        CommonViewHolder holder;
+    public static CommVHolder get(View convertView, View itemView) {
+        CommVHolder holder;
         if (convertView == null) {
-            holder = new CommonViewHolder(itemView);
+            holder = new CommVHolder(itemView);
             convertView = itemView;
             convertView.setTag(holder);
         } else {
-            holder = (CommonViewHolder) convertView.getTag();
+            holder = (CommVHolder) convertView.getTag();
         }
         return holder;
     }
@@ -68,155 +69,155 @@ public class CommonViewHolder {
         return (T) childView;
     }
 
-    public CommonViewHolder setText(int viewId, CharSequence text) {
+    public CommVHolder setText(int viewId, CharSequence text) {
         TextView textView = findViewById(viewId);
         textView.setText(text);
         return this;
     }
 
-    public CommonViewHolder setTextColor(int viewId, int textColor) {
+    public CommVHolder setTextColor(int viewId, int textColor) {
         TextView view = findViewById(viewId);
         view.setTextColor(textColor);
         return this;
     }
 
-    public CommonViewHolder setTextColor(int viewId, ColorStateList colorStateList) {
+    public CommVHolder setTextColor(int viewId, ColorStateList colorStateList) {
         TextView view = findViewById(viewId);
         view.setTextColor(colorStateList);
         return this;
     }
 
-    public CommonViewHolder setMovementMethod(int viewId, MovementMethod method) {
+    public CommVHolder setMovementMethod(int viewId, MovementMethod method) {
         TextView textView = findViewById(viewId);
         textView.setMovementMethod(method);
         return this;
     }
 
-    public CommonViewHolder setImageResource(int viewId, @DrawableRes int resId) {
+    public CommVHolder setImageResource(int viewId, @DrawableRes int resId) {
         ImageView view = findViewById(viewId);
         view.setImageResource(resId);
         return this;
     }
 
-    public CommonViewHolder setImageDrawable(int viewId, Drawable drawable) {
+    public CommVHolder setImageDrawable(int viewId, Drawable drawable) {
         ImageView view = findViewById(viewId);
         view.setImageDrawable(drawable);
         return this;
     }
 
-    public CommonViewHolder setImageBitmap(int viewId, Bitmap bitmap) {
+    public CommVHolder setImageBitmap(int viewId, Bitmap bitmap) {
         ImageView view = findViewById(viewId);
         view.setImageBitmap(bitmap);
         return this;
     }
 
-    public CommonViewHolder setImageUri(int viewId, Uri imageUri) {
+    public CommVHolder setImageUri(int viewId, Uri imageUri) {
         ImageView view = findViewById(viewId);
         view.setImageURI(imageUri);
         return this;
     }
 
-    public CommonViewHolder setScaleType(int viewId, ImageView.ScaleType type) {
+    public CommVHolder setScaleType(int viewId, ImageView.ScaleType type) {
         ImageView view = findViewById(viewId);
         view.setScaleType(type);
         return this;
     }
 
-    public CommonViewHolder setBackgroundColor(int viewId, @ColorInt int bgColor) {
+    public CommVHolder setBackgroundColor(int viewId, @ColorInt int bgColor) {
         View view = findViewById(viewId);
         view.setBackgroundColor(bgColor);
         return this;
     }
 
-    public CommonViewHolder setBackgroundResource(int viewId, @DrawableRes int bgRes) {
+    public CommVHolder setBackgroundResource(int viewId, @DrawableRes int bgRes) {
         View view = findViewById(viewId);
         view.setBackgroundResource(bgRes);
         return this;
     }
 
-    public CommonViewHolder setColorFilter(int viewId, ColorFilter colorFilter) {
+    public CommVHolder setColorFilter(int viewId, ColorFilter colorFilter) {
         ImageView view = findViewById(viewId);
         view.setColorFilter(colorFilter);
         return this;
     }
 
-    public CommonViewHolder setColorFilter(int viewId, int colorFilter) {
+    public CommVHolder setColorFilter(int viewId, int colorFilter) {
         ImageView view = findViewById(viewId);
         view.setColorFilter(colorFilter);
         return this;
     }
 
-    public CommonViewHolder setAlpha(int viewId, @FloatRange(from = 0.0, to = 1.0) float value) {
+    public CommVHolder setAlpha(int viewId, @FloatRange(from = 0.0, to = 1.0) float value) {
         View view = findViewById(viewId);
         ViewCompat.setAlpha(view, value);
         return this;
     }
 
-    public CommonViewHolder setVisibility(int viewId, int visibility) {
+    public CommVHolder setVisibility(int viewId, int visibility) {
         View view = findViewById(viewId);
         view.setVisibility(visibility);
         return this;
     }
 
-    public CommonViewHolder setMax(int viewId, int max) {
+    public CommVHolder setMax(int viewId, int max) {
         ProgressBar view = findViewById(viewId);
         view.setMax(max);
         return this;
     }
 
-    public CommonViewHolder setProgress(int viewId, int progress) {
+    public CommVHolder setProgress(int viewId, int progress) {
         ProgressBar view = findViewById(viewId);
         view.setProgress(progress);
         return this;
     }
 
-    public CommonViewHolder setRating(int viewId, float rating) {
+    public CommVHolder setRating(int viewId, float rating) {
         RatingBar view = findViewById(viewId);
         view.setRating(rating);
         return this;
     }
 
-    public CommonViewHolder setTag(int viewId, Object tag) {
+    public CommVHolder setTag(int viewId, Object tag) {
         View view = findViewById(viewId);
         view.setTag(tag);
         return this;
     }
 
-    public CommonViewHolder setEnabled(int viewId, boolean enabled) {
+    public CommVHolder setEnabled(int viewId, boolean enabled) {
         View view = findViewById(viewId);
         view.setEnabled(enabled);
         return this;
     }
 
-    public CommonViewHolder setAdapter(int viewId, Adapter adapter) {
+    public CommVHolder setAdapter(int viewId, Adapter adapter) {
         AdapterView<Adapter> view = findViewById(viewId);
         view.setAdapter(adapter);
         return this;
     }
 
-    public CommonViewHolder setAdapter(int viewId, RecyclerView.Adapter adapter) {
+    public CommVHolder setAdapter(int viewId, RecyclerView.Adapter adapter) {
         RecyclerView view = findViewById(viewId);
         view.setAdapter(adapter);
         return this;
     }
 
-    public CommonViewHolder setChecked(int viewId, boolean checked) {
+    public CommVHolder setChecked(int viewId, boolean checked) {
         Checkable view = findViewById(viewId);
         view.setChecked(checked);
         return this;
     }
 
-    public CommonViewHolder setOnClickListener(int viewId, View.OnClickListener listener) {
+    public CommVHolder setOnClickListener(int viewId, View.OnClickListener listener) {
         findViewById(viewId).setOnClickListener(listener);
         return this;
     }
 
-    public CommonViewHolder setOnLongClickListener(int viewId, View.OnLongClickListener listener) {
+    public CommVHolder setOnLongClickListener(int viewId, View.OnLongClickListener listener) {
         findViewById(viewId).setOnLongClickListener(listener);
         return this;
     }
 
-    public CommonViewHolder setOnTouchListener(int viewId, View.OnTouchListener listener) {
+    public CommVHolder setOnTouchListener(int viewId, View.OnTouchListener listener) {
         findViewById(viewId).setOnTouchListener(listener);
         return this;
     }
@@ -234,25 +235,25 @@ public class CommonViewHolder {
     /**================================================= Add_By_Self ===============================================*/
 
 
-    public CommonViewHolder setLayoutParams(int viewId, ViewGroup.LayoutParams params) {
+    public CommVHolder setLayoutParams(int viewId, ViewGroup.LayoutParams params) {
         View view = findViewById(viewId);
         view.setLayoutParams(params);
         return this;
     }
 
-    public CommonViewHolder setGravity(int viewId, int gravity) {
+    public CommVHolder setGravity(int viewId, int gravity) {
         TextView textView = findViewById(viewId);
         textView.setGravity(gravity);
         return this;
     }
 
-    public CommonViewHolder setTextSize(int viewId, float size) {
+    public CommVHolder setTextSize(int viewId, float size) {
         TextView textView = findViewById(viewId);
         textView.setTextSize(size);
         return this;
     }
 
-    public CommonViewHolder setHint(int viewId, CharSequence hint) {
+    public CommVHolder setHint(int viewId, CharSequence hint) {
         TextView textView = findViewById(viewId);
         textView.setHint(hint);
         return this;
@@ -268,7 +269,7 @@ public class CommonViewHolder {
      * @param dpH       单位dp, -1 表示使用原始高度
      * @param dpPadding 图标文字间隔
      */
-    public CommonViewHolder setTextViewDrawableLeft(int viewId, int resId, int dpW, int dpH, int dpPadding) {
+    public CommVHolder setTVDrawableLeft(int viewId, int resId, int dpW, int dpH, int dpPadding) {
         TextView tv = findViewById(viewId);
         Drawable[] ds = tv.getCompoundDrawables();
         tv.setCompoundDrawables(res2drawable(tv.getContext(), resId, dpW, dpH), ds[1], ds[2], ds[3]);
@@ -276,7 +277,7 @@ public class CommonViewHolder {
         return this;
     }
 
-    public CommonViewHolder setTextViewDrawableTop(int viewId, int resId, int dpW, int dpH, int dpPadding) {
+    public CommVHolder setTVDrawableTop(int viewId, int resId, int dpW, int dpH, int dpPadding) {
         TextView tv = findViewById(viewId);
         Drawable[] ds = tv.getCompoundDrawables();
         tv.setCompoundDrawables(ds[0], res2drawable(tv.getContext(), resId, dpW, dpH), ds[2], ds[3]);
@@ -284,7 +285,7 @@ public class CommonViewHolder {
         return this;
     }
 
-    public CommonViewHolder setTextViewDrawableRight(int viewId, int resId, int dpW, int dpH, int dpPadding) {
+    public CommVHolder setTVDrawableRight(int viewId, int resId, int dpW, int dpH, int dpPadding) {
         TextView tv = findViewById(viewId);
         Drawable[] ds = tv.getCompoundDrawables();
         tv.setCompoundDrawables(ds[0], ds[1], res2drawable(tv.getContext(), resId, dpW, dpH), ds[3]);
@@ -292,7 +293,7 @@ public class CommonViewHolder {
         return this;
     }
 
-    public CommonViewHolder setTextViewDrawableBottom(int viewId, int resId, int dpW, int dpH, int dpPadding) {
+    public CommVHolder setTVDrawableBottom(int viewId, int resId, int dpW, int dpH, int dpPadding) {
         TextView tv = findViewById(viewId);
         Drawable[] ds = tv.getCompoundDrawables();
         tv.setCompoundDrawables(ds[0], ds[1], ds[2], res2drawable(tv.getContext(), resId, dpW, dpH));

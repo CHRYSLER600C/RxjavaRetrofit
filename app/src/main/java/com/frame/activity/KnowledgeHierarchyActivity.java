@@ -2,8 +2,8 @@ package com.frame.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 
 import com.blankj.utilcode.util.ActivityUtils;
@@ -12,7 +12,7 @@ import com.frame.R;
 import com.frame.common.CommonData;
 import com.frame.dataclass.DataClass;
 import com.frame.observers.ProgressObserver;
-import com.frame.utils.CommonUtil;
+import com.frame.utils.CU;
 import com.frame.utils.JU;
 import com.google.gson.internal.LinkedTreeMap;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
@@ -49,7 +49,7 @@ public class KnowledgeHierarchyActivity extends BaseTitleActivity {
     private void initControl() {
         setTitleText("知识体系");
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mBActivity));
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mSuperAdapter = getSuperAdapter());
 
@@ -82,12 +82,12 @@ public class KnowledgeHierarchyActivity extends BaseTitleActivity {
 
     @SuppressWarnings("unchecked")
     private SuperAdapter getSuperAdapter() {
-        return new SuperAdapter<LinkedTreeMap<String, Object>>(mContext, mList, R.layout.item_knowledge_hierarchy) {
+        return new SuperAdapter<LinkedTreeMap<String, Object>>(mBActivity, mList, R.layout.item_knowledge_hierarchy) {
             @Override
             public void onBind(SuperViewHolder holder, int viewType, int layoutPosition, LinkedTreeMap<String,
                     Object> map) {
                 holder.setText(R.id.tvKnowledgeHierarchyTitle, JU.s(map, "name"))
-                        .setTextColor(R.id.tvKnowledgeHierarchyTitle, CommonUtil.randomColor());
+                        .setTextColor(R.id.tvKnowledgeHierarchyTitle, CU.randomColor());
 
                 StringBuilder content = new StringBuilder();
                 List<LinkedTreeMap<String, Object>> list = JU.al(map, "children");
@@ -96,7 +96,7 @@ public class KnowledgeHierarchyActivity extends BaseTitleActivity {
                 }
                 holder.setText(R.id.tvKnowledgeHierarchyContent, content);
                 holder.itemView.setOnClickListener(view -> {
-                            ActivityUtils.startActivity(new Intent(mContext, WxArticleActivity.class)
+                            ActivityUtils.startActivity(new Intent(mBActivity, WxArticleActivity.class)
                                     .putExtra(CommonData.PARAM1, map));
                         }
                 );
@@ -105,7 +105,7 @@ public class KnowledgeHierarchyActivity extends BaseTitleActivity {
     }
 
     private void getNetData() {
-        BaseActivity.doCommonGetImpl("tree/json", null, new ProgressObserver<DataClass>(mContext, true,
+        BaseActivity.doCommonGet("tree/json", null, new ProgressObserver<DataClass>(mBActivity, true,
                 mSmartRefreshLayout) {
             @Override
             public void onNext(DataClass dc) {

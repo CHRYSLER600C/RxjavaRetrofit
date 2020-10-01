@@ -5,10 +5,10 @@ import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.widget.NestedScrollView;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.core.widget.NestedScrollView;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -22,7 +22,7 @@ import com.frame.dataclass.DataClass;
 import com.frame.dataclass.bean.Template;
 import com.frame.observers.ProgressObserver;
 import com.frame.utils.JU;
-import com.frame.utils.LogicUtil;
+import com.frame.utils.LU;
 import com.google.gson.internal.LinkedTreeMap;
 import com.scwang.smartrefresh.header.PhoenixHeader;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
@@ -66,7 +66,7 @@ public class Tab1Fragment extends BaseTitleFragment {
 
     @Override
     protected View setContentView(Bundle savedInstanceState) {
-        return View.inflate(mBaseActivity, R.layout.fragment_tab1, null);
+        return View.inflate(mBActivity, R.layout.fragment_tab1, null);
     }
 
     @Override
@@ -80,11 +80,11 @@ public class Tab1Fragment extends BaseTitleFragment {
         mTitleBar.getRightImg().setLayoutParams(lp);
         mTitleBar.getRightBar().setOnClickListener(view -> ActivityUtils.startActivity(SearchActivity.class));
 
-        mRvBlock.setLayoutManager(new GridLayoutManager(mBaseActivity, 4));
+        mRvBlock.setLayoutManager(new GridLayoutManager(mBActivity, 4));
         mRvBlock.setAdapter(getSuperAdapterBlock());
 
-        mRvTab1.setLayoutManager(new LinearLayoutManager(mBaseActivity));
-        mRvTab1.setAdapter(mSAdapterArticle = WxArticleDetailFragment.getSuperAdapter(mBaseActivity, mList));
+        mRvTab1.setLayoutManager(new LinearLayoutManager(mBActivity));
+        mRvTab1.setAdapter(mSAdapterArticle = WxArticleDetailFragment.getSuperAdapter(mBActivity, mList));
         mRvTab1.setNestedScrollingEnabled(false);
 
         mNsvTab1.setOnScrollChangeListener((NestedScrollView nestedScrollView, int scrollX, int scrollY, int
@@ -125,8 +125,8 @@ public class Tab1Fragment extends BaseTitleFragment {
     }
 
     private void setSmartRefreshLayout() {
-        mSmartRefreshLayout.setRefreshHeader(new PhoenixHeader(mBaseActivity));
-        mSmartRefreshLayout.setRefreshFooter(new BallPulseFooter(mBaseActivity));
+        mSmartRefreshLayout.setRefreshHeader(new PhoenixHeader(mBActivity));
+        mSmartRefreshLayout.setRefreshFooter(new BallPulseFooter(mBActivity));
         mSmartRefreshLayout.setOnRefreshListener(refreshLayout -> {
             getBannerData();
             getNetData(mCurrPage = 0, false);
@@ -148,14 +148,14 @@ public class Tab1Fragment extends BaseTitleFragment {
 
     @SuppressWarnings("unchecked")
     private SuperAdapter getSuperAdapterBlock() {
-        return new SuperAdapter<Template>(mBaseActivity, LogicUtil.getBlockList(), R.layout.item_block_list) {
+        return new SuperAdapter<Template>(mBActivity, LU.getBlockList(), R.layout.item_block_list) {
             @Override
             public void onBind(SuperViewHolder holder, int viewType, int layoutPosition, Template template) {
                 holder.setImageResource(R.id.ivIconBlock, template.resId);
                 holder.setText(R.id.tvTextBlock, template.content);
                 holder.itemView.setOnClickListener(view -> {
                     if (!Build.MANUFACTURER.contains("samsung") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mBaseActivity, view,
+                        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mBActivity, view,
                                 getString(R.string.share_view));
                         ActivityUtils.startActivity(template.cls, options.toBundle());
                     } else {
@@ -167,17 +167,17 @@ public class Tab1Fragment extends BaseTitleFragment {
     }
 
     private void getBannerData() {
-        BaseActivity.doCommonGetImpl("banner/json", null, new ProgressObserver<DataClass>(mBaseActivity, false) {
+        BaseActivity.doCommonGet("banner/json", null, new ProgressObserver<DataClass>(mBActivity, false) {
             @Override
             public void onNext(DataClass dc) {
-                LogicUtil.setBannerDataAndShow(mBaseActivity, mBannerAdv, JU.al(dc.object, "data"));
+                LU.initBanner(mBActivity, mBannerAdv, JU.al(dc.object, "data"));
             }
         });
     }
 
     private void getNetData(int currPage, boolean isLoading) {
-        BaseActivity.doCommonGetImpl("article/list/" + currPage + "/json", null, new ProgressObserver<DataClass>
-                (mBaseActivity, isLoading, mSmartRefreshLayout) {
+        BaseActivity.doCommonGet("article/list/" + currPage + "/json", null, new ProgressObserver<DataClass>
+                (mBActivity, isLoading, mSmartRefreshLayout) {
             @Override
             public void onNext(DataClass dc) {
                 LinkedTreeMap<String, Object> data = JU.m(dc.object, "data");

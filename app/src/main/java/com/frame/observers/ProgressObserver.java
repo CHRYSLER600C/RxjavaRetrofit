@@ -2,9 +2,8 @@ package com.frame.observers;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.v4.app.Fragment;
-import android.widget.Toast;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.frame.activity.BaseActivity;
 import com.frame.common.CommonData;
 import com.frame.observers.progress.ProgressCancelListener;
@@ -14,6 +13,7 @@ import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 
+import androidx.fragment.app.Fragment;
 import io.reactivex.observers.ResourceObserver;
 
 /**
@@ -25,7 +25,7 @@ import io.reactivex.observers.ResourceObserver;
 public abstract class ProgressObserver<T> extends ResourceObserver<T> implements ProgressCancelListener {
 
     private ProgressDialogHandler mProgressDialogHandler;
-    private boolean mIsShowProgressDialog = true;
+    private boolean mIsShowProgressDialog;
     private Object mObject; // Activity or Fragment
     private Context mContext;
     private Object mRefreshLayout;
@@ -37,7 +37,7 @@ public abstract class ProgressObserver<T> extends ResourceObserver<T> implements
     /**
      * @param object               Activity or Fragment
      * @param isShowProgressDialog 是否显示进度条
-     * @param refreshLayout                  用于停止刷新
+     * @param refreshLayout        用于停止刷新
      */
     public ProgressObserver(Object object, boolean isShowProgressDialog, Object refreshLayout) {
         this.mObject = object;
@@ -107,9 +107,9 @@ public abstract class ProgressObserver<T> extends ResourceObserver<T> implements
     @Override
     public void onError(Throwable e) {
         if (e instanceof SocketTimeoutException || e instanceof ConnectException) {
-            Toast.makeText(mContext, CommonData.NETWORK_ERROR_MSG, Toast.LENGTH_SHORT).show();
+            ToastUtils.showShort(CommonData.NETWORK_ERROR_MSG);
         } else {
-            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+            ToastUtils.showShort(e.getMessage());
         }
         dismissAll();
     }

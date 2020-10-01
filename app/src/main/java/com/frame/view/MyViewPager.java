@@ -8,7 +8,6 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,7 +17,10 @@ import android.widget.RelativeLayout;
 
 import com.frame.R;
 import com.frame.adapter.ViewPagerAdapter;
-import com.frame.utils.Logger;
+
+import androidx.viewpager.widget.ViewPager;
+
+import static com.frame.utils.LogUtilKt.logi;
 
 /**
  * 扩展ViewPager
@@ -105,7 +107,7 @@ public class MyViewPager extends ViewPager {
 		if (mViewSize == null) {
 			// 图片控件的高宽
 			mViewSize = new Point(imgView.getWidth(), imgView.getHeight());
-			Logger.i(TAG, "test(控件宽高):" + imgView.getWidth() + "," + imgView.getHeight());
+			logi(TAG, "test(控件宽高):" + imgView.getWidth() + "," + imgView.getHeight());
 
 			// 当前图片的高宽和间距
 			saveCurrentImageSizeAndPadding(imgView, values);
@@ -146,16 +148,16 @@ public class MyViewPager extends ViewPager {
 				if (mCurrentImageSize.x < mImageSize.x) {
 					// matrix.reset();
 					float scale = mImageSize.x / 1f / mCurrentImageSize.x;
-					Logger.i(TAG, "放大(缩放比例)=" + scale);
+					logi(TAG, "放大(缩放比例)=" + scale);
 					matrix.postScale(scale, scale, mMidddlePoint.x, mMidddlePoint.y);
 
 				} else {
 					// 如果图片放大超过图片控件的最大倍数
-					Logger.i(TAG, "放大(当前尺寸)=" + mCurrentImageSize.x + "," + mCurrentImageSize.y);
-					Logger.i(TAG, "放大(最大尺寸)=" + (mViewSize.x * 2) + "," + (mViewSize.y * 2));
+					logi(TAG, "放大(当前尺寸)=" + mCurrentImageSize.x + "," + mCurrentImageSize.y);
+					logi(TAG, "放大(最大尺寸)=" + (mViewSize.x * 2) + "," + (mViewSize.y * 2));
 					if (mCurrentImageSize.x > mViewSize.x * mMaxBig) {
 						float scale = mViewSize.x * mMaxBig / 1f / mCurrentImageSize.x;
-						Logger.i(TAG, "放大(缩放比例)=" + scale);
+						logi(TAG, "放大(缩放比例)=" + scale);
 						matrix.postScale(scale, scale, mMidddlePoint.x, mMidddlePoint.y);
 					}
 
@@ -173,12 +175,12 @@ public class MyViewPager extends ViewPager {
 				float dx = event.getX() - mStartPoint.x;
 				float dy = event.getY() - mStartPoint.y;
 				if (dx > 0 && mCurrentPadding.left >= 0) { // 拖动达到最左边
-					Logger.i(TAG, "hit=left");
+					logi(TAG, "hit=left");
 
 					return super.dispatchTouchEvent(event);
 
 				} else if (dx < 0 && mCurrentPadding.right >= 0) { // 拖动达到最右边
-					Logger.i(TAG, "hit=right");
+					logi(TAG, "hit=right");
 
 					return super.dispatchTouchEvent(event);
 
@@ -253,12 +255,12 @@ public class MyViewPager extends ViewPager {
 	}
 
 	public void temp() {
-		Logger.i(TAG, "test-movie(目标位置)=" + ((mViewSize.x - mCurrentImageSize.x) / 2) + ","
+		logi(TAG, "test-movie(目标位置)=" + ((mViewSize.x - mCurrentImageSize.x) / 2) + ","
 				+ ((mViewSize.y - mCurrentImageSize.y) / 2));
-		Logger.i(TAG, "test-movie(当前间距)=" + +mCurrentPadding.left + "," + mCurrentPadding.top);
+		logi(TAG, "test-movie(当前间距)=" + +mCurrentPadding.left + "," + mCurrentPadding.top);
 		float dx = (mViewSize.x - mCurrentImageSize.x) / 2 - mCurrentPadding.left;
 		float dy = (mViewSize.y - mCurrentImageSize.y) / 2 - mCurrentPadding.top;
-		Logger.i(TAG, "test-movie(移动距离)" + dx + "," + dy);
+		logi(TAG, "test-movie(移动距离)" + dx + "," + dy);
 	}
 
 	/**
@@ -276,7 +278,7 @@ public class MyViewPager extends ViewPager {
 		Rect rect = imgView.getDrawable().getBounds();
 		mCurrentImageSize.x = (int) (rect.width() * values[0]);
 		mCurrentImageSize.y = (int) (rect.height() * values[0]);
-		Logger.i(TAG, "当前图片大小：" + mCurrentImageSize.x + "," + mCurrentImageSize.y);
+		logi(TAG, "当前图片大小：" + mCurrentImageSize.x + "," + mCurrentImageSize.y);
 
 		if (mCurrentPadding == null) {
 			mCurrentPadding = new Rect();
@@ -288,7 +290,7 @@ public class MyViewPager extends ViewPager {
 		// 图片控件宽度 - 图片距离左边的边距 - 图片自身的宽度 = 图片距离右边的边距
 		mCurrentPadding.right = mViewSize.x - mCurrentPadding.left - mCurrentImageSize.x;
 		mCurrentPadding.bottom = mViewSize.y - mCurrentPadding.top - mCurrentImageSize.y;
-		Logger.i(TAG, "test(边距):" + mCurrentPadding.left + "," + mCurrentPadding.right + "," + mCurrentPadding.top
+		logi(TAG, "test(边距):" + mCurrentPadding.left + "," + mCurrentPadding.right + "," + mCurrentPadding.top
 				+ "," + mCurrentPadding.bottom);
 	}
 

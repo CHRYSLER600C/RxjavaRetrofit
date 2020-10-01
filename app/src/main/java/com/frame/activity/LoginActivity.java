@@ -12,7 +12,7 @@ import com.frame.common.CommonData;
 import com.frame.common.SPreferences;
 import com.frame.dataclass.DataClass;
 import com.frame.observers.ProgressObserver;
-import com.frame.utils.CommonUtil;
+import com.frame.utils.CU;
 
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -43,8 +43,8 @@ public class LoginActivity extends BaseTitleActivity {
         setTitleBgColor(getResources().getColor(R.color.color_6));
 
         CommonData.IS_LOGIN = false;
-//        CommonUtil.setTextViewDrawableLeft(mEtUserName, R.drawable.ic_registration_user, 18, 20, 10);
-//        CommonUtil.setTextViewDrawableLeft(mEtPwd, R.drawable.ic_registration_pwd, 18, 22, 10);
+//        CU.setTVDrawableLeft(mEtUserName, R.drawable.ic_registration_user, 18, 20, 10);
+//        CU.setTVDrawableLeft(mEtPwd, R.drawable.ic_registration_pwd, 18, 22, 10);
     }
 
     @Override
@@ -83,8 +83,8 @@ public class LoginActivity extends BaseTitleActivity {
     private void doLoginRequest(final String name, String pwd) {
         Map<String, Object> map = new HashMap<>();
         map.put("userName", URLEncoder.encode(name));
-        map.put("passWord", CommonUtil.encodePwd(pwd));
-        doCommonGetImpl("login", map, new ProgressObserver<DataClass>(this, true) {
+        map.put("passWord", CU.encodePwd(pwd));
+        doCommonGet("login", map, new ProgressObserver<DataClass>(this, true) {
             @Override
             public void onNext(DataClass dc) {
                 SPreferences.saveData(SPreferences.USER_NAME, name);

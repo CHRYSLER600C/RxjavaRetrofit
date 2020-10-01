@@ -23,7 +23,7 @@ import com.frame.dataclass.bean.NameValue;
 import com.frame.dataclass.bean.PickerItem;
 import com.frame.dataclass.bean.PickerValue;
 import com.frame.observers.RecycleObserver;
-import com.frame.utils.CommonUtil;
+import com.frame.utils.CU;
 import com.frame.view.dialog.PickerDialog;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 
@@ -41,12 +41,12 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ItemListAdapter {
 
-    private BaseActivity mBaseActivity;
+    private BaseActivity mBActivity;
     private LinearLayout mLlParent;         // 父布局
     private ItemListDataClass mILdc;        // 布局数据
     private LayoutInflater mInflater;
     private Object[] mKeys;
-    private CommonViewHolder holder = null;
+    private CommVHolder holder = null;
 
     /**
      * ========================================== public function ==========================================
@@ -55,10 +55,10 @@ public class ItemListAdapter {
      * @param ildc      布局数据
      */
     public ItemListAdapter(BaseActivity baseActivity, LinearLayout mLlParent, ItemListDataClass ildc) {
-        this.mBaseActivity = baseActivity;
+        this.mBActivity = baseActivity;
         this.mLlParent = mLlParent;
         this.mILdc = ildc;
-        this.mInflater = LayoutInflater.from(mBaseActivity);
+        this.mInflater = LayoutInflater.from(mBActivity);
     }
 
     private void refreshKeys() {
@@ -72,7 +72,7 @@ public class ItemListAdapter {
     public void refreshAllItemView() {
         mLlParent.removeAllViews();
         refreshKeys();
-        mBaseActivity.add2Disposable(Observable.fromArray(mKeys)
+        mBActivity.add2Disposable(Observable.fromArray(mKeys)
                 .map((Object o) -> getView((int) o, null))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -260,7 +260,7 @@ public class ItemListAdapter {
                 holder.findViewById(R.id.llSelectContent).setEnabled(itemInfo.isEdit == 1);
 
                 final PickerValue pickerValue = (PickerValue) itemInfo.value3;
-                final PickerDialog.Builder pickerBuilder = new PickerDialog.Builder(mBaseActivity);
+                final PickerDialog.Builder pickerBuilder = new PickerDialog.Builder(mBActivity);
                 pickerBuilder.setBtnOk(pickerValue, "bottom", (NameValue nv1, NameValue nv2, NameValue nv3) -> {
                     itemInfo.value2 = new PickerItem(nv1, nv2, nv3);
                     holder.setText(R.id.tvSelectContent1, nv1.name);
@@ -275,9 +275,9 @@ public class ItemListAdapter {
                     holder.findViewById(R.id.llSelectContent).setOnClickListener((View view) -> {
                         pickerBuilder.setPickedData((PickerItem) itemInfo.value2);
                         if (pickerValue != null && pickerValue.list1.size() == 0) {
-                            Toast.makeText(mBaseActivity, "暂无数据", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mBActivity, "暂无数据", Toast.LENGTH_SHORT).show();
                         } else {
-                            CommonUtil.showAnimatDialog(pickerBuilder.create());
+                            CU.showAnimatDialog(pickerBuilder.create());
                         }
                     });
                 } else {
@@ -314,7 +314,7 @@ public class ItemListAdapter {
                             dayInt = c.get(Calendar.DATE);
                         }
 
-                        final DatePickerDialog datePickerDialog = new DatePickerDialog(mBaseActivity,
+                        final DatePickerDialog datePickerDialog = new DatePickerDialog(mBActivity,
                                 (DatePicker datePicker, int year, int month, int day) -> {
                                     itemInfo.value = String.format("%02d-%02d-%02d", year, ++month, day);
                                     tv.setText(itemInfo.value);
@@ -335,7 +335,7 @@ public class ItemListAdapter {
                 holder.itemView.setVisibility(itemInfo.visible);
                 setItemBackground(itemInfo, holder.itemView);// 设置背景
 
-                holder.setTextViewDrawableLeft(R.id.tvItemNameTt, (int) itemInfo.value2, 25, 25, 10);
+                holder.setTVDrawableLeft(R.id.tvItemNameTt, (int) itemInfo.value2, 25, 25, 10);
                 holder.setText(R.id.tvItemNameTt, itemInfo.name);
                 holder.setText(R.id.tvItemContentTt, itemInfo.value);
                 if (itemInfo.isEdit == 1) { // 点击事件回调
@@ -416,11 +416,11 @@ public class ItemListAdapter {
         return holder != null ? holder.itemView : convertView;
     }
 
-    private CommonViewHolder getSVH(View convertView, int resId) {
+    private CommVHolder getSVH(View convertView, int resId) {
         if (convertView == null) {
-            return CommonViewHolder.get(null, mInflater.inflate(resId, null));
+            return CommVHolder.get(null, mInflater.inflate(resId, null));
         } else { // When convertView != null, parent must be an AbsListView.
-            return CommonViewHolder.get(convertView, null);
+            return CommVHolder.get(convertView, null);
         }
     }
 
@@ -434,7 +434,7 @@ public class ItemListAdapter {
     }
 
     private void addEditTextChangedListener(final int key, EditText et, final ItemInfo itemInfo) {
-        mBaseActivity.add2Disposable(RxTextView.textChanges(et) // 抛砖引玉
+        mBActivity.add2Disposable(RxTextView.textChanges(et) // 抛砖引玉
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new RecycleObserver<CharSequence>() {
                     @Override

@@ -12,7 +12,7 @@ import com.frame.R;
 import com.frame.dataclass.DataClass;
 import com.frame.httputils.OkHttpUtil;
 import com.frame.observers.ProgressObserver;
-import com.frame.utils.CommonUtil;
+import com.frame.utils.CU;
 import com.frame.utils.JU;
 import com.frame.view.dialog.CommonDialog;
 import com.google.gson.internal.LinkedTreeMap;
@@ -58,16 +58,16 @@ public class SplashActivity extends BaseActivity {
         Map<String, Object> map = new HashMap<>();
         map.put("verCode", "" + AppUtils.getAppVersionCode());
         map.put("verName", AppUtils.getAppVersionName());
-        map.put("channelCode", CommonUtil.getAppChanel());
+        map.put("channelCode", CU.getAppChanel());
         map.put("type", "ANDROID");
         Observable<DataClass> observable = OkHttpUtil.getInstance().mRequestService
                 .commonGet("https://www.yiqiyiqi.cn/app/appUpdateInfo.htm", map).subscribeOn(Schedulers.io());
 
-        ProgressObserver<DataClass>  progressObserver = new ProgressObserver<DataClass>(mContext, true) {
+        ProgressObserver<DataClass>  progressObserver = new ProgressObserver<DataClass>(mBActivity, true) {
             @Override
             public void onNext(DataClass dc) {
                 final LinkedTreeMap<String, Object> map = JU.m(dc.object, "updateInfo");
-                CommonDialog.Builder builder = new CommonDialog.Builder(mContext, CommonDialog.DialogType.TYPE_SIMPLE)
+                CommonDialog.Builder builder = new CommonDialog.Builder(mBActivity, CommonDialog.DialogType.TYPE_SIMPLE)
                         .setTitle("有新版本")
                         .setMessage(JU.s(map, "updateInfo"))
                         .setCancelBtn("立即升级", (View view) -> goToUpdate(JU.s(map, "updateUrl")));

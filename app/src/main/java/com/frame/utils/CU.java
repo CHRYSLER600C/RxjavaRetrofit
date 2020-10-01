@@ -1,5 +1,9 @@
 package com.frame.utils;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -9,7 +13,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -18,9 +29,11 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Base64;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.widget.DatePicker;
@@ -34,22 +47,22 @@ import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.ImageUtils;
 import com.blankj.utilcode.util.MetaDataUtils;
 import com.blankj.utilcode.util.ObjectUtils;
-import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.UriUtils;
 import com.frame.R;
-import com.frame.application.AndApp;
+import com.frame.activity.BaseActivity;
+import com.frame.application.App;
 import com.frame.common.CommonData;
 import com.frame.dataclass.bean.NameValue;
 import com.frame.dataclass.bean.PickerItem;
 import com.frame.dataclass.bean.PickerValue;
 import com.frame.httputils.OkHttpUtil;
-import com.frame.view.dialog.CommonDialog;
+import com.frame.other.ICallBack;
 import com.frame.view.dialog.PickerDialog;
-
-import org.apache.http.util.EncodingUtils;
+import com.gyf.immersionbar.ImmersionBar;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -67,10 +80,9 @@ import okhttp3.Cookie;
 
 /**
  * Created by min on 2016/12/12.
- * 工具类
+ * CommonUtil：通用工具类
  */
-
-public class CommonUtil {
+public class CU {
 
     /*
      * AES/CBC/NoPadding 要求 密钥必须是16位的；Initialization vector (IV) 必须是16位
@@ -108,19 +120,6 @@ public class CommonUtil {
      */
     public static String getAppChanel() {
         return MetaDataUtils.getMetaDataInApp("UMENG_CHANNEL");
-    }
-
-    public static void appSetting(final Activity activity, final boolean isOkFinish, final boolean isCancelFinish) {
-        //打开设置页面前的对话框
-        new CommonDialog.Builder(activity, CommonDialog.DialogType.TYPE_SIMPLE)
-                .setTitle("提示")
-                .setMessage("是否进入打开权限页面？")
-                .setOkBtn("确定", (View v, String value) -> {
-                    PermissionUtils.launchAppDetailsSettings();
-                    if (isOkFinish) activity.finish();
-                }).setCancelBtn("取消", (View v) -> {
-            if (isCancelFinish) activity.finish();
-        }).create().show();
     }
 
     /**
@@ -246,7 +245,7 @@ public class CommonUtil {
         if (pickerValue != null && pickerValue.list1.size() == 0) {
             Toast.makeText(context, "暂无数据", Toast.LENGTH_SHORT).show();
         } else {
-            CommonUtil.showAnimatDialog(pickerBuilder.create());
+            CU.showAnimatDialog(pickerBuilder.create());
         }
     }
 
@@ -262,7 +261,7 @@ public class CommonUtil {
         if (pickerValue != null && pickerValue.list1.size() == 0) {
             Toast.makeText(context, "暂无数据", Toast.LENGTH_SHORT).show();
         } else {
-            CommonUtil.showAnimatDialog(pickerBuilder.create());
+            CU.showAnimatDialog(pickerBuilder.create());
         }
     }
 
@@ -278,9 +277,9 @@ public class CommonUtil {
     public static String getCacheSize() {
         long fileSize = 0;
         try {
-            fileSize += Long.parseLong(FileUtils.getDirSize(AndApp.getInstance().getFilesDir()));
-            fileSize += Long.parseLong(FileUtils.getDirSize(AndApp.getInstance().getCacheDir()));
-            fileSize += Long.parseLong(FileUtils.getDirSize(AndApp.getInstance().getExternalCacheDir()));
+            fileSize += Long.parseLong(FileUtils.getSize(App.getInstance().getFilesDir()));
+            fileSize += Long.parseLong(FileUtils.getSize(App.getInstance().getCacheDir()));
+            fileSize += Long.parseLong(FileUtils.getSize(App.getInstance().getExternalCacheDir()));
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
@@ -291,21 +290,21 @@ public class CommonUtil {
      * 清除本应用内部缓存(/data/data/com.xxx.xxx/cache)
      */
     public static void cleanInternalCache() {
-        FileUtils.deleteDir(AndApp.getInstance().getCacheDir());
+        FileUtils.delete(App.getInstance().getCacheDir());
     }
 
     /**
      * 清除/data/data/com.xxx.xxx/files下的内容
      */
     public static void cleanFiles() {
-        FileUtils.deleteDir(AndApp.getInstance().getFilesDir());
+        FileUtils.delete(App.getInstance().getFilesDir());
     }
 
     /**
      * * 清除外部cache下的内容(/mnt/sdcard/android/data/com.xxx.xxx/cache)
      */
     public static void cleanExternalCache() {
-        FileUtils.deleteDir(AndApp.getInstance().getExternalCacheDir());
+        FileUtils.delete(App.getInstance().getExternalCacheDir());
     }
 
 
@@ -401,7 +400,7 @@ public class CommonUtil {
         StringBuilder sFormatBuilder = new StringBuilder();
         Formatter sFormatter = new Formatter(sFormatBuilder, Locale.getDefault());
 
-        int totalSeconds = (int) (timeMs / 1000 );
+        int totalSeconds = (int) (timeMs / 1000);
         int seconds = totalSeconds % 60;
         int minutes = (totalSeconds / 60) % 60;
         int hours = totalSeconds / 3600;
@@ -466,8 +465,8 @@ public class CommonUtil {
      * 获取图片下载存放目录
      */
     public static String getBaseImgPath() {
-        String filePath = CommonData.IMAGE_DIR_SD + File.separator;
-        FileUtils.createOrExistsFile(filePath);
+        String filePath = CommonData.IMAGE_DIR_SD;
+        FileUtils.createOrExistsDir(filePath);
         return filePath;
     }
 
@@ -499,7 +498,7 @@ public class CommonUtil {
 //        int degree = ImageUtils.getRotateDegree(pathSrc);
 //        bitmap = ImageUtils.rotate(bitmap, degree, 0, 0, true);
 
-        String filePath = pathDest + fileName;
+        String filePath = pathDest + (pathDest.endsWith(File.separator) ? "" : File.separator) + fileName;
         Bitmap.CompressFormat format = Bitmap.CompressFormat.JPEG;
         if (fileName.endsWith("png")) format = Bitmap.CompressFormat.PNG;
         if (ImageUtils.save(bitmap, filePath, format, true)) return filePath;
@@ -518,7 +517,7 @@ public class CommonUtil {
         try {
             Uri picUri = data.getData();// 获得图片的uri=content://media/external/images/media/75920
             String[] proj = {MediaStore.MediaColumns.DATA};
-            cursor = AndApp.getInstance().getContentResolver().query(picUri, proj, null, null, null);
+            cursor = App.getInstance().getContentResolver().query(picUri, proj, null, null, null);
             if (cursor != null) {
                 int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
                 cursor.moveToFirst();
@@ -526,7 +525,6 @@ public class CommonUtil {
             } else {
                 sdcardPath = picUri.getPath();
             }
-            sdcardPath = EncodingUtils.getString(sdcardPath.getBytes(), "utf-8");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -542,25 +540,25 @@ public class CommonUtil {
      * @param dpH       单位dp, -1 表示使用原始高度
      * @param dpPadding 图标文字间隔
      */
-    public static void setTextViewDrawableLeft(TextView tv, int resId, int dpW, int dpH, int dpPadding) {
+    public static void setTVDrawableLeft(TextView tv, int resId, int dpW, int dpH, int dpPadding) {
         Drawable[] ds = tv.getCompoundDrawables();
         tv.setCompoundDrawables(res2drawable(tv.getContext(), resId, dpW, dpH), ds[1], ds[2], ds[3]);
         tv.setCompoundDrawablePadding(ConvertUtils.dp2px(dpPadding));
     }
 
-    public static void setTextViewDrawableTop(TextView tv, int resId, int dpW, int dpH, int dpPadding) {
+    public static void setTVDrawableTop(TextView tv, int resId, int dpW, int dpH, int dpPadding) {
         Drawable[] ds = tv.getCompoundDrawables();
         tv.setCompoundDrawables(ds[0], res2drawable(tv.getContext(), resId, dpW, dpH), ds[2], ds[3]);
         tv.setCompoundDrawablePadding(ConvertUtils.dp2px(dpPadding));
     }
 
-    public static void setTextViewDrawableRight(TextView tv, int resId, int dpW, int dpH, int dpPadding) {
+    public static void setTVDrawableRight(TextView tv, int resId, int dpW, int dpH, int dpPadding) {
         Drawable[] ds = tv.getCompoundDrawables();
         tv.setCompoundDrawables(ds[0], ds[1], res2drawable(tv.getContext(), resId, dpW, dpH), ds[3]);
         tv.setCompoundDrawablePadding(ConvertUtils.dp2px(dpPadding));
     }
 
-    public static void setTextViewDrawableBottom(TextView tv, int resId, int dpW, int dpH, int dpPadding) {
+    public static void setTVDrawableBottom(TextView tv, int resId, int dpW, int dpH, int dpPadding) {
         Drawable[] ds = tv.getCompoundDrawables();
         tv.setCompoundDrawables(ds[0], ds[1], ds[2], res2drawable(tv.getContext(), resId, dpW, dpH));
         tv.setCompoundDrawablePadding(ConvertUtils.dp2px(dpPadding));
@@ -590,11 +588,11 @@ public class CommonUtil {
             isSuccess = ImageUtils.save(bmp, file, Bitmap.CompressFormat.JPEG, true);
 
             //把文件插入到系统图库
-            MediaStore.Images.Media.insertImage(AndApp.getInstance().getContentResolver(), file.getAbsolutePath(),
+            MediaStore.Images.Media.insertImage(App.getInstance().getContentResolver(), file.getAbsolutePath(),
                     fileName, null);
 
             //保存图片后发送广播通知更新数据库
-            AndApp.getInstance().sendBroadcast(
+            App.getInstance().sendBroadcast(
                     new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, UriUtils.file2Uri(file)));
         } catch (IOException e) {
             e.printStackTrace();
@@ -602,6 +600,12 @@ public class CommonUtil {
         return isSuccess;
     }
 
+    /**
+     * 给WebView同步Cookie
+     *
+     * @param context 上下文
+     * @param url     可以使用[domain][host]
+     */
     public static void synCookies(Context context, String url) {
         List<Cookie> cookies = OkHttpUtil.getInstance().getCookies(null);
 
@@ -609,23 +613,145 @@ public class CommonUtil {
         cookieSyncManager.sync();
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeAllCookie();
-            for (Cookie cookie : cookies) {
-                cookieManager.setCookie(url, cookie.toString());
-            }
+        for (Cookie cookie : cookies) {
+            cookieManager.setCookie(url, cookie.toString());
+        }
         CookieSyncManager.getInstance().sync();
     }
 
+    /**
+     * 调用本地分享文本
+     */
+    public static void showLocationShare(Activity activity, String shareContent) {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, shareContent);//注意：这里只是分享文本内容
+        sendIntent.setType("text/plain");
+        activity.startActivity(sendIntent);
+    }
+
+    /**
+     * 在X,Y方向上缩放
+     */
+    public static void scaleXY(View view, long duration, ICallBack icb, float... values) {
+        commonFloatAnim(view, "scaleX", duration, null, icb, values);
+        commonFloatAnim(view, "scaleY", duration, null, icb, values);
+    }
 
 
+    public static void clickScale(View v, MotionEvent event, float scale) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            scaleXY(v, 100, null, 1f, scale);
+        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+            scaleXY(v, 100, null, scale, 1f);
+        }
+    }
 
+    /**
+     * 通用属性动画
+     *
+     * @param icb 动画完成后回调
+     */
+    public static void commonFloatAnim(View view, String propertyName, long duration,
+                                       TimeInterpolator interpolator, ICallBack icb, float... values) {
+        ObjectAnimator anim = ObjectAnimator.ofFloat(view, propertyName, values).setDuration(duration);
+        if (interpolator != null) anim.setInterpolator(new AccelerateInterpolator());
+        anim.start();
+        if (icb != null) {
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    icb.dataCallback(null);
+                    super.onAnimationEnd(animation);
+                }
+            });
+        }
+    }
 
+    /**
+     * 设置图片圆角
+     *
+     * @param bitmap      数据源
+     * @param innerCorner 圆角显示的位置 8个圆角半径值 分别对就左上、右上、右下、左下四个点<br/>
+     *                    float inner[] = new float[] {20, 20, 0, 0, 20, 20 ,0, 0 };
+     */
+    public static Bitmap drawCorner(Bitmap bitmap, float[] innerCorner) {
+        if (bitmap == null) {
+            return null;
+        }
+        Bitmap output = null;
+        try {
+            output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        } catch (OutOfMemoryError e) {
+            if (output != null && !output.isRecycled()) {
+                output.recycle();
+                output = null;
+            }
+            return null;
+        }
+        Canvas canvas = new Canvas(output);
 
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
 
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        Path path = new Path();
+        path.addRoundRect(rectF, innerCorner, Path.Direction.CW);
+        canvas.drawPath(path, paint);
 
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
 
+        return output;
+    }
 
+    public static double parserDouble(String value) {
+        if (ObjectUtils.isEmpty(value)) return 0d;
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return 0d;
+        }
+    }
 
+    public static int parserInt(String value) {
+        return (int) parserDouble(value);
+    }
 
+    public static long parserLong(String value) {
+        return (long) parserDouble(value);
+    }
+
+    public static int getRandomInt(int max) {
+        return max > 0 ? new Random().nextInt(max) : 0;
+    }
+
+    public static byte[] getBytes(final String data, final String charset) {
+        try {
+            return data.getBytes(charset);
+        } catch (final UnsupportedEncodingException e) {
+            return data.getBytes();
+        }
+    }
+
+    /**
+     * 初始化沉浸式状态栏，个性化请重载
+     *
+     * @param barColorResId 状态栏颜色（0：default, -1:不设置)
+     * @param isFit         是否留出状态栏高度
+     */
+    public static void setImmersionBar(BaseActivity activity, int barColorResId, boolean isFit) {
+        ImmersionBar bar = ImmersionBar.with(activity)
+                .statusBarDarkFont(true) //状态栏字体是深色，不写默认为亮色
+                .fitsSystemWindows(isFit);//解决状态栏和布局重叠问题，默认false，为true时要指定statusBarColor()，不然状态栏为透明色
+        if (barColorResId >= 0) bar.statusBarColor(barColorResId > 0 ? barColorResId : R.color.title_bg_color);
+        bar.init(); //必须调用方可应用以上所配置的参数
+    }
 
     /**
      * 两个长的数字字符串做和

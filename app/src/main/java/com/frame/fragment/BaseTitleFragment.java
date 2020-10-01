@@ -1,7 +1,6 @@
 package com.frame.fragment;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +17,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import androidx.fragment.app.Fragment;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
@@ -59,11 +59,11 @@ public abstract class BaseTitleFragment extends Fragment {
     private LinearLayout mRootView;
     public TitleBar mTitleBar;
     private Unbinder mUnbinder;
-    protected BaseActivity mBaseActivity;
+    protected BaseActivity mBActivity;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mBaseActivity = (BaseActivity) getActivity();
+        mBActivity = (BaseActivity) getActivity();
         if (ObjectUtils.isEmpty(mRootView)) {
             mRootView = (LinearLayout) inflater.inflate(R.layout.activity_base_title, null);
             mTitleBar = mRootView.findViewById(R.id.titleBar);
@@ -194,6 +194,7 @@ public abstract class BaseTitleFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mRootView = null;
         if (mUnbinder != null) {
             mUnbinder.unbind();
             mUnbinder = null;

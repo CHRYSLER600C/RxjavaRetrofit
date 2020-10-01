@@ -4,9 +4,6 @@ import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -17,7 +14,7 @@ import com.blankj.utilcode.util.ObjectUtils;
 import com.frame.R;
 import com.frame.dataclass.DataClass;
 import com.frame.observers.ProgressObserver;
-import com.frame.utils.CommonUtil;
+import com.frame.utils.CU;
 import com.frame.utils.JU;
 import com.google.gson.internal.LinkedTreeMap;
 import com.zhy.view.flowlayout.FlowLayout;
@@ -30,6 +27,9 @@ import org.byteam.superadapter.SuperViewHolder;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.OnClick;
 import q.rorbin.verticaltablayout.VerticalTabLayout;
@@ -38,6 +38,7 @@ import q.rorbin.verticaltablayout.widget.ITabView;
 import q.rorbin.verticaltablayout.widget.TabView;
 
 /**
+ *
  */
 public class NavigationActivity extends BaseTitleActivity {
 
@@ -64,7 +65,7 @@ public class NavigationActivity extends BaseTitleActivity {
     protected void initControl() {
         setTitleText("导航");
 
-        mManager = new LinearLayoutManager(mContext);
+        mManager = new LinearLayoutManager(mBActivity);
         mRecyclerView.setLayoutManager(mManager);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mSuperAdapter = getSuperAdapter());
@@ -190,29 +191,28 @@ public class NavigationActivity extends BaseTitleActivity {
 
     @SuppressWarnings("unchecked")
     private SuperAdapter getSuperAdapter() {
-        return new SuperAdapter<LinkedTreeMap<String, Object>>(mContext, mList, R.layout.item_navigation) {
+        return new SuperAdapter<LinkedTreeMap<String, Object>>(mBActivity, mList, R.layout.item_navigation) {
             @Override
-            public void onBind(SuperViewHolder holder, int viewType, int layoutPosition, LinkedTreeMap<String,
-                    Object> map1) {
-                holder.setText(R.id.tvNavigationTitle, JU.s(map1, "name"));
-                TagFlowLayout mTagFlowLayout = holder.findViewById(R.id.tflNavigation);
-                List<LinkedTreeMap<String, Object>> list = JU.al(map1, "articles");
-                mTagFlowLayout.setAdapter(new TagAdapter<LinkedTreeMap<String, Object>>(list) {
+            public void onBind(SuperViewHolder h, int viewType, int layoutPosition, LinkedTreeMap<String, Object> map) {
+                h.setText(R.id.tvNavigationTitle, JU.s(map, "name"));
+                TagFlowLayout tagFlowLayout = h.findViewById(R.id.tflNavigation);
+                List<LinkedTreeMap<String, Object>> list = JU.al(map, "articles");
+                tagFlowLayout.setAdapter(new TagAdapter<LinkedTreeMap<String, Object>>(list) {
                     @Override
                     public View getView(FlowLayout parent, int position, LinkedTreeMap<String, Object> map2) {
                         TextView tv = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout
-                                .flow_layout_tv, mTagFlowLayout, false);
+                                .flow_layout_tv, tagFlowLayout, false);
                         tv.setPadding(ConvertUtils.dp2px(10), ConvertUtils.dp2px(6), ConvertUtils.dp2px(10),
                                 ConvertUtils.dp2px(6));
                         tv.setText(JU.s(map2, "title"));
-                        tv.setTextColor(CommonUtil.randomColor());
+                        tv.setTextColor(CU.randomColor());
                         return tv;
                     }
                 });
-                mTagFlowLayout.setOnTagClickListener((view, position1, parent1) -> {
+                tagFlowLayout.setOnTagClickListener((view, position1, parent1) -> {
                     ActivityOptions options = ActivityOptions.makeScaleUpAnimation(view, view.getWidth() / 2,
                             view.getHeight() / 2, 0, 0);
-                    Intent i = new Intent(mContext, WebViewActivity.class)
+                    Intent i = new Intent(mBActivity, WebViewActivity.class)
                             .putExtra(WebViewActivity.TYPE, WebViewActivity.TYPE_LOAD_URL)
                             .putExtra("title", JU.s(list.get(position1), "title"))
                             .putExtra("url", JU.s(list.get(position1), "link"));
@@ -228,7 +228,7 @@ public class NavigationActivity extends BaseTitleActivity {
 
 
     private void getNetData() {
-        BaseActivity.doCommonGetImpl("navi/json", null, new ProgressObserver<DataClass>(this, true) {
+        BaseActivity.doCommonGet("navi/json", null, new ProgressObserver<DataClass>(this, true) {
             @Override
             public void onNext(DataClass dc) {
                 mList.addAll(JU.al(dc.object, "data"));
@@ -254,8 +254,8 @@ public class NavigationActivity extends BaseTitleActivity {
                     public ITabView.TabTitle getTitle(int i) {
                         return new TabView.TabTitle.Builder()
                                 .setContent(JU.s(mList.get(i), "name"))
-                                .setTextColor(ContextCompat.getColor(mContext, R.color.shallow_green),
-                                        ContextCompat.getColor(mContext, R.color.shallow_grey))
+                                .setTextColor(ContextCompat.getColor(mBActivity, R.color.shallow_green),
+                                        ContextCompat.getColor(mBActivity, R.color.shallow_grey))
                                 .build();
                     }
 

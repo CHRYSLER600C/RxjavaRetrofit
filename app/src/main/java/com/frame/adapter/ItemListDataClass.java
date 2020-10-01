@@ -268,6 +268,6 @@ public class ItemListDataClass extends DataClass implements Serializable {
          * @param convertView Inflater的View
          * @param holder      viewholder
          */
-        void handleItem(View convertView, CommonViewHolder holder);
+        void handleItem(View convertView, CommVHolder holder);
     }
 }

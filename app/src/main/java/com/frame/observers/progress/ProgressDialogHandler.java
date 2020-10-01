@@ -7,7 +7,6 @@ import android.os.Message;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.blankj.utilcode.util.ObjectUtils;
 import com.frame.R;
@@ -51,13 +50,12 @@ public class ProgressDialogHandler extends Handler {
         if (mProgressDialog == null && context != null) {
             View view = View.inflate(context, R.layout.dialog_progress, null);
             ImageView ivProgress = view.findViewById(R.id.progress_dialog_img);
-            TextView tvMsg = view.findViewById(R.id.progress_dialog_txt);
             ivProgress.setAnimation(AnimationUtils.loadAnimation(context, R.anim.dialog_loading_progressbar));
-            tvMsg.setText(R.string.loading);
             mProgressDialog = ProgressDialog.show(context, "", "");
             mProgressDialog.setContentView(view);
             mProgressDialog.setCanceledOnTouchOutside(false);
             mProgressDialog.setCancelable(mCancelable);
+            if (mProgressDialog.getWindow() != null) mProgressDialog.getWindow().setBackgroundDrawable(null);
 
             if (mCancelable && ObjectUtils.isNotEmpty(mProgressCancelListener)) {
                 mProgressDialog.setOnCancelListener((dialogInterface) -> mProgressCancelListener.onCancelProgress());

@@ -10,7 +10,7 @@ import android.widget.EditText;
 import com.blankj.utilcode.util.ObjectUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.frame.R;
-import com.frame.adapter.CommonViewHolder;
+import com.frame.adapter.CommVHolder;
 
 /**
  * Simple Dialog 通知型对话框
@@ -130,7 +130,7 @@ public class CommonDialog extends Dialog {
         public CommonDialog create() {
             final CommonDialog dialog = new CommonDialog(context, R.style.CommonDialog);
             View vDialog = View.inflate(context, R.layout.dialog_common, null);
-            final CommonViewHolder holder = CommonViewHolder.get(null, vDialog);
+            final CommVHolder holder = CommVHolder.get(null, vDialog);
 
             if (DialogType.TYPE_SIMPLE == dialogType) {
                 holder.setVisibility(R.id.tvCommonDialogMessage, View.VISIBLE);

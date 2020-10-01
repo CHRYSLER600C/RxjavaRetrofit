@@ -3,9 +3,9 @@ package com.frame.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.Fragment;
 
 import com.blankj.utilcode.util.ActivityUtils;
+import com.blankj.utilcode.util.ObjectUtils;
 import com.frame.R;
 import com.frame.activity.ExampleActivity;
 import com.frame.activity.KnowledgeHierarchyActivity;
@@ -18,6 +18,7 @@ import com.frame.common.CommonData;
 import com.frame.dataclass.bean.Template;
 import com.frame.httputils.OkHttpUtil;
 import com.frame.httputils.OkHttpUtil2;
+import com.frame.other.BannerImageLoader;
 import com.google.gson.internal.LinkedTreeMap;
 import com.youth.banner.Banner;
 import com.youth.banner.BannerConfig;
@@ -26,12 +27,14 @@ import com.youth.banner.Transformer;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * App相关逻辑处理的工具类
- */
-public class LogicUtil {
+import androidx.fragment.app.Fragment;
 
-    public static List<Template> getSelectList() {
+/**
+ * LogicUtil：App业务逻辑处理的工具类
+ */
+public class LU {
+
+    public static List<Template> getListTab4() {
         List<Template> list = new ArrayList<>();
         list.add(new Template(R.drawable.ic_default, "Example", "", ExampleActivity.class));
         return list;
@@ -73,22 +76,24 @@ public class LogicUtil {
     }
 
     //Banner of Tab1
-    public static void setBannerDataAndShow(Context context, Banner banner, ArrayList<LinkedTreeMap<String, Object>>
-            list) {
+    public static void initBanner(Context context, Banner banner,
+                                  ArrayList<LinkedTreeMap<String, Object>> list) {
+        if(ObjectUtils.isEmpty(list)) return;
+
         final List<String> titleList = new ArrayList<>();
-        List<String> bannerImageList = new ArrayList<>();
-        final List<String> urlList = new ArrayList<>();
+        List<String> imageList = new ArrayList<>();
+        final List<String> webUrlList = new ArrayList<>();
         for (LinkedTreeMap<String, Object> map : list) {
             titleList.add(JU.s(map, "title"));
-            bannerImageList.add(JU.s(map, "imagePath"));
-            urlList.add(JU.s(map, "url"));
+            imageList.add(JU.s(map, "imagePath"));
+            webUrlList.add(JU.s(map, "url"));
         }
         //设置banner样式
         banner.setBannerStyle(BannerConfig.NUM_INDICATOR_TITLE);
         //设置图片加载器
         banner.setImageLoader(new BannerImageLoader());
         //设置图片集合
-        banner.setImages(bannerImageList);
+        banner.setImages(imageList);
         //设置banner动画效果
         banner.setBannerAnimation(Transformer.DepthPage);
         //设置标题集合（当banner样式有显示title时）
@@ -100,9 +105,14 @@ public class LogicUtil {
         //设置指示器位置（当banner模式中有指示器时）
         banner.setIndicatorGravity(BannerConfig.CENTER);
 
-        banner.setOnBannerListener(i -> ActivityUtils.startActivity(new Intent(context, WebViewActivity.class)
-                .putExtra(WebViewActivity.TYPE, WebViewActivity.TYPE_LOAD_URL).putExtra("title", titleList.get(i))
-                .putExtra("url", urlList.get(i))));
+        banner.setOnBannerListener(i -> {
+            if (i < webUrlList.size() && ObjectUtils.isNotEmpty(webUrlList.get(i))) {
+                ActivityUtils.startActivity(new Intent(context, WebViewActivity.class)
+                        .putExtra(WebViewActivity.TYPE, WebViewActivity.TYPE_LOAD_URL)
+                        .putExtra("title", titleList.get(i))
+                        .putExtra("url", webUrlList.get(i)));
+            }
+        });
         banner.start();  //banner设置方法全部调用完毕时最后调用
     }
 

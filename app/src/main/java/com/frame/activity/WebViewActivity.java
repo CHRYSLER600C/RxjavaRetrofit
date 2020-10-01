@@ -3,13 +3,11 @@ package com.frame.activity;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
@@ -28,10 +26,8 @@ import android.widget.Toast;
 
 import com.blankj.utilcode.util.ObjectUtils;
 import com.frame.R;
-import com.frame.utils.CommonUtil;
+import com.frame.utils.CU;
 import com.frame.utils.ViewUtil;
-
-import org.apache.http.util.EncodingUtils;
 
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
@@ -39,6 +35,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 
+import androidx.annotation.Nullable;
 import butterknife.BindView;
 
 /**
@@ -120,7 +117,7 @@ public class WebViewActivity extends BaseTitleActivity {
         String cacheDirPath = getFilesDir().getAbsolutePath() + "APP_CACAHE_DIRNAME";
         webSettings.setAppCachePath(cacheDirPath);                   //设置  Application Caches 缓存目录
 
-        mWebView.addJavascriptInterface(new WebViewJsInterface(mContext, mWebView), "handler");
+        mWebView.addJavascriptInterface(new WebViewJsInterface(mBActivity, mWebView), "handler");
         mWebView.setWebChromeClient(new CustomWebChromeClient());
         mWebView.setWebViewClient(new CustomWebViewClient());
 
@@ -133,14 +130,14 @@ public class WebViewActivity extends BaseTitleActivity {
     private void loadWebViewData() {
         String type = getIntent().getStringExtra(TYPE);
         String url = getIntent().getStringExtra("url");
-        if (ObjectUtils.isNotEmpty(url)) CommonUtil.synCookies(this, url);
+        if (ObjectUtils.isNotEmpty(url)) CU.synCookies(this, url);
 
         switch (type) {
             case TYPE_LOAD_URL:
                 mWebView.loadUrl(url);
                 break;
             case TYPE_POST_URL:
-                mWebView.postUrl(url, EncodingUtils.getBytes(mPostData, "BASE64"));
+                mWebView.postUrl(url, CU.getBytes(mPostData, "BASE64"));
                 break;
             case TYPE_LOAD_CONTENT:
                 String data = getIntent().getStringExtra("data");
@@ -189,15 +186,10 @@ public class WebViewActivity extends BaseTitleActivity {
     class CustomWebChromeClient extends WebChromeClient {
         @Override
         public boolean onJsAlert(WebView view, String url, final String message, final JsResult result) {
-            AlertDialog.Builder b = new AlertDialog.Builder(mContext);
+            AlertDialog.Builder b = new AlertDialog.Builder(mBActivity);
             b.setTitle("Alert");
             b.setMessage(message);
-            b.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    result.confirm();
-                }
-            });
+            b.setPositiveButton(android.R.string.ok, (dialog, which) -> result.confirm());
             b.setCancelable(false);
             b.create().show();
             return true; // false: 弹系统框
@@ -244,8 +236,10 @@ public class WebViewActivity extends BaseTitleActivity {
 
         @Override
         public void onProgressChanged(WebView view, int newProgress) { // 加载进度变化
-            mPbWebView.setProgress(newProgress);
-            mPbWebView.setVisibility(newProgress == 100 ? View.GONE : View.VISIBLE);
+            if (mPbWebView != null) {
+                mPbWebView.setProgress(newProgress);
+                mPbWebView.setVisibility(newProgress == 100 ? View.GONE : View.VISIBLE);
+            }
             super.onProgressChanged(view, newProgress);
         }
 
@@ -328,7 +322,9 @@ public class WebViewActivity extends BaseTitleActivity {
                     connection.setRequestMethod("POST");
                     connection.setRequestProperty("version", "blue"); // add to header
                     DataOutputStream os = new DataOutputStream(connection.getOutputStream());
-                    os.write(EncodingUtils.getBytes(mPostData, "BASE64")); // add to body
+//    implementation 'org.apache.httpcomponents:httpcore:4.4.10'
+//    os.write(EncodingUtils.getBytes(mPostData, "BASE64")); // add to body
+                    os.write(CU.getBytes(mPostData, "BASE64")); // add to body
                     os.flush();
                     mPostData = null;
                     return new WebResourceResponse("text/html", connection.getContentEncoding(), connection

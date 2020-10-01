@@ -6,7 +6,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.frame.common.CommonData;
 import com.frame.dataclass.DataClass;
 import com.frame.utils.JU;
-import com.frame.utils.LogicUtil;
+import com.frame.utils.LU;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -152,10 +152,10 @@ public class HttpUtil2 {
     }
 
     /**
-     * 创建上传文件请求
+     * 创建上传多文件请求
      *
      * @param url
-     * @param params     需要上传的文件
+     * @param params   需要上传的文件
      * @param callback
      * @param tag
      * @return
@@ -168,8 +168,8 @@ public class HttpUtil2 {
             Object object = params.get(key);
             if (object instanceof File) {
                 File file = (File) object;
-                builder.addFormDataPart(key, file.getName(), RequestBody.create(MediaType.parse(HttpUtil2.guessMimeType
-                        (file.getName())), file));
+                builder.addFormDataPart("file", file.getName(),
+                        RequestBody.create(MediaType.parse(HttpUtil2.guessMimeType(file.getName())), file));
             } else {
                 builder.addFormDataPart(key, object.toString());
             }
@@ -243,7 +243,7 @@ public class HttpUtil2 {
         String message = JU.s(dc.object, CommonData.MESSAGE);
 
         if (CommonData.RESULT_UNLOGIN == code) {
-            LogicUtil.gotoLogin(context);
+            LU.gotoLogin(context);
             throw new ApiException(message);
         } else if (CommonData.RESULT_SUCCESS != code) {
             throw new ApiException(message);

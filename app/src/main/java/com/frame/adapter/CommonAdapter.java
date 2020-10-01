@@ -75,14 +75,14 @@ public class CommonAdapter extends BaseAdapter {
 //        } else {
 //            holder = convertView.getTag();
 //        }
-        CommonViewHolder commonViewHolder;
+        CommVHolder commVHolder;
         if (convertView == null) {
-            commonViewHolder = CommonViewHolder.get(null, mInflater.inflate(mLayoutId, null));
+            commVHolder = CommVHolder.get(null, mInflater.inflate(mLayoutId, null));
         } else { // When convertView != null, parent must be an AbsListView.
-            commonViewHolder =  CommonViewHolder.get(convertView, null);
+            commVHolder =  CommVHolder.get(convertView, null);
         }
-        mHandler.handleItem(position, parent, commonViewHolder, mList);
-        return commonViewHolder.itemView;
+        mHandler.handleItem(position, parent, commVHolder, mList);
+        return commVHolder.itemView;
     }
 
     // 回调接口
@@ -92,9 +92,9 @@ public class CommonAdapter extends BaseAdapter {
          *
          * @param position    位置
          * @param parent      父窗口
-         * @param h           CommonViewHolder
+         * @param h           CommVHolder
          * @param list        回调对应position的数据项
          */
-        void handleItem(int position, ViewGroup parent, CommonViewHolder h, List list);
+        void handleItem(int position, ViewGroup parent, CommVHolder h, List list);
     }
 }

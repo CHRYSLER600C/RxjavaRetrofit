@@ -26,4 +26,14 @@ public class Event {
     public Object getData() {
         return data;
     }
+
+
+    /**
+     * EventBus事件
+     */
+    public interface Action {
+
+        String EA_LOGIN = "event_action_login"; //登录事件
+
+    }
 }

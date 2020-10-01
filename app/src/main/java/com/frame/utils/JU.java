@@ -10,7 +10,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 
 /**
- * JsonUtil类，解析返回的对象
+ * JsonUtil：解析返回的对象
  */
 
 @SuppressWarnings("unchecked")
@@ -43,10 +43,12 @@ public class JU {
      */
     public static double d(Object object, String key) {
         if (object == null || TextUtils.isEmpty(key)) return 0d;
-        Double value = 0d;
+        double value = 0d;
         if (object instanceof AbstractMap) {
             try {
-                value = Double.parseDouble(s(object, key));
+                String dStr = s(object, key);
+                if (TextUtils.isEmpty(dStr)) return 0d;
+                value = Double.parseDouble(dStr);
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
@@ -57,10 +59,31 @@ public class JU {
     /**
      * 获取指定key的value
      *
+     * @return long
+     */
+    public static long l(Object object, String key) {
+        return (long) d(object, key);
+    }
+
+    /**
+     * 获取指定key的value
+     *
      * @return int
      */
     public static int i(Object object, String key) {
         return (int) d(object, key);
+    }
+
+    public static String d2s(Object object, String key) { //先转double，再转String
+        return String.valueOf(d(object, key));
+    }
+
+    public static String l2s(Object object, String key) { //先转long，再转String
+        return String.valueOf(l(object, key));
+    }
+
+    public static String i2s(Object object, String key) { //先转int，再转String
+        return String.valueOf(i(object, key));
     }
 
     /**
@@ -107,6 +130,21 @@ public class JU {
      */
     public static <T> T al(Object object) {
         return object instanceof ArrayList ? (T) object : (T) new ArrayList<>();
+    }
+
+    /**
+     * 通用转换器
+     * 获取指定key的value，缺省返回Object类型
+     *
+     * @return T
+     */
+    public static <T> T obj(Object object, String key) {
+        if (object == null || TextUtils.isEmpty(key)) return (T) new Object();
+        Object objResult = null;
+        if (object instanceof AbstractMap) {
+            objResult = ((AbstractMap) object).get(key);
+        }
+        return objResult == null ? (T) new Object() : (T) objResult;
     }
 
 }

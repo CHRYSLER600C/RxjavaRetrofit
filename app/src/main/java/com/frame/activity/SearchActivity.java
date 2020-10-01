@@ -14,11 +14,11 @@ import com.blankj.utilcode.util.KeyboardUtils;
 import com.blankj.utilcode.util.ObjectUtils;
 import com.frame.R;
 import com.frame.core.dao.HistoryData;
-import com.frame.core.db.DbHelperImpl;
+import com.frame.core.db.DbHelper;
 import com.frame.dataclass.DataClass;
 import com.frame.observers.ProgressObserver;
 import com.frame.observers.RecycleObserver;
-import com.frame.utils.CommonUtil;
+import com.frame.utils.CU;
 import com.frame.utils.JU;
 import com.frame.view.dialog.CommonDialog;
 import com.google.gson.internal.LinkedTreeMap;
@@ -35,6 +35,7 @@ import butterknife.BindView;
 import butterknife.OnClick;
 
 /**
+ *
  */
 public class SearchActivity extends BaseTitleActivity {
 
@@ -49,7 +50,7 @@ public class SearchActivity extends BaseTitleActivity {
     @BindView(R.id.tflSearchHistory)
     TagFlowLayout mTflSearchHistory;
 
-    private DbHelperImpl mDbHelperImpl = new DbHelperImpl();
+    private DbHelper mDbHelper = DbHelper.getInstance();
     private List<LinkedTreeMap<String, Object>> mList;
     private List<HistoryData> mHistoryList = new ArrayList<>();
 
@@ -94,7 +95,7 @@ public class SearchActivity extends BaseTitleActivity {
                 finish();
                 break;
             case R.id.ivClearAll:
-                CommonDialog.Builder builder = new CommonDialog.Builder(mContext, CommonDialog.DialogType.TYPE_SIMPLE)
+                CommonDialog.Builder builder = new CommonDialog.Builder(mBActivity, CommonDialog.DialogType.TYPE_SIMPLE)
                         .setTitle("提示")
                         .setMessage("确定清空搜索历史吗？")
                         .setOkBtn("确定", (View v, String value) -> refreshHistoryData(null, true))
@@ -109,17 +110,17 @@ public class SearchActivity extends BaseTitleActivity {
 
     private void startSearch() {
         String key = mEtSearch.getText().toString();
-        refreshHistoryData(mDbHelperImpl.addHistoryData(key), false);
-        ActivityUtils.startActivity(new Intent(mContext, SearchListActivity.class)
+        refreshHistoryData(mDbHelper.addHistoryData(key), false);
+        ActivityUtils.startActivity(new Intent(mBActivity, SearchListActivity.class)
                 .putExtra("key", key));
     }
 
     private void refreshHistoryData(List<HistoryData> list, boolean isClear) {
         mHistoryList.clear();
         if (isClear) {
-            mDbHelperImpl.clearHistoryData();
+            mDbHelper.clearHistoryData();
         } else {
-            mHistoryList.addAll(ObjectUtils.isEmpty(list) ? mDbHelperImpl.loadAllHistoryData() : list);
+            mHistoryList.addAll(ObjectUtils.isEmpty(list) ? mDbHelper.loadAllHistoryData() : list);
             Collections.reverse(mHistoryList);
         }
         mTflSearchHistory.getAdapter().notifyDataChanged();
@@ -130,40 +131,40 @@ public class SearchActivity extends BaseTitleActivity {
         mTflSearchHistory.setAdapter(new TagAdapter<HistoryData>(list) {
             @Override
             public View getView(FlowLayout parent, int position, HistoryData item) {
-                TextView tv = (TextView) LayoutInflater.from(mContext).inflate(R.layout.flow_layout_tv,
+                TextView tv = (TextView) LayoutInflater.from(mBActivity).inflate(R.layout.flow_layout_tv,
                         parent, false);
                 tv.setPadding(ConvertUtils.dp2px(12), ConvertUtils.dp2px(6), ConvertUtils.dp2px(12),
                         ConvertUtils.dp2px(6));
                 tv.setText(item.getData());
-                tv.setTextColor(CommonUtil.randomColor());
+                tv.setTextColor(CU.randomColor());
                 return tv;
             }
         });
         mTflSearchHistory.setOnTagClickListener((view, position1, parent1) -> {
-            ActivityUtils.startActivity(new Intent(mContext, SearchListActivity.class)
+            ActivityUtils.startActivity(new Intent(mBActivity, SearchListActivity.class)
                     .putExtra("key", list.get(position1).getData()));
             return true;
         });
     }
 
     private void getNetData() {
-        BaseActivity.doCommonGetImpl("hotkey/json", null, new ProgressObserver<DataClass>(this, true) {
+        BaseActivity.doCommonGet("hotkey/json", null, new ProgressObserver<DataClass>(this, true) {
             @Override
             public void onNext(DataClass dc) {
                 mList = JU.al(dc.object, "data");
                 mTflSearch.setAdapter(new TagAdapter<LinkedTreeMap<String, Object>>(mList) {
                     @Override
                     public View getView(FlowLayout parent, int position, LinkedTreeMap<String, Object> map) {
-                        TextView tv = (TextView) LayoutInflater.from(mContext).inflate(R.layout.flow_layout_tv,
+                        TextView tv = (TextView) LayoutInflater.from(mBActivity).inflate(R.layout.flow_layout_tv,
                                 parent, false);
                         tv.setText(JU.s(map, "name"));
-                        tv.setBackgroundColor(CommonUtil.randomTagColor());
+                        tv.setBackgroundColor(CU.randomTagColor());
                         tv.setTextColor(getResources().getColor(R.color.white));
                         return tv;
                     }
                 });
                 mTflSearch.setOnTagClickListener((view, position1, parent1) -> {
-                    ActivityUtils.startActivity(new Intent(mContext, SearchListActivity.class)
+                    ActivityUtils.startActivity(new Intent(mBActivity, SearchListActivity.class)
                             .putExtra("key", JU.s(mList.get(position1), "name")));
                     return true;
                 });

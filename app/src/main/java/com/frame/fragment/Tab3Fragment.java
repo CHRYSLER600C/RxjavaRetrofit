@@ -15,7 +15,7 @@ public class Tab3Fragment extends BaseTitleFragment implements View.OnClickListe
 
     @Override
     protected View setContentView(Bundle savedInstanceState) {
-        return View.inflate(mBaseActivity, R.layout.fragment_tab3, null);
+        return View.inflate(mBActivity, R.layout.fragment_tab3, null);
     }
 
     @Override

@@ -256,6 +256,7 @@ public class PickerScroller extends View {
             if (item.isSelected())
                 return;
         }
+        if(itemList.size() == 0) return;
         int move = (int) itemList.get(0).moveToSelected();
         if (move <= 0) {
             defaultMove(move);

@@ -1,9 +1,9 @@
 package com.frame.activity;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.ViewPager;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import com.blankj.utilcode.util.ObjectUtils;
 import com.flyco.tablayout.SlidingTabLayout;
@@ -13,7 +13,7 @@ import com.frame.dataclass.DataClass;
 import com.frame.fragment.BaseTitleFragment;
 import com.frame.fragment.WxArticleDetailFragment;
 import com.frame.observers.ProgressObserver;
-import com.frame.utils.CommonUtil;
+import com.frame.utils.CU;
 import com.frame.utils.JU;
 
 import java.util.AbstractMap;
@@ -43,7 +43,7 @@ public class WxArticleActivity extends BaseTitleActivity {
     }
 
     protected void initControl() {
-        map = CommonUtil.cast(getIntent().getSerializableExtra(CommonData.PARAM1));
+        map = CU.cast(getIntent().getSerializableExtra(CommonData.PARAM1));
         if (ObjectUtils.isNotEmpty(JU.s(map, "name"))) setTitleText(JU.s(map, "name"));
         else setTitleText("公众号");
     }
@@ -83,7 +83,7 @@ public class WxArticleActivity extends BaseTitleActivity {
     }
 
     private void getWxArticleTitleData() {
-        BaseActivity.doCommonGetImpl("wxarticle/chapters/json", null, new ProgressObserver<DataClass>(this, true) {
+        BaseActivity.doCommonGet("wxarticle/chapters/json", null, new ProgressObserver<DataClass>(this, true) {
             @Override
             public void onNext(DataClass dc) {
                 initTabLayoutAndViewPager(JU.al(dc.object, "data"));

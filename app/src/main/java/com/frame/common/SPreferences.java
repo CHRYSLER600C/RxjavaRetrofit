@@ -3,7 +3,7 @@ package com.frame.common;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.frame.application.AndApp;
+import com.frame.application.App;
 
 public class SPreferences {
 
@@ -21,7 +21,7 @@ public class SPreferences {
      * @return 是否成功
      */
     public static boolean saveData(String key, Object data) {
-        SharedPreferences sp = AndApp.getInstance().getSharedPreferences(SP_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sp = App.getInstance().getSharedPreferences(SP_NAME, Context.MODE_PRIVATE);
 
         if (data instanceof Integer) return sp.edit().putInt(key, (Integer) data).commit();
         else if (data instanceof Long) return sp.edit().putLong(key, (Long) data).commit();
@@ -39,7 +39,7 @@ public class SPreferences {
      * @return 返回存储的类型
      */
     public static <T> T getData(String key, T defaultValue) {
-        SharedPreferences sp = AndApp.getInstance().getSharedPreferences(SP_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sp = App.getInstance().getSharedPreferences(SP_NAME, Context.MODE_PRIVATE);
 
         if (defaultValue instanceof Integer) return cast(sp.getInt(key, (Integer) defaultValue));
         else if (defaultValue instanceof Long) return cast(sp.getLong(key, (Long) defaultValue));

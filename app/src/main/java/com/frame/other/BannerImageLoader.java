@@ -1,4 +1,4 @@
-package com.frame.utils;
+package com.frame.other;
 
 import android.content.Context;
 import android.widget.ImageView;
@@ -16,6 +16,6 @@ public class BannerImageLoader extends ImageLoader {
 
     @Override
     public void displayImage(Context context, Object o, ImageView iv) {
-        ImageLoaderUtil.downloadImage(context, (String)o, iv, R.drawable.ic_default);
+        ImageLoaderUtil.loadImage(context, (String)o, iv, R.drawable.ic_default, 0);
     }
 }

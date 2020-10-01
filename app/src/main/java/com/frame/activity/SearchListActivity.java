@@ -2,8 +2,8 @@ package com.frame.activity;
 
 
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 
 import com.blankj.utilcode.util.ObjectUtils;
@@ -52,8 +52,8 @@ public class SearchListActivity extends BaseTitleActivity {
         mCurrKey = getIntent().getStringExtra("key");
         setTitleText(mCurrKey);
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        mRecyclerView.setAdapter(mSuperAdapter = WxArticleDetailFragment.getSuperAdapter(mContext, mList));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mBActivity));
+        mRecyclerView.setAdapter(mSuperAdapter = WxArticleDetailFragment.getSuperAdapter(mBActivity, mList));
 
         setSmartRefreshLayout();
     }
@@ -76,7 +76,7 @@ public class SearchListActivity extends BaseTitleActivity {
     }
 
     private void setSmartRefreshLayout() {
-        mSmartRefreshLayout.setRefreshFooter(new ClassicsFooter(mContext));
+        mSmartRefreshLayout.setRefreshFooter(new ClassicsFooter(mBActivity));
         mSmartRefreshLayout.setOnRefreshListener(refreshLayout -> {
             getNetData(mCurrKey, mCurrPage = 0, false);
         });
@@ -88,8 +88,8 @@ public class SearchListActivity extends BaseTitleActivity {
     private void getNetData(String key, int currPage, boolean isLoading) {
         Map<String, Object> map = new HashMap<>();
         map.put("k", key);
-        BaseActivity.doCommonPostImpl("article/query/" + currPage + "/json", map, new
-                ProgressObserver<DataClass>(mContext, isLoading, mSmartRefreshLayout) {
+        BaseActivity.doCommonPost("article/query/" + currPage + "/json", map, new
+                ProgressObserver<DataClass>(mBActivity, isLoading, mSmartRefreshLayout) {
                     @Override
                     public void onNext(DataClass dc) {
                         LinkedTreeMap<String, Object> data = JU.m(dc.object, "data");

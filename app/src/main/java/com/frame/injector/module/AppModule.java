@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 
 import com.frame.common.CommonData;
 import com.frame.httputils.HeaderInterceptor;
-import com.frame.httputils.LoggerInterceptor;
+import com.frame.httputils.LogInterceptor;
 import com.frame.httputils.MemoryCookieStore;
 import com.frame.httputils.MyHostnameVerifier;
 import com.frame.httputils.MyTrustManager;
@@ -71,7 +71,7 @@ public class AppModule {
         /** 通过Interceptor来定义静态请求头 */
         builder.addInterceptor(new HeaderInterceptor()); //使用请开启
         /** 添加日志拦截器 */
-        builder.addInterceptor(new LoggerInterceptor(null, CommonData.DEBUG));
+        builder.addInterceptor(new LogInterceptor(null, CommonData.DEBUG));
         return builder.build();
     }
 
@@ -83,7 +83,7 @@ public class AppModule {
     Retrofit provideRetrofit(OkHttpClient okHttpClient) {
         return new Retrofit.Builder()
                 .client(okHttpClient)
-//                .addConverterFactory(GsonConverterFactory.create()) // Gson解析
+//                .addConverterFactory(GsonConverterFactory.create()) // com.squareup.retrofit2:converter-gson:2.6.0
                 .addConverterFactory(MyGsonConverterFactory.create()) // 自定义Gson解析
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create()) // 支持RxJava
                 .baseUrl(CommonData.SEVER_URL)

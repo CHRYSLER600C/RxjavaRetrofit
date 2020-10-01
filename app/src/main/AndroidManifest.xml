@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.frame">
+    package="com.frame">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!--Dangerous Permissions-->
     <!--<uses-permission android:name="android.permission.CAMERA"/>            &lt;!&ndash;照相机&ndash;&gt;-->
@@ -16,47 +16,52 @@
     <!--<uses-permission android:name="android.permission.READ_CALL_LOG"/>     &lt;!&ndash;看电话记录&ndash;&gt;-->
     <!--<uses-permission android:name="android.permission.WRITE_CALL_LOG" />   &lt;!&ndash;写电话记录&ndash;&gt;-->
     <!--<uses-permission android:name="android.permission.RECORD_AUDIO" />     &lt;!&ndash;音频录音&ndash;&gt;-->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>  <!--读取手机状态-->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/><!--写外部存储器-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />  <!--读取手机状态-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /><!--写外部存储器-->
     <!--<uses-permission android:name="com.android.launcher.permission.ACCESS_COARSE_LOCATION"/> &lt;!&ndash;获取粗略定位&ndash;&gt;-->
 
     <application
-        android:name=".application.AndApp"
+        android:name=".application.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="@string/app_name_flavors"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
 
         <meta-data
             android:name="UMENG_CHANNEL"
-            android:value="04"/>
+            android:value="${UMENG_CHANNEL_VALUE}" />
 
         <activity
             android:name=".activity.SplashActivity"
             android:theme="@style/AppLaunchTheme">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.UpdateActivity"/>
-        <activity android:name=".activity.GroupActivity"/>
-        <activity android:name=".activity.WebViewActivity"/>
-        <activity android:name=".activity.LoginActivity"/>
-        <activity android:name=".activity.RegistrationActivity"/>
-        <activity android:name=".activity.ExampleActivity"/>
-        <activity android:name=".activity.BigPicActivity"/>
-        <activity android:name=".activity.KnowledgeHierarchyActivity"/>
-        <activity android:name=".activity.WxArticleActivity"/>
-        <activity android:name=".activity.NavigationActivity"/>
-        <activity android:name=".activity.ProjectActivity"/>
-        <activity android:name=".activity.SearchActivity"/>
-        <activity android:name=".activity.SearchListActivity"/>
+        <activity android:name=".activity.UpdateActivity" />
+        <activity android:name=".activity.GroupActivity" />
+        <activity android:name=".activity.WebViewActivity" />
+        <activity android:name=".activity.LoginActivity" />
+        <activity android:name=".activity.RegistrationActivity" />
+        <activity android:name=".activity.ExampleActivity" />
+        <activity android:name=".activity.BigPicActivity" />
+        <activity android:name=".activity.KnowledgeHierarchyActivity" />
+        <activity android:name=".activity.WxArticleActivity" />
+        <activity android:name=".activity.NavigationActivity" />
+        <activity android:name=".activity.ProjectActivity" />
+        <activity android:name=".activity.SearchActivity" />
+        <activity android:name=".activity.SearchListActivity" />
 
+
+        <!--设置Glide配置信息-->
+        <meta-data
+            android:name="com.frame.httputils.other.GlideConfiguration"
+            android:value="GlideModule" />
     </application>
-
 </manifest>

@@ -42,7 +42,6 @@ public interface RequestService {
     // ============================== All POST Method Declaration ==============================
 
     // 通用POST请求
-    @FormUrlEncoded
     @POST
     Observable<DataClass> commonPost(@Url String url);
 
@@ -56,7 +55,6 @@ public interface RequestService {
     Observable<DataClass> commonPostJson(@Url String url, @Body RequestBody strJson);
 
     // 通用POST请求，返回原始数据
-    @FormUrlEncoded
     @POST
     Observable<String> commonPostRaw(@Url String url);
 

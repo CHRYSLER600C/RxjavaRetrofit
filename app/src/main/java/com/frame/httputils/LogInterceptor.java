@@ -2,8 +2,6 @@ package com.frame.httputils;
 
 import android.text.TextUtils;
 
-import com.frame.utils.Logger;
-
 import java.io.IOException;
 
 import okhttp3.Headers;
@@ -15,22 +13,26 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 
+import static com.frame.utils.LogUtilKt.logd;
+import static com.frame.utils.LogUtilKt.logi;
+import static com.frame.utils.LogUtilKt.logv;
+
 
 /**
  * Created by zhy on 16/3/1.
  */
-public class LoggerInterceptor implements Interceptor {
+public class LogInterceptor implements Interceptor {
 
     public static final String TAG = "okhttp";
     private String tag;
     private boolean showResponse;
 
-    public LoggerInterceptor(String tag, boolean showResponse) {
+    public LogInterceptor(String tag, boolean showResponse) {
         this.tag = TextUtils.isEmpty(tag) ? TAG : tag;
         this.showResponse = showResponse;
     }
 
-    public LoggerInterceptor(String tag) {
+    public LogInterceptor(String tag) {
         this(tag, false);
     }
 
@@ -52,25 +54,25 @@ public class LoggerInterceptor implements Interceptor {
             String url = request.url().toString();
             Headers headers = request.headers();
 
-            Logger.v(tag, "================ Request Log Begin ================");
-            Logger.d(tag, "Method : " + request.method());
-            Logger.d(tag, "Url : " + url);
+            logv(tag, "================ Request Log Begin ================");
+            logd(tag, "Method : " + request.method());
+            logd(tag, "Url : " + url);
             if (headers != null && headers.size() > 0) {
-                Logger.d(tag, "Headers : " + headers.toString());
+                logd(tag, "Headers : " + headers.toString());
             }
             RequestBody requestBody = request.body();
             if (requestBody != null) {
                 MediaType mediaType = requestBody.contentType();
                 if (mediaType != null) {
-                    Logger.d(tag, "RequestBody ContentType : " + mediaType.toString());
+                    logd(tag, "RequestBody ContentType : " + mediaType.toString());
                     if (isText(mediaType)) {
-                        Logger.d(tag, "RequestBody Content : " + bodyToString(request));
+                        logd(tag, "RequestBody Content : " + bodyToString(request));
                     } else {
-                        Logger.d(tag, "RequestBody Content : maybe [file part] , too large too print , ignored!");
+                        logd(tag, "RequestBody Content : maybe [file part] , too large too print , ignored!");
                     }
                 }
             }
-            Logger.v(tag, "================= Request Log End =================\n ");
+            logv(tag, "================= Request Log End =================\n ");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -84,32 +86,32 @@ public class LoggerInterceptor implements Interceptor {
      */
     private Response logForResponse(Response response) {
         try {
-            Logger.i(tag, "================ Response Log Begin ================");
+            logi(tag, "================ Response Log Begin ================");
             Response.Builder builder = response.newBuilder();
             Response clone = builder.build();
             String url = clone.request().url().toString();
-            Logger.d(tag, "Url : " + url);
-            Logger.d(tag, "Code : " + clone.code());
+            logd(tag, "Url : " + url);
+            logd(tag, "Code : " + clone.code());
             if (showResponse) {
                 ResponseBody body = clone.body();
                 if (body != null) {
                     MediaType mediaType = body.contentType();
                     if (mediaType != null) {
-                        Logger.d(tag, "ResponseBody ContentType : " + mediaType.toString());
+                        logd(tag, "ResponseBody ContentType : " + mediaType.toString());
                         if (isText(mediaType)) {
                             String responseBody = body.string();
-                            Logger.d(tag, "ResponseBody Content : " + responseBody);
-                            Logger.i(tag, "================= Response Log End =================\n ");
+                            logd(tag, "ResponseBody Content : " + responseBody);
+                            logi(tag, "================= Response Log End =================\n ");
 
                             body = ResponseBody.create(mediaType, responseBody);
                             return response.newBuilder().body(body).build();
                         } else {
-                            Logger.d(tag, "ResponseBody Content : maybe [file part] , too large too print , ignored!");
+                            logd(tag, "ResponseBody Content : maybe [file part] , too large too print , ignored!");
                         }
                     }
                 }
             }
-            Logger.i(tag, "================= Response Log End =================\n ");
+            logi(tag, "================= Response Log End =================\n ");
         } catch (Exception e) {
             e.printStackTrace();
         }

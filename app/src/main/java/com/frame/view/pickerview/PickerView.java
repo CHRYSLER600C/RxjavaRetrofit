@@ -80,7 +80,7 @@ public class PickerView extends LinearLayout {
             pickerScroller1.setData(mPickerValue.list1);
             int defaultId1 = 0; // 查找已选name的id
             if (pickerItem != null && pickerItem.nv1 != null) {
-                defaultId1 = getSelectedId(pickerItem.nv1.name, mPickerValue.list1);
+                defaultId1 = getSelectedId(pickerItem.nv1.value, mPickerValue.list1);
             }
             pickerScroller1.setDefault(defaultId1);
         } else {
@@ -135,7 +135,7 @@ public class PickerView extends LinearLayout {
         }
         int defaultId2 = 0; // 查找已选name的id
         if (pickerItem != null && pickerItem.nv2 != null) {
-            defaultId2 = getSelectedId(pickerItem.nv2.name, pickerScroller2.getData());
+            defaultId2 = getSelectedId(pickerItem.nv2.value, pickerScroller2.getData());
         }
         pickerScroller2.setDefault(defaultId2);
     }
@@ -175,22 +175,18 @@ public class PickerView extends LinearLayout {
         }
         int defaultId3 = 0; // 查找已选name的id
         if (pickerItem != null && pickerItem.nv3 != null) {
-            defaultId3 = getSelectedId(pickerItem.nv3.name, pickerScroller3.getData());
+            defaultId3 = getSelectedId(pickerItem.nv3.value, pickerScroller3.getData());
         }
         pickerScroller3.setDefault(defaultId3);
     }
 
-    private int getSelectedId(String name, ArrayList<NameValue> list) {
-        int id = 0;
-        if (!TextUtils.isEmpty(name)) {
-            for (int i = 0; i < list.size(); i++) {
-                if (name.equals(list.get(i).name)) {
-                    id = i;
-                    break;
-                }
-            }
+    private int getSelectedId(String value, ArrayList<NameValue> list) {
+        if (TextUtils.isEmpty(value)) return 0;
+
+        for (int i = 0; i < list.size(); i++) {
+            if (value.equals(list.get(i).value)) return i;
         }
-        return id;
+        return 0;
     }
 
     @Override

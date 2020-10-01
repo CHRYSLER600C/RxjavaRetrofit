@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 apply plugin: 'org.greenrobot.greendao' // apply plugin
 
 
@@ -12,25 +14,40 @@ android {
         }
     }
 
-    compileSdkVersion 28
+    compileSdkVersion rootProject.ext.buildInfo.compileSdkVersion
     buildToolsVersion '28.0.3'
 
     defaultConfig {
         applicationId "com.frame"
-        minSdkVersion 17
-        targetSdkVersion 28
-        versionCode 100
-        versionName "1.0.0"
+        minSdkVersion rootProject.ext.buildInfo.minSdkVersion
+        targetSdkVersion rootProject.ext.buildInfo.targetSdkVersion
+        versionCode rootProject.ext.otherInfo.versionCode
+        versionName rootProject.ext.otherInfo.versionName
+        flavorDimensions "default" //必须要保证所有的flavor 都属于同一个维度
+        multiDexEnabled true
     }
     buildTypes {
-        release {
-            buildConfigField "boolean", "ISRELEASE", "true"
+        release { //ForRelease
+            buildConfigField "boolean", "IS_DEBUG", "false"
+            buildConfigField "boolean", "IS_OPEN_LEAK_CANARY", "false" //leakcanary
             signingConfig signingConfigs.release   // 指定签名为release，否则不会签名
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
+            zipAlignEnabled true  //Zipalign优化
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        debug {
-            buildConfigField "boolean", "ISRELEASE", "false"
+        debugTest { //ForTest
+            buildConfigField "boolean", "IS_DEBUG", "true"
+            buildConfigField "boolean", "IS_OPEN_LEAK_CANARY", "false" //leakcanary
+            signingConfig signingConfigs.release   // 指定签名为release，否则不会签名
+            minifyEnabled true
+            shrinkResources true
+            zipAlignEnabled true  //Zipalign优化
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug { //ForDevelop
+            buildConfigField "boolean", "IS_DEBUG", "true"
+            buildConfigField "boolean", "IS_OPEN_LEAK_CANARY", "true" //leakcanary
             signingConfig signingConfigs.release   // 指定签名为release，否则不会签名
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -40,18 +57,46 @@ android {
     // 自定义APK文件名
     applicationVariants.all { variant ->
         variant.outputs.all {
-            outputFileName = "RxjavaRetrofit_V${defaultConfig.versionName}(${defaultConfig.versionCode})_${buildType.name}_${releaseTime()}().apk";
+            outputFileName = "RxjavaRetrofit_V${defaultConfig.versionName}(${defaultConfig.versionCode})_${variant.productFlavors[0].name}_${buildType.name}_${releaseTime()}.apk"
         }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    //多渠道多配置打包
+    productFlavors {
+        google_play {
+            resValue "string", "app_name_flavors", "@string/app_name"
+        }
+//        official {
+//            resValue "string", "app_name_flavors", "@string/app_name"
+//        }
+//        samsung {
+//            resValue "string", "app_name_flavors", "@string/app_name_cn"
+//        }
+//        qh360 {
+//            resValue "string", "app_name_flavors", "@string/app_name_cn"
+//        }
+//        huawei {
+//            resValue "string", "app_name_flavors", "@string/app_name_cn"
+//        }
+//        xiaomi {
+//            resValue "string", "app_name_flavors", "@string/app_name_cn"
+//        }
+//        yybao {
+//            resValue "string", "app_name_flavors", "@string/app_name_cn"
+//        }
+    }
+    productFlavors.all {
+        flavor -> flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+    }
 }
 
 //获取时间
 def releaseTime() {
-    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+    return new Date().format("yyyy-MM-dd_HHmmss", TimeZone.getTimeZone("UTC"))
 }
 
 greendao {
@@ -64,63 +109,81 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
 
-    //Base
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:cardview-v7:28.0.0'
-    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    /**
+     * Base Androidx
+     */
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
 
-    //Dagger2
+    /**
+     * Dagger2
+     */
     implementation 'com.google.dagger:dagger:2.15'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.15'
 
-    //RxJava && RxAndroid && RxBinding && rxPermissions
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.6'
+    /**
+     * RxJava && RxAndroid && RxBinding && rxPermissions
+     */
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.10'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation 'com.jakewharton.rxbinding2:rxbinding:2.1.0'
     implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.5'
 
-    // Net
+    /**
+     * Net Request
+     */
     //Retrofit2
-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.6.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.6.0'
     //Gson
     implementation 'com.google.code.gson:gson:2.8.5'
-    //picasso
-    implementation 'com.squareup.picasso:picasso:2.5.2'
+    //Glide
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
     //SuperAdapter
     implementation 'org.byteam.superadapter:superadapter:3.6.8'
 
-    // Utils
+    /**
+     * Utils
+     */
     //Butterknife
-    implementation 'com.jakewharton:butterknife:8.8.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
-    //EncodingUtils
-    implementation 'org.apache.httpcomponents:httpcore:4.4.5'
-    //java注解
-    implementation 'org.glassfish:javax.annotation:10.0-b28'
-    //LeakCanary
+    implementation 'com.jakewharton:butterknife:10.0.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
+    //LeakCanary（增加debugTestImplementation给debugTest打包用）
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
+    debugTestImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
     //EventBus
     implementation 'org.greenrobot:eventbus:3.1.1'
     //AndroidUtilCode
-    implementation 'com.blankj:utilcode:1.23.5'
+    implementation 'com.blankj:utilcodex:1.26.0'
     //GreenDao
     implementation 'org.greenrobot:greendao:3.2.2' // add library
 
-    //UI
-    //状态栏
-    implementation 'com.githang:status-bar-compat:0.7'
+    /**
+     * UI
+     */
+    //沉浸式状态栏
+    implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
     //TabLayout
     implementation 'com.flyco.tablayout:FlycoTabLayout_Lib:2.1.2@aar'
     //Banner轮播图
     implementation 'com.youth.banner:banner:1.4.10'
-    //smartrefresh
+    //SmartRefresh
     implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-20'
     implementation 'com.scwang.smartrefresh:SmartRefreshHeader:1.1.0-alpha-20'
     //VerticalTabLayout
     implementation 'q.rorbin:VerticalTabLayout:1.2.5'
     //流式布局
     implementation 'com.hyman:flowlayout-lib:1.1.2'
+
+    /**
+     * Kotlin
+     */
+    implementation "androidx.core:core-ktx:1.1.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral() //Kotlin
 }

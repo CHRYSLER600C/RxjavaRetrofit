@@ -12,38 +12,38 @@ import android.view.WindowManager;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.PopupWindow;
 
-import com.frame.adapter.CommonViewHolder;
+import com.frame.adapter.CommVHolder;
 
 /**
  * 通用弹窗
  */
-public class CommonPopView extends PopupWindow {
+public class CustomPopView extends PopupWindow {
 
-    public CommonPopView() {
+    public CustomPopView() {
         super();
     }
 
-    public CommonPopView(Context context) {
+    public CustomPopView(Context context) {
         super(context);
     }
 
-    public CommonPopView(Context context, AttributeSet attrs) {
+    public CustomPopView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public CommonPopView(View contentView, int width, int height) {
+    public CustomPopView(View contentView, int width, int height) {
         super(contentView, width, height);
     }
 
-    public CommonPopView(View contentView) {
+    public CustomPopView(View contentView) {
         super(contentView);
     }
 
-    public CommonPopView(int width, int height) {
+    public CustomPopView(int width, int height) {
         super(width, height);
     }
 
-    public CommonPopView(View contentView, int width, int height, boolean focusable) {
+    public CustomPopView(View contentView, int width, int height, boolean focusable) {
         super(contentView, width, height, focusable);
     }
 
@@ -95,11 +95,12 @@ public class CommonPopView extends PopupWindow {
         private ICallBackPopView mHandler;
 
         // 选传属性
-        private Object mAdapter = null; // listview adapter
+        private Object mData = null; // 数据传输
         private boolean mIsOutsideTouchDismiss = true; // 是否点击后dismiss
         private boolean mIsBackDismiss = true; // 是否点击返回键后dismiss
         private int mViewWidth = LayoutParams.MATCH_PARENT;
         private int mViewHeight = LayoutParams.MATCH_PARENT;
+        private int mAnimResId; // 动画
 
         /**
          * 构造函数
@@ -117,8 +118,8 @@ public class CommonPopView extends PopupWindow {
 
         // 设置属性
         // ==============================================================================
-        public Builder setAdapter(Object adapter) {
-            this.mAdapter = adapter;
+        public Builder setData(Object data) {
+            this.mData = data;
             return this;
         }
 
@@ -137,15 +138,20 @@ public class CommonPopView extends PopupWindow {
             this.mViewHeight = height;
             return this;
         }
+
+        public Builder setAnimResId(int animResId) {
+            this.mAnimResId = animResId;
+            return this;
+        }
         // ==============================================================================
 
-        public CommonPopView create() {
-            final CommonPopView popupWindow = new CommonPopView(mContext);
+        public CustomPopView create() {
+            final CustomPopView popupWindow = new CustomPopView(mContext);
             View view = mInflater.inflate(mLayoutId, null);
             if (mIsOutsideTouchDismiss) {
                 view.setOnClickListener( (View v)-> popupWindow.dismiss() );
             }
-            mHandler.handlePopView(popupWindow, CommonViewHolder.get(null, view), mAdapter);
+            mHandler.handlePopView(popupWindow, CommVHolder.get(null, view), mData);
 
             popupWindow.setWidth(mViewWidth);
             popupWindow.setHeight(mViewHeight);
@@ -154,6 +160,7 @@ public class CommonPopView extends PopupWindow {
             popupWindow.setOutsideTouchable(true);
             popupWindow.setFocusable(true);
             popupWindow.setBackgroundDrawable(mIsBackDismiss ? new BitmapDrawable() : null);
+            if (mAnimResId > 0) popupWindow.setAnimationStyle(mAnimResId);
             return popupWindow;
         }
     }
@@ -163,6 +170,6 @@ public class CommonPopView extends PopupWindow {
         /**
          * 处理PopupWindow的页面
          */
-        void handlePopView(CommonPopView popView, CommonViewHolder h, Object adapter);
+        void handlePopView(CustomPopView popView, CommVHolder h, Object adapter);
     }
 }

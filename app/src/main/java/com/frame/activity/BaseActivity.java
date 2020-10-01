@@ -3,37 +3,40 @@ package com.frame.activity;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.frame.R;
 import com.frame.common.CommonData;
-import com.frame.dataclass.DataClass;
 import com.frame.dataclass.bean.Event;
 import com.frame.httputils.OkHttpUtil;
 import com.frame.httputils.OkHttpUtil2;
-import com.frame.httputils.OkHttpUtil2.IRequestFileCallback;
 import com.frame.httputils.OkHttpUtil2.IRequestCallback;
+import com.frame.httputils.OkHttpUtil2.IRequestFileCallback;
 import com.frame.httputils.RequestBuilder;
 import com.frame.httputils.RequestBuilder.RequestObject;
 import com.frame.observers.ProgressObserver;
+import com.frame.observers.RecycleObserver;
 import com.frame.observers.progress.ProgressDialogHandler;
-import com.githang.statusbar.StatusBarCompat;
+import com.frame.other.ICallBack;
+import com.frame.utils.CU;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import androidx.appcompat.app.AppCompatActivity;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.disposables.CompositeDisposable;
@@ -44,7 +47,7 @@ import io.reactivex.disposables.Disposable;
  */
 public class BaseActivity extends AppCompatActivity {
 
-    public BaseActivity mContext;
+    public BaseActivity mBActivity;
     private Unbinder mUnbinder;
     private ProgressDialogHandler mProgressDialogHandler;
     private CompositeDisposable mCompositeDisposable;
@@ -55,11 +58,11 @@ public class BaseActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN | WindowManager
                 .LayoutParams.SOFT_INPUT_ADJUST_PAN);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        mContext = this;
+        mBActivity = this;
         if (regEvent()) {
             EventBus.getDefault().register(this);
         }
-        StatusBarCompat.setStatusBarColor(this, ContextCompat.getColor(this, R.color.title_bg_color));
+        initImmersionBar();
     }
 
     public void setContentView(int layoutResId) {
@@ -77,6 +80,31 @@ public class BaseActivity extends AppCompatActivity {
         mUnbinder = ButterKnife.bind(this);
     }
 
+    /**
+     * 初始化沉浸式状态栏，个性化请重载
+     */
+    protected void initImmersionBar() {
+        CU.setImmersionBar(this, 0, true);
+    }
+
+    /**
+     * 权限申请
+     *
+     * @param icb 申请结果回调
+     */
+    public void rxPermissionsRequest(ICallBack icb, final String... permissions) {
+        if (PermissionUtils.isGranted(permissions)) {
+            if (icb != null) icb.dataCallback(true);
+            return;
+        }
+        add2Disposable(new RxPermissions(this).request(permissions).subscribeWith(new RecycleObserver<Boolean>() {
+            @Override
+            public void onNext(Boolean isGranted) {// 权限申请结果回调
+                if (icb != null) icb.dataCallback(isGranted);
+            }
+        }));
+    }
+
     public void showToast(String text) {
         ToastUtils.showShort(text);
     }
@@ -84,7 +112,7 @@ public class BaseActivity extends AppCompatActivity {
 
     public void showProgressDialog() {
         if (mProgressDialogHandler == null) {
-            mProgressDialogHandler = new ProgressDialogHandler(mContext, null, true);
+            mProgressDialogHandler = new ProgressDialogHandler(mBActivity, null, true);
         }
         mProgressDialogHandler.obtainMessage(ProgressDialogHandler.SHOW_PROGRESS_DIALOG).sendToTarget();
     }
@@ -207,51 +235,58 @@ public class BaseActivity extends AppCompatActivity {
      * @param params           url/path/header等参数集合，必须和RequestService里的定义函数保存顺序一致, 没有传null
      * @param map              ( GET:@QueryMap / POST:@FieldMap ), 没有传null
      * @param progressObserver 订阅者
-     * @param <T>              DataClass子类
+     * @param <T>              如果传入String则返回原始数据，传DataClass则解析成json返回
      */
-    public static <T extends DataClass> void doRequestImpl(String methodName, List<String> params, Map<String,
-            Object> map, final ProgressObserver<T> progressObserver) {
+    public static <T> void doCommonRequest(String methodName, List<String> params, Map<String, Object> map,
+                                           final ProgressObserver<T> progressObserver) {
         OkHttpUtil.getInstance().doRequestImpl(methodName, params, map, progressObserver);
     }
 
     /**
-     * Common Retrofit Method (Get)
+     * 如果T传入String则返回原始数据，传DataClass则解析成json返回
      *
      * @param url 如果只有方法名，会采用默认的BaseURL
      * @param map 没有参数传null
      */
 
-    public static <T extends DataClass> void doCommonGetImpl(String url, Map<String, Object> map, ProgressObserver<T>
-            progressObserver) {
+    public static <T> void doCommonGet(String url, Map<String, Object> map, ProgressObserver<T> progressObserver) {
         List<String> params = new ArrayList<>();
         params.add((url.startsWith("http") ? "" : CommonData.SEVER_URL) + url);
-        doRequestImpl("commonGet", params, map, progressObserver);
+        doCommonRequest(getMethodName(progressObserver, "commonGet"), params, map, progressObserver);
     }
 
     /**
-     * Common Retrofit Method (Post)
+     * 如果T传入String则返回原始数据，传DataClass则解析成json返回
      *
      * @param url 如果只有方法名，会采用默认的BaseURL
      * @param map 没有参数传null
      */
-    public static <T extends DataClass> void doCommonPostImpl(String url, Map<String, Object> map, ProgressObserver<T>
-            progressObserver) {
+    public static <T> void doCommonPost(String url, Map<String, Object> map, ProgressObserver<T> progressObserver) {
         List<String> params = new ArrayList<>();
         params.add((url.startsWith("http") ? "" : CommonData.SEVER_URL) + url);
-        doRequestImpl("commonPost", params, map, progressObserver);
+        doCommonRequest(getMethodName(progressObserver, "commonPost"), params, map, progressObserver);
     }
 
     /**
-     * Common Retrofit Method (Post),以json字符串传送
+     * 以json字符串传送，如果T传入String则返回原始数据，传DataClass则解析成json返回
      *
      * @param url 如果只有方法名，会采用默认的BaseURL
      * @param map 没有参数传null
      */
-    public static <T extends DataClass> void doCommonPostJsonImpl(String url, Map<String, Object> map,
-                                                                  ProgressObserver<T> progressObserver) {
+    public static <T> void doCommonPostJson(String url, Map<String, Object> map, ProgressObserver<T> progressObserver) {
         List<String> params = new ArrayList<>();
         params.add((url.startsWith("http") ? "" : CommonData.SEVER_URL) + url);
         if (map != null) map.put("POST_TYPE", "JSON_STRING");
-        doRequestImpl("commonPostJson", params, map, progressObserver);
+        doCommonRequest(getMethodName(progressObserver, "commonPostJson"), params, map, progressObserver);
     }
+
+    /**
+     * 根据T的类型（String/DataClass）来生成RequestServices的方法名
+     */
+    private static <T> String getMethodName(ProgressObserver<T> progressObserver, String name) {
+        Type genType = progressObserver.getClass().getGenericSuperclass();
+        Type[] types = ((ParameterizedType) genType).getActualTypeArguments();
+        return name + (types[0].equals(String.class) ? "Raw" : "");
+    }
+
 }

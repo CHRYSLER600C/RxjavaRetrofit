@@ -5,9 +5,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.View;
 
@@ -17,7 +17,7 @@ import com.frame.R;
 import com.frame.dataclass.DataClass;
 import com.frame.httputils.ImageLoaderUtil;
 import com.frame.observers.ProgressObserver;
-import com.frame.utils.CommonUtil;
+import com.frame.utils.CU;
 import com.frame.utils.JU;
 import com.google.gson.internal.LinkedTreeMap;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
@@ -71,11 +71,11 @@ public class ProjectActivity extends BaseTitleActivity {
                 }
         );
 
-        mRecyclerViewSlide.setLayoutManager(new LinearLayoutManager(mContext));
+        mRecyclerViewSlide.setLayoutManager(new LinearLayoutManager(mBActivity));
         mRecyclerViewSlide.setHasFixedSize(true);
         mRecyclerViewSlide.setAdapter(mSuperAdapterType = getSuperAdapterType());
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mBActivity));
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mSuperAdapter = getSuperAdapter());
 
@@ -109,7 +109,7 @@ public class ProjectActivity extends BaseTitleActivity {
     }
 
     private void setSmartRefreshLayout() {
-        mSmartRefreshLayout.setRefreshFooter(new ClassicsFooter(mContext));
+        mSmartRefreshLayout.setRefreshFooter(new ClassicsFooter(mBActivity));
         mSmartRefreshLayout.setOnRefreshListener(refreshLayout -> {
             getNetData(mCurrId, mCurrPage = 1, false);
         });
@@ -120,7 +120,7 @@ public class ProjectActivity extends BaseTitleActivity {
 
     @SuppressWarnings("unchecked")
     private SuperAdapter getSuperAdapterType() {
-        return new SuperAdapter<LinkedTreeMap<String, Object>>(mContext, mListType, R.layout.item_project_type) {
+        return new SuperAdapter<LinkedTreeMap<String, Object>>(mBActivity, mListType, R.layout.item_project_type) {
             @Override
             public void onBind(SuperViewHolder holder, int viewType, int layoutPosition, LinkedTreeMap<String,
                     Object> map) {
@@ -143,26 +143,26 @@ public class ProjectActivity extends BaseTitleActivity {
 
     @SuppressWarnings("unchecked")
     private SuperAdapter getSuperAdapter() {
-        return new SuperAdapter<LinkedTreeMap<String, Object>>(mContext, mList, R.layout.item_project_list) {
+        return new SuperAdapter<LinkedTreeMap<String, Object>>(mBActivity, mList, R.layout.item_project_list) {
             @Override
             public void onBind(SuperViewHolder holder, int viewType, int layoutPosition, LinkedTreeMap<String,
                     Object> map) {
-                ImageLoaderUtil.downloadImage(mContext, JU.s(map, "envelopePic"), holder.findViewById(R.id
-                        .ivItemProject));
+                ImageLoaderUtil.loadImage(mBActivity, JU.s(map, "envelopePic"), holder.findViewById(R.id
+                        .ivItemProject), 0, 0);
                 holder.setText(R.id.tvItemProjectTitle, JU.s(map, "title"));
-                holder.setTextColor(R.id.tvItemProjectTitle, CommonUtil.randomColor());
+                holder.setTextColor(R.id.tvItemProjectTitle, CU.randomColor());
                 holder.setText(R.id.tvItemProjectContent, JU.s(map, "desc"));
                 holder.setText(R.id.tvItemProjectAuthor, "作者：" + JU.s(map, "author"));
                 holder.setText(R.id.tvItemProjectTime, JU.s(map, "niceDate"));
                 holder.itemView.setOnClickListener(view -> {
-                            Intent i = new Intent(mContext, WebViewActivity.class)
+                            Intent i = new Intent(mBActivity, WebViewActivity.class)
                                     .putExtra(WebViewActivity.TYPE, WebViewActivity.TYPE_LOAD_URL)
                                     .putExtra("title", JU.s(map, "title"))
                                     .putExtra("url", JU.s(map, "link"));
 
                             if (!Build.MANUFACTURER.contains("samsung") && Build.VERSION.SDK_INT >= Build
                                     .VERSION_CODES.M) {
-                                ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mContext,
+                                ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mBActivity,
                                         view, getString(R.string.share_view));
                                 ActivityUtils.startActivity(i, options.toBundle());
                             } else ActivityUtils.startActivity(i);
@@ -173,7 +173,7 @@ public class ProjectActivity extends BaseTitleActivity {
     }
 
     private void getNetDataType() {
-        BaseActivity.doCommonGetImpl("project/tree/json", null, new ProgressObserver<DataClass>(mContext, true) {
+        BaseActivity.doCommonGet("project/tree/json", null, new ProgressObserver<DataClass>(mBActivity, true) {
             @Override
             public void onNext(DataClass dc) {
                 mListType.clear();
@@ -189,8 +189,8 @@ public class ProjectActivity extends BaseTitleActivity {
     }
 
     private void getNetData(int id, int currPage, boolean isLoading) {
-        BaseActivity.doCommonGetImpl("project/list/" + currPage + "/json?cid=" + id, null, new
-                ProgressObserver<DataClass>(mContext, isLoading, mSmartRefreshLayout) {
+        BaseActivity.doCommonGet("project/list/" + currPage + "/json?cid=" + id, null, new
+                ProgressObserver<DataClass>(mBActivity, isLoading, mSmartRefreshLayout) {
                     @Override
                     public void onNext(DataClass dc) {
                         LinkedTreeMap<String, Object> data = JU.m(dc.object, "data");

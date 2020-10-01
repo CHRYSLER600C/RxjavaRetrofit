@@ -29,18 +29,17 @@ public final class MyGsonConverterFactory extends Converter.Factory {
         this.gson = gson;
     }
 
-    //返回我们自定义的Gson响应体变换器
-    @Override
-    public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit
-            retrofit) {
-        return new MyGsonResponseBodyConverter<>(gson, type);
-    }
-
     //使用GsonConverterFactory的GsonRequestBodyConverter
     @Override
     public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] parameterAnnotations,
                                                           Annotation[] methodAnnotations, Retrofit retrofit) {
         TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
         return new GsonRequestBodyConverter<>(gson, adapter);
+    }
+
+    //返回我们自定义的Gson响应体变换器
+    @Override
+    public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
+        return new MyGsonResponseBodyConverter<>(gson, type);
     }
 }

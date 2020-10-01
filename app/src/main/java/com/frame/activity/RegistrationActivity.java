@@ -20,7 +20,7 @@ import com.frame.httputils.OkHttpUtil2;
 import com.frame.httputils.RequestBuilder;
 import com.frame.observers.ProgressObserver;
 import com.frame.observers.RecycleObserver;
-import com.frame.utils.CommonUtil;
+import com.frame.utils.CU;
 import com.frame.utils.ViewUtil;
 
 import java.io.IOException;
@@ -70,11 +70,11 @@ public class RegistrationActivity extends BaseTitleActivity implements OnChecked
         setTitleText("注册");
         mCbRegPwdEye.setOnCheckedChangeListener(this);
 
-//        CommonUtil.setTextViewDrawableLeft(mEtRegUserName, R.drawable.ic_registration_user, 18, 20, 10);
-//        CommonUtil.setTextViewDrawableLeft(mEtRegPwd, R.drawable.ic_registration_pwd, 18, 20, 10);
-//        CommonUtil.setTextViewDrawableLeft(mEtRegImgCode, R.drawable.ic_registration_img_code, 18, 20, 10);
-//        CommonUtil.setTextViewDrawableLeft(mEtRegMobile, R.drawable.ic_registration_mobile, 18, 20, 10);
-//        CommonUtil.setTextViewDrawableLeft(mRegistrationSmsCode, R.drawable.ic_registration_sms_code, 18, 20, 10);
+//        CU.setTVDrawableLeft(mEtRegUserName, R.drawable.ic_registration_user, 18, 20, 10);
+//        CU.setTVDrawableLeft(mEtRegPwd, R.drawable.ic_registration_pwd, 18, 20, 10);
+//        CU.setTVDrawableLeft(mEtRegImgCode, R.drawable.ic_registration_img_code, 18, 20, 10);
+//        CU.setTVDrawableLeft(mEtRegMobile, R.drawable.ic_registration_mobile, 18, 20, 10);
+//        CU.setTVDrawableLeft(mRegistrationSmsCode, R.drawable.ic_registration_sms_code, 18, 20, 10);
     }
 
 
@@ -128,7 +128,7 @@ public class RegistrationActivity extends BaseTitleActivity implements OnChecked
 
                 Map<String, Object> map = new HashMap<>();
                 map.put("name", name);
-                map.put("pwd", CommonUtil.encodePwd(pwd));
+                map.put("pwd", CU.encodePwd(pwd));
                 map.put("mobile", mobile);
                 map.put("smsCode", smsCode);
                 doRegistrationRequest(map);
@@ -145,7 +145,7 @@ public class RegistrationActivity extends BaseTitleActivity implements OnChecked
     }
 
     private void doRegistrationRequest(Map<String, Object> map) {
-        doCommonGetImpl("registerGRSubmit", map, new ProgressObserver<DataClass>(this, true) {
+        doCommonGet("registerGRSubmit", map, new ProgressObserver<DataClass>(this, true) {
             @Override
             public void onNext(DataClass dc) {
 //                showToast(dc.message);
@@ -157,7 +157,7 @@ public class RegistrationActivity extends BaseTitleActivity implements OnChecked
     private void verifyImgCode(String imgCode) {
         Map<String, Object> map = new HashMap<>();
         map.put("imgCode", imgCode);
-        doCommonGetImpl("verifyImgCode", map, new ProgressObserver<DataClass>(this, true) {
+        doCommonGet("verifyImgCode", map, new ProgressObserver<DataClass>(this, true) {
             @Override
             public void onNext(DataClass dc) {
                 sendSmsCode();
@@ -174,7 +174,7 @@ public class RegistrationActivity extends BaseTitleActivity implements OnChecked
         if (ObjectUtils.isNotEmpty(imgCode)) {
             map.put("imgCode", imgCode);
         }
-        doCommonGetImpl("sendSmsCode", map, new ProgressObserver<DataClass>(this, true) {
+        doCommonGet("sendSmsCode", map, new ProgressObserver<DataClass>(this, true) {
             @Override
             public void onNext(DataClass dc) {
                 mBtnRegSmsCode.setClickable(false);
