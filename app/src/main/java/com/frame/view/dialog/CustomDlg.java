@@ -30,6 +30,9 @@ public class CustomDlg extends Dialog {
 
     @Override
     public void show() {
+        //防止Dlg附属的页面关闭后，延迟收到的show引起异常
+        if(mActivity == null || mActivity.isFinishing() || mActivity.isDestroyed()) return;
+
         super.show();
 
         //设置宽度全屏，要设置在show的后面
