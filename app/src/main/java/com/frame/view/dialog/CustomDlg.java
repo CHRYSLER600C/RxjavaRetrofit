@@ -1,7 +1,7 @@
 package com.frame.view.dialog;
 
+import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -18,12 +18,14 @@ import androidx.annotation.NonNull;
  */
 public class CustomDlg extends Dialog {
 
-    private IBackPressCallBack mIBackPressCallBack;
+    private ICallBackBackPress mICallBackBackPress;
     private WindowManager.LayoutParams mLayoutParams;
     private Object mDlgData;
+    private Activity mActivity;
 
-    private CustomDlg(Context context, int theme) {
-        super(context, theme);
+    private CustomDlg(Activity activity, int theme) {
+        super(activity, theme);
+        this.mActivity = activity;
     }
 
     @Override
@@ -45,9 +47,8 @@ public class CustomDlg extends Dialog {
     @Override
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            if (mIBackPressCallBack != null) {
-                super.onKeyDown(keyCode, event);
-                mIBackPressCallBack.onBackPressCallBack();
+            if (mICallBackBackPress != null) {
+                mICallBackBackPress.onBackPressCallBack(this);
                 return true;
             }
         }
@@ -55,10 +56,10 @@ public class CustomDlg extends Dialog {
     }
 
     /**
-     * 设置点击返回键时回调
+     * 点击返回键时回调
      */
-    public CustomDlg setIBackPressCallBack(IBackPressCallBack iBackPressCallBack) {
-        mIBackPressCallBack = iBackPressCallBack;
+    public CustomDlg setIBackPressCallBack(ICallBackBackPress iBackPressCallBack) {
+        this.mICallBackBackPress = iBackPressCallBack;
         return this;
     }
 
@@ -77,25 +78,25 @@ public class CustomDlg extends Dialog {
     public static class Builder {
 
         // 必传属性
-        private Context mContext;
+        private Activity activity;
         private int mLayoutId;
         private ICallBackCustomDlg mICallBackCustomDlg;
 
         // 选传属性
-        private Object mData = null;              // 数据传输 eg. adapter
-        private boolean mCancelable = true;       // 是否返回键可关闭
+        private Object mData = null;        // 数据传输 eg. adapter
+        private boolean mCancelable = true; // 是否返回键可关闭
         private boolean mOtherCancelable = true;  // 点击其它地方是否可关闭
-        private int mAnimResId = 0;               // 动画资源
+        private int mAnimResId = 0;    // 动画资源
 
         /**
          * 构造函数
          *
-         * @param context
+         * @param activity
          * @param layoutId           dlg_id
          * @param iCallBackCustomDlg 回调回去自己处理
          */
-        public Builder(Context context, int layoutId, ICallBackCustomDlg iCallBackCustomDlg) {
-            this.mContext = context;
+        public Builder(Activity activity, int layoutId, ICallBackCustomDlg iCallBackCustomDlg) {
+            this.activity = activity;
             this.mLayoutId = layoutId;
             this.mICallBackCustomDlg = iCallBackCustomDlg;
         }
@@ -124,29 +125,36 @@ public class CustomDlg extends Dialog {
         // ==============================================================================
 
         public CustomDlg create() {
-            CustomDlg customDlg = new CustomDlg(mContext, R.style.CommonDialog);
-            View view = View.inflate(mContext, mLayoutId, null);
+            CustomDlg customDlg = new CustomDlg(activity, R.style.CommonDialog);
+            View view = View.inflate(activity, mLayoutId, null);
             mICallBackCustomDlg.drawUI(customDlg, CommVHolder.get(null, view), mData);
 
             customDlg.setContentView(view);
             customDlg.setCancelable(mCancelable);
-            if (mAnimResId > 0) customDlg.getWindow().setWindowAnimations(mAnimResId);
+            if (mAnimResId > 0 && customDlg.getWindow() != null) customDlg.getWindow().setWindowAnimations(mAnimResId);
             if (mOtherCancelable) view.setOnClickListener(v -> customDlg.dismiss());
             return customDlg;
         }
     }
 
+    @Override
+    public void dismiss() {
+        //防止Dlg附属的页面关闭后，延迟收到的dismiss引起IllegalArgumentException: View=DecorView not attached to window manager
+        if(mActivity == null || mActivity.isFinishing() || mActivity.isDestroyed()) return;
+        super.dismiss();
+    }
+
+    /**
+     * 处理页面UI
+     */
     public interface ICallBackCustomDlg {
-        /**
-         * 处理页面UI
-         */
         void drawUI(CustomDlg dlg, CommVHolder h, Object data);
     }
 
     /**
      * 点击返回键时回调
      */
-    public interface IBackPressCallBack {
-        void onBackPressCallBack();
+    public interface ICallBackBackPress {
+        void onBackPressCallBack(CustomDlg dlg);
     }
 }
