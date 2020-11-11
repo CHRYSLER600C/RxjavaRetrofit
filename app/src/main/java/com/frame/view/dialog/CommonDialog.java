@@ -1,7 +1,7 @@
 package com.frame.view.dialog;
 
+import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -17,24 +17,30 @@ import com.frame.adapter.CommVHolder;
  */
 public class CommonDialog extends Dialog {
 
+    private Activity mActivity;
+
     public enum DialogType {
         TYPE_SIMPLE, TYPE_INPUT
     }
 
-    public CommonDialog(Context context) {
-        super(context);
+    public CommonDialog(Activity activity) {
+        super(activity);
     }
 
-    public CommonDialog(Context context, int theme) {
-        super(context, theme);
+    public CommonDialog(Activity activity, int theme) {
+        super(activity, theme);
     }
 
-    protected CommonDialog(Context context, boolean cancelable, OnCancelListener cancelListener) {
-        super(context, cancelable, cancelListener);
+    protected CommonDialog(Activity activity, boolean cancelable, OnCancelListener cancelListener) {
+        super(activity, cancelable, cancelListener);
+        this.mActivity = activity;
     }
 
     @Override
     public void show() {
+        //防止Dlg附属的页面关闭后，延迟收到的show引起异常
+        if(mActivity == null || mActivity.isFinishing() || mActivity.isDestroyed()) return;
+
         super.show();
 
         //设置宽度全屏，要设置在show的后面
@@ -46,11 +52,19 @@ public class CommonDialog extends Dialog {
         getWindow().setAttributes(layoutParams);
     }
 
+    @Override
+    public void dismiss() {
+        //防止Dlg附属的页面关闭后，延迟收到的dismiss引起IllegalArgumentException: View=DecorView not attached to window manager
+        if(mActivity == null || mActivity.isFinishing() || mActivity.isDestroyed()) return;
+        super.dismiss();
+    }
+
     public static class Builder {
-        private Context context;
+        private Activity activity;
         private DialogType dialogType;
         private CharSequence title;
         private String hint;
+        private String etText;
         private CharSequence message;
         private String strCancel;
         private String strOk;
@@ -60,18 +74,23 @@ public class CommonDialog extends Dialog {
         private OnOkClickListener okListener;
 
 
-        public Builder(Context context, DialogType dialogType) {
-            this.context = context;
+        public Builder(Activity activity, DialogType dialogType) {
+            this.activity = activity;
             this.dialogType = dialogType;
         }
 
         public Builder setTitle(int title) {
-            this.title = (String) context.getText(title);
+            this.title = (String) activity.getText(title);
             return this;
         }
 
         public Builder setTitle(CharSequence title) {
             this.title = title;
+            return this;
+        }
+
+        public Builder setEtText(String etText) {
+            this.etText = etText;
             return this;
         }
 
@@ -81,7 +100,7 @@ public class CommonDialog extends Dialog {
         }
 
         public Builder setHint(int hint) {
-            this.hint = (String) context.getText(hint);
+            this.hint = (String) activity.getText(hint);
             return this;
         }
 
@@ -91,12 +110,12 @@ public class CommonDialog extends Dialog {
         }
 
         public Builder setMessage(int message) {
-            this.message = (String) context.getText(message);
+            this.message = (String) activity.getText(message);
             return this;
         }
 
         public Builder setCancelBtn(int strCancel, View.OnClickListener listener) {
-            this.strCancel = (String) context.getText(strCancel);
+            this.strCancel = (String) activity.getText(strCancel);
             this.cancelListener = listener;
             return this;
         }
@@ -108,7 +127,7 @@ public class CommonDialog extends Dialog {
         }
 
         public Builder setOkBtn(int strOk, OnOkClickListener listener) {
-            this.strOk = (String) context.getText(strOk);
+            this.strOk = (String) activity.getText(strOk);
             this.okListener = listener;
             return this;
         }
@@ -128,58 +147,61 @@ public class CommonDialog extends Dialog {
          * Create the simple dialog
          */
         public CommonDialog create() {
-            final CommonDialog dialog = new CommonDialog(context, R.style.CommonDialog);
-            View vDialog = View.inflate(context, R.layout.dialog_common, null);
-            final CommVHolder holder = CommVHolder.get(null, vDialog);
+            final CommonDialog dialog = new CommonDialog(activity, R.style.CommonDialog);
+            View vDialog = View.inflate(activity, R.layout.dialog_common, null);
+            final CommVHolder h = CommVHolder.get(null, vDialog);
 
             if (DialogType.TYPE_SIMPLE == dialogType) {
-                holder.setVisibility(R.id.tvCommonDialogMessage, View.VISIBLE);
+                h.setVisibility(R.id.tvCommonDialogMessage, View.VISIBLE);
             } else if (DialogType.TYPE_INPUT == dialogType) {
-                holder.setVisibility(R.id.etCommonDialog, View.VISIBLE);
+                h.setVisibility(R.id.etCommonDialog, View.VISIBLE);
             }
-            EditText et = holder.findViewById(R.id.etCommonDialog);
+            EditText et = h.findViewById(R.id.etCommonDialog);
 
             if (ObjectUtils.isNotEmpty(title)) {
-                holder.setText(R.id.tvCommonDialogTitle, title);
+                h.setText(R.id.tvCommonDialogTitle, title);
             } else {
-                holder.setVisibility(R.id.tvCommonDialogTitle, View.GONE);
+                h.setVisibility(R.id.tvCommonDialogTitle, View.GONE);
+            }
+            if (ObjectUtils.isNotEmpty(etText)) {
+                et.setText(etText);
             }
             if (ObjectUtils.isNotEmpty(hint)) {
                 et.setHint(hint);
             }
 
             if (ObjectUtils.isNotEmpty(message)) {
-                holder.setText(R.id.tvCommonDialogMessage,message);
+                h.setText(R.id.tvCommonDialogMessage,message);
             } else {
-                holder.setVisibility(R.id.tvCommonDialogMessage,View.GONE);
+                h.setVisibility(R.id.tvCommonDialogMessage,View.GONE);
             }
 
             if (ObjectUtils.isNotEmpty(strCancel)) {
-                holder.setText(R.id.tvCommonDialogCancel,strCancel);
+                h.setText(R.id.tvCommonDialogCancel,strCancel);
             } else {
-                holder.setVisibility(R.id.tvCommonDialogCancel,View.GONE);
+                h.setVisibility(R.id.tvCommonDialogCancel,View.GONE);
             }
 
             if (ObjectUtils.isNotEmpty(strOk)) {
-                holder.setText(R.id.tvCommonDialogOk,strOk);
+                h.setText(R.id.tvCommonDialogOk,strOk);
             } else {
-                holder.setVisibility(R.id.tvCommonDialogOk,View.GONE);
+                h.setVisibility(R.id.tvCommonDialogOk,View.GONE);
             }
 
-            holder.findViewById(R.id.tvCommonDialogCancel).setOnClickListener((View v) -> {
+            h.findViewById(R.id.tvCommonDialogCancel).setOnClickListener((View v) -> {
                 if (ObjectUtils.isNotEmpty(cancelListener)) {
-                    cancelListener.onClick(holder.findViewById(R.id.tvCommonDialogCancel));
+                    cancelListener.onClick(h.findViewById(R.id.tvCommonDialogCancel));
                 }
                 dialog.dismiss();
             });
 
-            holder.findViewById(R.id.tvCommonDialogOk).setOnClickListener((View v) -> {
+            h.findViewById(R.id.tvCommonDialogOk).setOnClickListener((View v) -> {
                 if (DialogType.TYPE_INPUT == dialogType && ObjectUtils.isEmpty(et.getText().toString())) {
                     ToastUtils.showShort(ObjectUtils.getOrDefault(et.getHint().toString(), "请输入"));
                     return;
                 }
                 if (ObjectUtils.isNotEmpty(okListener)) {
-                    okListener.onClick(holder.findViewById(R.id.tvCommonDialogOk), et.getText().toString());
+                    okListener.onClick(h.findViewById(R.id.tvCommonDialogOk), et.getText().toString());
                 }
                 dialog.dismiss();
             });
