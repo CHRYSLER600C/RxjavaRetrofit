@@ -160,6 +160,8 @@ dependencies {
     implementation 'com.blankj:utilcodex:1.26.0'
     //GreenDao
     implementation 'org.greenrobot:greendao:3.2.2' // add library
+    //SlideBack
+    implementation 'com.github.zouxianbincc:AndroidSlideBack:v1.0.0'
 
     /**
      * UI

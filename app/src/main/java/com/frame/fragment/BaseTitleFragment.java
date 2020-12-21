@@ -44,7 +44,7 @@ public abstract class BaseTitleFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mBActivity = (BaseActivity) getActivity();
         if (ObjectUtils.isEmpty(mRootView)) {
-            mRootView = (LinearLayout) inflater.inflate(R.layout.activity_base_title, null);
+            mRootView = (LinearLayout) inflater.inflate(R.layout.fragment_base_title, null);
             mTitleBar = mRootView.findViewById(R.id.titleBar);
             View view = setContentView(savedInstanceState);
             if (ObjectUtils.isNotEmpty(view)) {

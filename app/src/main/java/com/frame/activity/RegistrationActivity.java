@@ -89,11 +89,11 @@ public class RegistrationActivity extends BaseTitleActivity implements OnChecked
                 String imgCodeSms = ViewUtil.getEtTrim(mEtRegImgCode);
 
                 if (TextUtils.isEmpty(mobileSms) || mobileSms.length() < 11) {
-                    showToast("请输入11位手机号码");
+                    showShort("请输入11位手机号码");
                     return;
                 }
                 if (TextUtils.isEmpty(imgCodeSms)) {
-                    showToast("请输入图中字符");
+                    showShort("请输入图中字符");
                     return;
                 }
                 verifyImgCode(imgCodeSms);
@@ -105,24 +105,24 @@ public class RegistrationActivity extends BaseTitleActivity implements OnChecked
                 String mobile = ViewUtil.getEtTrim(mEtRegMobile);
                 String smsCode = ViewUtil.getEtTrim(mRegistrationSmsCode);
                 if (TextUtils.isEmpty(name) || name.length() < 6 || name.length() > 20) {
-                    showToast("请输入6-20位用户名");
+                    showShort("请输入6-20位用户名");
                     return;
                 }
                 if (TextUtils.isEmpty(pwd) || pwd.length() < 6 || pwd.length() > 14) {
-                    showToast("请输入6-14位密码");
+                    showShort("请输入6-14位密码");
                     return;
                 }
 
                 if (TextUtils.isEmpty(imgCode)) {
-                    showToast("请输入图中字符");
+                    showShort("请输入图中字符");
                     return;
                 }
                 if (TextUtils.isEmpty(mobile) || mobile.length() < 11) {
-                    showToast("请输入11位手机号码");
+                    showShort("请输入11位手机号码");
                     return;
                 }
                 if (TextUtils.isEmpty(smsCode)) {
-                    showToast("请输入短信验证码");
+                    showShort("请输入短信验证码");
                     return;
                 }
 
@@ -148,7 +148,7 @@ public class RegistrationActivity extends BaseTitleActivity implements OnChecked
         doCommonGet("registerGRSubmit", map, new ProgressObserver<DataClass>(this, true) {
             @Override
             public void onNext(DataClass dc) {
-//                showToast(dc.message);
+//                showShort(dc.message);
                 finish();
             }
         });
@@ -207,10 +207,10 @@ public class RegistrationActivity extends BaseTitleActivity implements OnChecked
                     if (ObjectUtils.isNotEmpty(responseObj)) {
                         mIvRegCodeImgView.setImageBitmap((Bitmap) responseObj);
                     } else {
-                        showToast(CommonData.NETWORK_ERROR_MSG);
+                        showShort(CommonData.NETWORK_ERROR_MSG);
                     }
                 } else {
-                    showToast(CommonData.NETWORK_ERROR_MSG);
+                    showShort(CommonData.NETWORK_ERROR_MSG);
                 }
             }
         });

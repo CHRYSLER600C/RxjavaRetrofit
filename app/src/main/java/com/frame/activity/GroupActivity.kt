@@ -86,8 +86,10 @@ class GroupActivity : BaseActivity() {
             LU.logout()
             super.onBackPressed()
         } else {
-            showToast("再点一次退出程序！")
+            showShort("再点一次退出程序！")
             mExitTime = System.currentTimeMillis()
         }
     }
+
+    override fun isActivityCanSlideBack() = false
 }

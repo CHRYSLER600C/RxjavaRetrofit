@@ -33,7 +33,7 @@
 <div id="bottom-container">
 
     <input id="inputTest" type="text" name="firstname" value="Mickey"  class="button-class"/>
-    <button type="button" onclick="showToast()" class="button-class">Click for showing Toast Message
+    <button type="button" onclick="showShort()" class="button-class">Click for showing Toast Message
     </button>
     <button type="button"
             onclick="window.handler.callAndroid('Html页面首先调用Android的callAndroid方法，然后Android又调用了JS的callJS方法')"
@@ -45,7 +45,7 @@
 </div>
 
 <script>
-	function showToast(){
+	function showShort(){
 		handler.handleMessage('This is a toast message from Javascript !!');  <!-- 回调Android的方法 -->
 	}
 

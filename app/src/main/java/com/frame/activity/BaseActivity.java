@@ -3,13 +3,17 @@ package com.frame.activity;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
+import com.blankj.utilcode.util.BarUtils;
 import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.ToastUtils;
+import com.frame.R;
 import com.frame.common.CommonData;
 import com.frame.dataclass.bean.Event;
 import com.frame.httputils.OkHttpUtil;
@@ -23,11 +27,18 @@ import com.frame.observers.RecycleObserver;
 import com.frame.observers.progress.ProgressDialogHandler;
 import com.frame.other.ICallBack;
 import com.frame.utils.CU;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.footer.ClassicsFooter;
+import com.scwang.smartrefresh.layout.header.ClassicsHeader;
+import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.zouxianbin.android.slide.SlideBackAppCompatActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
@@ -36,7 +47,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import androidx.appcompat.app.AppCompatActivity;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.disposables.CompositeDisposable;
@@ -45,53 +55,59 @@ import io.reactivex.disposables.Disposable;
 /**
  * activity基类，继承此类可以使用butterknife来bind(view),还封装了数据请求，请求提示框和toast显示方法。
  */
-public class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends SlideBackAppCompatActivity {
 
     public BaseActivity mBActivity;
-    private Unbinder mUnbinder;
+    private Unbinder mUnBinder;
     private ProgressDialogHandler mProgressDialogHandler;
     private CompositeDisposable mCompositeDisposable;
+    protected View vStatusBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setSlideable(isActivityCanSlideBack());  //设置是否可以左滑返回，必须在super.onCreate（）之前
+
         super.onCreate(savedInstanceState);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN | WindowManager
-                .LayoutParams.SOFT_INPUT_ADJUST_PAN);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         mBActivity = this;
-        if (regEvent()) {
-            EventBus.getDefault().register(this);
-        }
+        if (regEvent()) EventBus.getDefault().register(this);
         initImmersionBar();
     }
 
     public void setContentView(int layoutResId) {
-        super.setContentView(layoutResId);
-        mUnbinder = ButterKnife.bind(this);
+        setContentView(LayoutInflater.from(this).inflate(layoutResId, null, false)); //滑动返回要求必须是setContentView(view)
     }
 
     public void setContentView(View view) {
-        super.setContentView(view);
-        mUnbinder = ButterKnife.bind(this);
-    }
-
-    public void setContentView(View view, LayoutParams params) {
-        super.setContentView(view, params);
-        mUnbinder = ButterKnife.bind(this);
+        LinearLayout root = (LinearLayout) View.inflate(this, R.layout.activity_base_title, null);
+        vStatusBar = root.findViewById(R.id.vStatusBar);
+        if (getStatusBarBgColor() > 0) {
+            vStatusBar.getLayoutParams().height = BarUtils.getStatusBarHeight();
+            vStatusBar.setBackgroundColor(getResources().getColor(getStatusBarBgColor()));
+        } else {
+            vStatusBar.setVisibility(View.GONE); //返回0时隐藏
+        }
+        root.addView(view, new ViewGroup.LayoutParams(-1, -1));
+        super.setContentView(root);
+        mUnBinder = ButterKnife.bind(this);
+        setShadowResource(R.drawable.shape_sliding_back_shadow); //设置Slide Back的阴影
+        initSmartRefreshLayout();
     }
 
     /**
      * 初始化沉浸式状态栏，个性化请重载
      */
     protected void initImmersionBar() {
-        CU.setImmersionBar(this, 0, true);
+        CU.setImmersionBar(this, false);
     }
 
-    /**
-     * 权限申请
-     *
-     * @param icb 申请结果回调
-     */
+    public boolean isActivityCanSlideBack() { return true; }
+
+    public int getStatusBarBgColor() {return R.color.title_bg_color;}
+
     public void rxPermissionsRequest(ICallBack icb, final String... permissions) {
         if (PermissionUtils.isGranted(permissions)) {
             if (icb != null) icb.dataCallback(true);
@@ -99,16 +115,27 @@ public class BaseActivity extends AppCompatActivity {
         }
         add2Disposable(new RxPermissions(this).request(permissions).subscribeWith(new RecycleObserver<Boolean>() {
             @Override
-            public void onNext(Boolean isGranted) {// 权限申请结果回调
+            public void onNext(@NotNull Boolean isGranted) {// 权限申请结果回调
                 if (icb != null) icb.dataCallback(isGranted);
             }
         }));
     }
 
-    public void showToast(String text) {
+    public void showShort(int resText) {
+        ToastUtils.showShort(getString(resText));
+    }
+
+    public void showShort(String text) {
         ToastUtils.showShort(text);
     }
 
+    public void showLong(int resText) {
+        ToastUtils.showLong(getString(resText));
+    }
+
+    public void showLong(String text) {
+        ToastUtils.showLong(text);
+    }
 
     public void showProgressDialog() {
         if (mProgressDialogHandler == null) {
@@ -123,6 +150,24 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+    protected void initSmartRefreshLayout() {
+        SmartRefreshLayout srl = findViewById(R.id.smartRefreshLayout);
+        if (srl != null) {
+            if (getOnRefreshListener() != null) {
+                srl.setRefreshHeader(new ClassicsHeader(mBActivity)).setOnRefreshListener(getOnRefreshListener());
+            }
+            if (getOnLoadMoreListener() != null) {
+                srl.setRefreshFooter(new ClassicsFooter(mBActivity)).setOnLoadMoreListener(getOnLoadMoreListener());
+            }
+            srl.setEnableRefresh(getOnRefreshListener() != null);
+            srl.setEnableLoadMore(getOnLoadMoreListener() != null);
+        }
+    }
+
+    protected OnRefreshListener getOnRefreshListener() { return null;}
+
+    protected OnLoadMoreListener getOnLoadMoreListener() { return null;}
+
     public void add2Disposable(Object object) {
         if (mCompositeDisposable == null) {
             mCompositeDisposable = new CompositeDisposable();
@@ -134,10 +179,9 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        if (mUnbinder != null) {
-            mUnbinder.unbind();
-            mUnbinder = null;
+        if (mUnBinder != null) {
+            mUnBinder.unbind();
+            mUnBinder = null;
         }
         if (regEvent()) {
             EventBus.getDefault().unregister(this);
@@ -151,6 +195,7 @@ public class BaseActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        super.onDestroy();
     }
 
     /**
@@ -176,7 +221,6 @@ public class BaseActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onCommonEventBusSticky(Event event) {
     }
-
 
     /**
      * ========================================= Request Method =========================================

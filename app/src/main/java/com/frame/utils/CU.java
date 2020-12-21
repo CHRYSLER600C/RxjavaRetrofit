@@ -49,7 +49,6 @@ import com.blankj.utilcode.util.MetaDataUtils;
 import com.blankj.utilcode.util.ObjectUtils;
 import com.blankj.utilcode.util.UriUtils;
 import com.frame.R;
-import com.frame.activity.BaseActivity;
 import com.frame.application.App;
 import com.frame.common.CommonData;
 import com.frame.dataclass.bean.NameValue;
@@ -742,15 +741,13 @@ public class CU {
     /**
      * 初始化沉浸式状态栏，个性化请重载
      *
-     * @param barColorResId 状态栏颜色（0：default, -1:不设置)
-     * @param isFit         是否留出状态栏高度
+     * @param isDarkFont       true：黑色，false：白色
      */
-    public static void setImmersionBar(BaseActivity activity, int barColorResId, boolean isFit) {
-        ImmersionBar bar = ImmersionBar.with(activity)
-                .statusBarDarkFont(true) //状态栏字体是深色，不写默认为亮色
-                .fitsSystemWindows(isFit);//解决状态栏和布局重叠问题，默认false，为true时要指定statusBarColor()，不然状态栏为透明色
-        if (barColorResId >= 0) bar.statusBarColor(barColorResId > 0 ? barColorResId : R.color.title_bg_color);
-        bar.init(); //必须调用方可应用以上所配置的参数
+    public static void setImmersionBar(Activity activity, boolean isDarkFont) {
+        ImmersionBar.with(activity)
+                .fitsSystemWindows(false)//解决状态栏和布局重叠问题，默认false，为true时要指定statusBarColor()，不然状态栏为透明色
+                .statusBarDarkFont(isDarkFont) //true：黑色，false：白色
+                .init(); //必须调用方可应用以上所配置的参数
     }
 
     /**

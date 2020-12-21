@@ -30,7 +30,7 @@
 
 
     <color name="dialog_bg_color">#88000000</color><!-- 对话框背景颜色-->
-    <color name="common_bg_color">#f7fafe</color>  <!-- 通用背景颜色-->
+    <color name="color_common_bg">#ededed</color>  <!-- 通用背景颜色-->
     <color name="title_bg_color">#2686D3</color>   <!-- 通用Title的背景颜色-->
     <color name="tab_text_color">#2686D3</color>   <!-- 首页tab的文字颜色-->
     <color name="touch_color">#10000000</color>    <!--selector_common-->

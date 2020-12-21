@@ -9,7 +9,7 @@
         android:id="@+id/srlTab1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/common_bg_color"
+        android:background="@color/color_common_bg"
         app:srlPrimaryColor="@color/white">
 
         <androidx.core.widget.NestedScrollView

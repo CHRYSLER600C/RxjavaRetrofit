@@ -63,11 +63,11 @@ public class LoginActivity extends BaseTitleActivity {
                 String name = mEtUserName.getText().toString().trim();
                 String pwd = mEtPwd.getText().toString().trim();
                 if (TextUtils.isEmpty(name)) {
-                    showToast("请输入您的用户名");
+                    showShort("请输入您的用户名");
                     return;
                 }
                 if (TextUtils.isEmpty(pwd)) {
-                    showToast("请输入登录密码");
+                    showShort("请输入登录密码");
                     return;
                 }
                 doLoginRequest(name, pwd);
