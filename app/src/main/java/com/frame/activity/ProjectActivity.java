@@ -5,10 +5,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import android.view.Gravity;
 import android.view.View;
 
 import com.blankj.utilcode.util.ActivityUtils;
@@ -29,6 +25,10 @@ import org.byteam.superadapter.SuperViewHolder;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.OnClick;
 
@@ -36,8 +36,8 @@ import butterknife.OnClick;
  */
 public class ProjectActivity extends BaseTitleActivity {
 
-    @BindView(R.id.srlProject)
-    SmartRefreshLayout mSmartRefreshLayout;
+    @BindView(R.id.smartRefreshLayout)
+    SmartRefreshLayout smartRefreshLayout;
     @BindView(R.id.rvProject)
     RecyclerView mRecyclerView;
 
@@ -66,8 +66,8 @@ public class ProjectActivity extends BaseTitleActivity {
         mTitleBar.setRightText("项目");
         mTitleBar.setRightImageResource(R.drawable.ic_arrow_drop_down_white_24dp);
         mTitleBar.getRightBar().setOnClickListener(view -> {
-                    if (mDrawerLayout.isDrawerOpen(Gravity.END)) mDrawerLayout.closeDrawer(Gravity.END);
-                    else mDrawerLayout.openDrawer(Gravity.END);
+                    if (mDrawerLayout.isDrawerOpen(GravityCompat.END)) mDrawerLayout.closeDrawer(GravityCompat.END);
+                    else mDrawerLayout.openDrawer(GravityCompat.END);
                 }
         );
 
@@ -92,8 +92,8 @@ public class ProjectActivity extends BaseTitleActivity {
 
     @Override
     public void onBackPressed() {
-        if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
-            mDrawerLayout.closeDrawer(Gravity.END);
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.END)) {
+            mDrawerLayout.closeDrawer(GravityCompat.END);
             return;
         }
         super.onBackPressed();
@@ -109,11 +109,11 @@ public class ProjectActivity extends BaseTitleActivity {
     }
 
     private void setSmartRefreshLayout() {
-        mSmartRefreshLayout.setRefreshFooter(new ClassicsFooter(mBActivity));
-        mSmartRefreshLayout.setOnRefreshListener(refreshLayout -> {
+        smartRefreshLayout.setRefreshFooter(new ClassicsFooter(mBActivity));
+        smartRefreshLayout.setOnRefreshListener(refreshLayout -> {
             getNetData(mCurrId, mCurrPage = 1, false);
         });
-        mSmartRefreshLayout.setOnLoadMoreListener(refreshLayout -> {
+        smartRefreshLayout.setOnLoadMoreListener(refreshLayout -> {
             getNetData(mCurrId, ++mCurrPage, false);
         });
     }
@@ -131,7 +131,7 @@ public class ProjectActivity extends BaseTitleActivity {
                 holder.itemView.setOnClickListener(view -> {
                             mLastClickPos = layoutPosition;
                             mSuperAdapterType.notifyDataSetChanged();
-                            mDrawerLayout.closeDrawer(Gravity.END);
+                            mDrawerLayout.closeDrawer(GravityCompat.END);
                             setTitleText(JU.s(mListType.get(mLastClickPos), "name"));
                             mCurrId = JU.i(mListType.get(mLastClickPos), "id");
                             getNetData(mCurrId, mCurrPage = 1, false);
@@ -190,11 +190,11 @@ public class ProjectActivity extends BaseTitleActivity {
 
     private void getNetData(int id, int currPage, boolean isLoading) {
         BaseActivity.doCommonGet("project/list/" + currPage + "/json?cid=" + id, null, new
-                ProgressObserver<DataClass>(mBActivity, isLoading, mSmartRefreshLayout) {
+                ProgressObserver<DataClass>(mBActivity, isLoading, smartRefreshLayout) {
                     @Override
                     public void onNext(DataClass dc) {
                         LinkedTreeMap<String, Object> data = JU.m(dc.object, "data");
-                        mSmartRefreshLayout.setEnableLoadMore(!JU.b(data, "over"));
+                        smartRefreshLayout.setEnableLoadMore(!JU.b(data, "over"));
                         if (0 == JU.i(data, "offset")) mList.clear();
                         mList.addAll(JU.al(data, "datas"));
                         mSuperAdapter.notifyDataSetChanged();

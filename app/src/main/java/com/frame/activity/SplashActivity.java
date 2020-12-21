@@ -1,5 +1,6 @@
 package com.frame.activity;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.widget.LinearLayout;
 
 import com.blankj.utilcode.util.ActivityUtils;
 import com.blankj.utilcode.util.AppUtils;
+import com.blankj.utilcode.util.PermissionUtils;
 import com.frame.R;
 import com.frame.dataclass.DataClass;
 import com.frame.httputils.OkHttpUtil;
@@ -40,7 +42,15 @@ public class SplashActivity extends BaseActivity {
         setContentView(R.layout.activity_common_ll);
 
         mLlContainer.setBackgroundResource(R.drawable.splash);
-        goToGroup();  //pauseAndEnter();  //
+
+        //申请多个权限
+        rxPermissionsRequest(isGranted -> {
+            if (PermissionUtils.isGranted(Manifest.permission.READ_PHONE_STATE)) {
+//                CommonData.IMEI = ObjectUtils.getOrDefault(PhoneUtils.getIMEI(), "");
+            }
+            goToGroup();  //pauseAndEnter();  //
+        }, Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
     }
 
     private void goToGroup() {
@@ -63,7 +73,7 @@ public class SplashActivity extends BaseActivity {
         Observable<DataClass> observable = OkHttpUtil.getInstance().mRequestService
                 .commonGet("https://www.yiqiyiqi.cn/app/appUpdateInfo.htm", map).subscribeOn(Schedulers.io());
 
-        ProgressObserver<DataClass>  progressObserver = new ProgressObserver<DataClass>(mBActivity, true) {
+        ProgressObserver<DataClass> progressObserver = new ProgressObserver<DataClass>(mBActivity, true) {
             @Override
             public void onNext(DataClass dc) {
                 final LinkedTreeMap<String, Object> map = JU.m(dc.object, "updateInfo");

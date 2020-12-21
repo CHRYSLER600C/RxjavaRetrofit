@@ -14,7 +14,7 @@
         android:orientation="vertical">
 
         <com.scwang.smartrefresh.layout.SmartRefreshLayout
-            android:id="@+id/srlProject"
+            android:id="@+id/smartRefreshLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

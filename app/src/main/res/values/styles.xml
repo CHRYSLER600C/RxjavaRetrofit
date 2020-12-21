@@ -51,8 +51,21 @@
     </style>
 
     <style name="AnimationBottomInOut" parent="android:Animation">
-        <item name="@android:windowEnterAnimation">@anim/push_bottom_in</item>    <!-- 进入时的动画 -->
-        <item name="@android:windowExitAnimation">@anim/push_bottom_out</item>    <!-- 退出时的动画 -->
+        <item name="android:windowEnterAnimation">@anim/push_bottom_in</item>    <!-- 进入时的动画 -->
+        <item name="android:windowExitAnimation">@anim/push_bottom_out</item>    <!-- 退出时的动画 -->
+    </style>
+
+    <style name="MainBottomTabStyle">
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:button">@null</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:drawablePadding">2dp</item>
+        <item name="android:layout_marginBottom">3.5dp</item>
+        <item name="android:layout_marginTop">3.5dp</item>
+        <item name="android:textSize">10.5sp</item>
+        <item name="android:textColor">@color/selector_tab_item_text</item>
     </style>
 
 </resources>

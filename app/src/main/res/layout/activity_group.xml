@@ -2,37 +2,43 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <FrameLayout
-        android:id="@+id/realtabcontent"
+        android:id="@+id/flContainer"
         android:layout_width="fill_parent"
         android:layout_height="0dip"
         android:layout_weight="1" />
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+    <RadioGroup
+        android:id="@+id/rgHomeTabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_top_ff_05s_ee"
+        android:orientation="horizontal">
 
-        <View
-            android:id="@+id/divider"
-            android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="@color/color_d" />
+        <RadioButton
+            android:id="@+id/rbTab1"
+            style="@style/MainBottomTabStyle"
+            android:drawableTop="@drawable/selector_group_tab1"
+            android:text="首页" />
 
-        <androidx.fragment.app.FragmentTabHost
-            android:id="@android:id/tabhost"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/divider"
-            android:background="@android:color/white" >
+        <RadioButton
+            android:id="@+id/rbTab2"
+            style="@style/MainBottomTabStyle"
+            android:drawableTop="@drawable/selector_group_tab2"
+            android:text="货源" />
 
-            <FrameLayout
-                android:id="@android:id/tabcontent"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="0" />
-        </androidx.fragment.app.FragmentTabHost>
-    </RelativeLayout>
+        <RadioButton
+            android:id="@+id/rbTab3"
+            style="@style/MainBottomTabStyle"
+            android:drawableTop="@drawable/selector_group_tab3"
+            android:text="车源" />
 
+        <RadioButton
+            android:id="@+id/rbTab4"
+            style="@style/MainBottomTabStyle"
+            android:drawableTop="@drawable/selector_group_tab4"
+            android:text="我的" />
+    </RadioGroup>
 </LinearLayout>
