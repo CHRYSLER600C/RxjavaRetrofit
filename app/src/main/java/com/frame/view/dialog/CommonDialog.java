@@ -23,16 +23,8 @@ public class CommonDialog extends Dialog {
         TYPE_SIMPLE, TYPE_INPUT
     }
 
-    public CommonDialog(Activity activity) {
-        super(activity);
-    }
-
     public CommonDialog(Activity activity, int theme) {
         super(activity, theme);
-    }
-
-    protected CommonDialog(Activity activity, boolean cancelable, OnCancelListener cancelListener) {
-        super(activity, cancelable, cancelListener);
         this.mActivity = activity;
     }
 
@@ -147,9 +139,9 @@ public class CommonDialog extends Dialog {
          * Create the simple dialog
          */
         public CommonDialog create() {
-            final CommonDialog dialog = new CommonDialog(activity, R.style.CommonDialog);
+            CommonDialog dialog = new CommonDialog(activity, R.style.CommonDialog);
             View vDialog = View.inflate(activity, R.layout.dialog_common, null);
-            final CommVHolder h = CommVHolder.get(null, vDialog);
+            CommVHolder h = CommVHolder.get(null, vDialog);
 
             if (DialogType.TYPE_SIMPLE == dialogType) {
                 h.setVisibility(R.id.tvCommonDialogMessage, View.VISIBLE);
