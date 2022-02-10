@@ -5,12 +5,6 @@ import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.core.widget.NestedScrollView;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -37,6 +31,10 @@ import org.byteam.superadapter.SuperViewHolder;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.core.widget.NestedScrollView;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.OnClick;
 
@@ -169,7 +167,7 @@ public class Tab1Fragment extends BaseTitleFragment {
     }
 
     private void getBannerData() {
-        doCommonGet("banner/json", null, new ProgressObserver<DataClass>(mBActivity, false) {
+        BaseActivity.doCommonGet("banner/json", null, new ProgressObserver<DataClass>(mBActivity, false) {
             @Override
             public void onNext(DataClass dc) {
                 LU.initBanner(mBActivity, mBannerAdv, JU.al(dc.object, "data"));
@@ -178,7 +176,7 @@ public class Tab1Fragment extends BaseTitleFragment {
     }
 
     private void getNetData(int currPage, boolean isLoading) {
-        doCommonGet("article/list/" + currPage + "/json", null, new ProgressObserver<DataClass>(mBActivity, isLoading,
+        BaseActivity.doCommonGet("article/list/" + currPage + "/json", null, new ProgressObserver<DataClass>(mBActivity, isLoading,
                 mSmartRefreshLayout) {
             @Override
             public void onNext(DataClass dc) {
