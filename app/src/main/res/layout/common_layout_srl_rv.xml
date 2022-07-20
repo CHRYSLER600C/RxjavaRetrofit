@@ -7,7 +7,7 @@
              android:orientation="vertical">
 
     <com.scwang.smartrefresh.layout.SmartRefreshLayout
-        android:id="@+id/srlCommon"
+        android:id="@+id/refreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"/>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvCommon"
+            android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/white"/>
@@ -29,6 +29,7 @@
         android:layout_height="40dp"
         android:layout_gravity="right|bottom"
         android:layout_margin="10dp"
+        android:onClick="onViewClicked"
         android:background="@drawable/shape_oval_dd"
         android:gravity="center"
         android:padding="10dp"

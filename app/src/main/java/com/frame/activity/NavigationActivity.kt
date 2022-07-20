@@ -1,140 +1,115 @@
-package com.frame.activity;
+package com.frame.activity
 
-import android.app.ActivityOptions;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.TextView;
+import android.app.ActivityOptions
+import android.content.Intent
+import android.os.Build
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.blankj.utilcode.util.ActivityUtils
+import com.blankj.utilcode.util.ConvertUtils
+import com.blankj.utilcode.util.ObjectUtils
+import com.frame.R
+import com.frame.dataclass.DataClass
+import com.frame.observers.ProgressObserver
+import com.frame.utils.CU
+import com.frame.utils.JU
+import com.google.gson.internal.LinkedTreeMap
+import com.zhy.view.flowlayout.FlowLayout
+import com.zhy.view.flowlayout.TagAdapter
+import com.zhy.view.flowlayout.TagFlowLayout
+import kotlinx.android.synthetic.main.activity_navigation.*
+import org.byteam.superadapter.SuperAdapter
+import org.byteam.superadapter.SuperViewHolder
+import q.rorbin.verticaltablayout.VerticalTabLayout.OnTabSelectedListener
+import q.rorbin.verticaltablayout.adapter.TabAdapter
+import q.rorbin.verticaltablayout.widget.ITabView.*
+import q.rorbin.verticaltablayout.widget.TabView
+import java.util.*
 
-import com.blankj.utilcode.util.ActivityUtils;
-import com.blankj.utilcode.util.ConvertUtils;
-import com.blankj.utilcode.util.ObjectUtils;
-import com.frame.R;
-import com.frame.dataclass.DataClass;
-import com.frame.observers.ProgressObserver;
-import com.frame.utils.CU;
-import com.frame.utils.JU;
-import com.google.gson.internal.LinkedTreeMap;
-import com.zhy.view.flowlayout.FlowLayout;
-import com.zhy.view.flowlayout.TagAdapter;
-import com.zhy.view.flowlayout.TagFlowLayout;
-
-import org.byteam.superadapter.SuperAdapter;
-import org.byteam.superadapter.SuperViewHolder;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
-import butterknife.OnClick;
-import q.rorbin.verticaltablayout.VerticalTabLayout;
-import q.rorbin.verticaltablayout.adapter.TabAdapter;
-import q.rorbin.verticaltablayout.widget.ITabView;
-import q.rorbin.verticaltablayout.widget.TabView;
 
 /**
  *
  */
-public class NavigationActivity extends BaseTitleActivity {
+class NavigationActivity : BaseTitleActivity() {
 
-    @BindView(R.id.vtlNavigation)
-    VerticalTabLayout mTabLayout;
-    @BindView(R.id.rvNavigation)
-    RecyclerView mRecyclerView;
+    private var mManager: LinearLayoutManager? = null
+    private var mSuperAdapter: SuperAdapter<*>? = null
+    private val mList: MutableList<LinkedTreeMap<String, Any>?>? = ArrayList()
+    private var needScroll = false
+    private var index = 0
+    private var isClickTab = false
 
-    private LinearLayoutManager mManager;
-    private SuperAdapter mSuperAdapter;
-    private List<LinkedTreeMap<String, Object>> mList = new ArrayList<>();
-
-    private boolean needScroll;
-    private int index;
-    private boolean isClickTab;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_navigation);
-        initControl();
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_navigation)
+        initControl()
     }
 
-    protected void initControl() {
-        setTitleText("导航");
-
-        mManager = new LinearLayoutManager(mBActivity);
-        mRecyclerView.setLayoutManager(mManager);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setAdapter(mSuperAdapter = getSuperAdapter());
+    private fun initControl() {
+        setTitleText("导航")
+        mManager = LinearLayoutManager(mBActivity)
+        rvNavigation?.layoutManager = mManager
+        rvNavigation?.setHasFixedSize(true)
+        rvNavigation?.adapter = getSuperAdapter().also { mSuperAdapter = it }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (ObjectUtils.isEmpty(mList)) {
-            getNetData();
-        }
+    override fun onResume() {
+        super.onResume()
+        if (ObjectUtils.isEmpty(mList)) getNetData()
     }
 
-    @OnClick(R.id.llGotoTop)
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.llGotoTop:
-                mRecyclerView.smoothScrollToPosition(0);
-                if (mTabLayout != null) {
-                    mTabLayout.setTabSelected(0);
-                }
-                break;
+    fun onViewClicked(view: View) {
+        when (view.id) {
+            R.id.llGotoTop -> {
+                rvNavigation?.smoothScrollToPosition(0)
+                vtlNavigation?.setTabSelected(0)
+            }
         }
     }
 
     /**
      * Left tabLayout and right recyclerView linkage
      */
-    private void leftRightLinkage() {
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (needScroll && (newState == RecyclerView.SCROLL_STATE_IDLE)) {
-                    scrollRecyclerView();
+    private fun leftRightLinkage() {
+        rvNavigation?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (needScroll && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    scrollRecyclerView()
                 }
-                rightLinkageLeft(newState);
+                rightLinkageLeft(newState)
             }
 
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
                 if (needScroll) {
-                    scrollRecyclerView();
+                    scrollRecyclerView()
                 }
             }
-        });
-
-        mTabLayout.addOnTabSelectedListener(new VerticalTabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabView tabView, int i) {
-                isClickTab = true;
-                index = i;
-                mRecyclerView.stopScroll();
-                smoothScrollToPosition(i);
+        })
+        vtlNavigation?.addOnTabSelectedListener(object : OnTabSelectedListener {
+            override fun onTabSelected(tabView: TabView, i: Int) {
+                isClickTab = true
+                index = i
+                rvNavigation?.stopScroll()
+                smoothScrollToPosition(i)
             }
 
-            @Override
-            public void onTabReselected(TabView tabView, int i) {
-            }
-        });
+            override fun onTabReselected(tabView: TabView, i: Int) {}
+        })
     }
 
-    private void scrollRecyclerView() {
-        needScroll = false;
-        int indexDistance = index - mManager.findFirstVisibleItemPosition();
-        if (indexDistance >= 0 && indexDistance < mRecyclerView.getChildCount()) {
-            int top = mRecyclerView.getChildAt(indexDistance).getTop();
-            mRecyclerView.smoothScrollBy(0, top);
+    private fun scrollRecyclerView() {
+        needScroll = false
+        val indexDistance = index - mManager!!.findFirstVisibleItemPosition()
+        if (indexDistance >= 0 && indexDistance < rvNavigation!!.childCount) {
+            val top = rvNavigation?.getChildAt(indexDistance)?.top ?: 0
+            rvNavigation?.smoothScrollBy(0, top)
         }
     }
 
@@ -144,16 +119,16 @@ public class NavigationActivity extends BaseTitleActivity {
      *
      * @param newState RecyclerView new scroll state
      */
-    private void rightLinkageLeft(int newState) {
+    private fun rightLinkageLeft(newState: Int) {
         if (newState == RecyclerView.SCROLL_STATE_IDLE) {
             if (isClickTab) {
-                isClickTab = false;
-                return;
+                isClickTab = false
+                return
             }
-            int firstPosition = mManager.findFirstVisibleItemPosition();
+            val firstPosition = mManager?.findFirstVisibleItemPosition() ?: 0
             if (index != firstPosition) {
-                index = firstPosition;
-                setChecked(index);
+                index = firstPosition
+                setChecked(index)
             }
         }
     }
@@ -163,110 +138,95 @@ public class NavigationActivity extends BaseTitleActivity {
      *
      * @param position checked position
      */
-    private void setChecked(int position) {
+    private fun setChecked(position: Int) {
         if (isClickTab) {
-            isClickTab = false;
+            isClickTab = false
         } else {
-            if (mTabLayout == null) {
-                return;
+            if (vtlNavigation == null) {
+                return
             }
-            mTabLayout.setTabSelected(index);
+            vtlNavigation?.setTabSelected(index)
         }
-        index = position;
+        index = position
     }
 
-    private void smoothScrollToPosition(int currentPosition) {
-        int firstPosition = mManager.findFirstVisibleItemPosition();
-        int lastPosition = mManager.findLastVisibleItemPosition();
+    private fun smoothScrollToPosition(currentPosition: Int) {
+        val firstPosition = mManager?.findFirstVisibleItemPosition() ?: 0
+        val lastPosition = mManager?.findLastVisibleItemPosition() ?: 0
         if (currentPosition <= firstPosition) {
-            mRecyclerView.smoothScrollToPosition(currentPosition);
+            rvNavigation?.smoothScrollToPosition(currentPosition)
         } else if (currentPosition <= lastPosition) {
-            int top = mRecyclerView.getChildAt(currentPosition - firstPosition).getTop();
-            mRecyclerView.smoothScrollBy(0, top);
+            val top = rvNavigation?.getChildAt(currentPosition - firstPosition)?.top ?: 0
+            rvNavigation?.smoothScrollBy(0, top)
         } else {
-            mRecyclerView.smoothScrollToPosition(currentPosition);
-            needScroll = true;
+            rvNavigation?.smoothScrollToPosition(currentPosition)
+            needScroll = true
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private SuperAdapter getSuperAdapter() {
-        return new SuperAdapter<LinkedTreeMap<String, Object>>(mBActivity, mList, R.layout.item_navigation) {
-            @Override
-            public void onBind(SuperViewHolder h, int viewType, int layoutPosition, LinkedTreeMap<String, Object> map) {
-                h.setText(R.id.tvNavigationTitle, JU.s(map, "name"));
-                TagFlowLayout tagFlowLayout = h.findViewById(R.id.tflNavigation);
-                List<LinkedTreeMap<String, Object>> list = JU.al(map, "articles");
-                tagFlowLayout.setAdapter(new TagAdapter<LinkedTreeMap<String, Object>>(list) {
-                    @Override
-                    public View getView(FlowLayout parent, int position, LinkedTreeMap<String, Object> map2) {
-                        TextView tv = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout
-                                .flow_layout_tv, tagFlowLayout, false);
-                        tv.setPadding(ConvertUtils.dp2px(10), ConvertUtils.dp2px(6), ConvertUtils.dp2px(10),
-                                ConvertUtils.dp2px(6));
-                        tv.setText(JU.s(map2, "title"));
-                        tv.setTextColor(CU.randomColor());
-                        return tv;
+    private fun getSuperAdapter(): SuperAdapter<*> {
+        return object : SuperAdapter<LinkedTreeMap<String, Any>>(mBActivity, mList, R.layout.item_navigation) {
+            override fun onBind(h: SuperViewHolder, viewType: Int, layoutPosition: Int, map: LinkedTreeMap<String, Any>) {
+                h.setText(R.id.tvNavigationTitle, JU.s(map, "name"))
+                val tagFlowLayout = h.findViewById<TagFlowLayout>(R.id.tflNavigation)
+                val list = JU.al<List<LinkedTreeMap<String, Any>>>(map, "articles")
+                tagFlowLayout.adapter = object : TagAdapter<LinkedTreeMap<String, Any>>(list) {
+                    override fun getView(parent: FlowLayout, position: Int, map2: LinkedTreeMap<String, Any>): View {
+                        val tv = LayoutInflater.from(parent.context).inflate(R.layout.flow_layout_tv, tagFlowLayout, false) as TextView
+                        tv.setPadding(ConvertUtils.dp2px(10f), ConvertUtils.dp2px(6f), ConvertUtils.dp2px(10f),
+                            ConvertUtils.dp2px(6f))
+                        tv.text = JU.s(map2, "title")
+                        tv.setTextColor(CU.randomColor())
+                        return tv
                     }
-                });
-                tagFlowLayout.setOnTagClickListener((view, position1, parent1) -> {
-                    ActivityOptions options = ActivityOptions.makeScaleUpAnimation(view, view.getWidth() / 2,
-                            view.getHeight() / 2, 0, 0);
-                    Intent i = new Intent(mBActivity, WebViewActivity.class)
-                            .putExtra(WebViewActivity.TYPE, WebViewActivity.TYPE_LOAD_URL)
-                            .putExtra("title", JU.s(list.get(position1), "title"))
-                            .putExtra("url", JU.s(list.get(position1), "link"));
-                    if (options != null && !Build.MANUFACTURER.contains("samsung") && Build.VERSION.SDK_INT
-                            >= Build.VERSION_CODES.M) {
-                        ActivityUtils.startActivity(i, options.toBundle());
-                    } else ActivityUtils.startActivity(i);
-                    return true;
-                });
+                }
+                tagFlowLayout.setOnTagClickListener { view: View, position1: Int, parent1: FlowLayout? ->
+                    val options = ActivityOptions.makeScaleUpAnimation(view, view.width / 2, view.height / 2, 0, 0)
+                    val i = Intent(mBActivity, WebViewActivity::class.java)
+                        .putExtra(WebViewActivity.TYPE, WebViewActivity.TYPE_LOAD_URL)
+                        .putExtra("title", JU.s(list[position1], "title"))
+                        .putExtra("url", JU.s(list[position1], "link"))
+                    if (options != null && !Build.MANUFACTURER.contains("samsung") && (Build.VERSION.SDK_INT                                >= Build.VERSION_CODES.M)) {
+                        ActivityUtils.startActivity(i, options.toBundle())
+                    } else ActivityUtils.startActivity(i)
+                    true
+                }
             }
-        };
+        }
     }
 
-
-    private void getNetData() {
-        BaseActivity.doCommonGet("navi/json", null, new ProgressObserver<DataClass>(this, true) {
-            @Override
-            public void onNext(DataClass dc) {
-                mList.addAll(JU.al(dc.object, "data"));
-                mSuperAdapter.notifyDataSetChanged();
-
-                mTabLayout.setTabAdapter(new TabAdapter() {
-                    @Override
-                    public int getCount() {
-                        return mList == null ? 0 : mList.size();
+    private fun getNetData() {
+        doCommonGet("navi/json", null, object : ProgressObserver<DataClass>(this, true) {
+            override fun onNext(dc: DataClass) {
+                mList?.addAll(JU.al(dc.obj, "data"))
+                mSuperAdapter?.notifyDataSetChanged()
+                vtlNavigation?.setTabAdapter(object : TabAdapter {
+                    override fun getCount(): Int {
+                        return mList?.size ?: 0
                     }
 
-                    @Override
-                    public ITabView.TabBadge getBadge(int i) {
-                        return null;
+                    override fun getBadge(i: Int): TabBadge? {
+                        return null
                     }
 
-                    @Override
-                    public ITabView.TabIcon getIcon(int i) {
-                        return null;
+                    override fun getIcon(i: Int): TabIcon? {
+                        return null
                     }
 
-                    @Override
-                    public ITabView.TabTitle getTitle(int i) {
-                        return new TabView.TabTitle.Builder()
-                                .setContent(JU.s(mList.get(i), "name"))
-                                .setTextColor(ContextCompat.getColor(mBActivity, R.color.shallow_green),
-                                        ContextCompat.getColor(mBActivity, R.color.shallow_grey))
-                                .build();
+                    override fun getTitle(i: Int): TabTitle {
+                        return TabTitle.Builder()
+                            .setContent(JU.s(mList!![i], "name"))
+                            .setTextColor(ContextCompat.getColor(mBActivity!!, R.color.shallow_green),
+                                ContextCompat.getColor(mBActivity!!, R.color.shallow_grey))
+                            .build()
                     }
 
-                    @Override
-                    public int getBackground(int i) {
-                        return -1;
+                    override fun getBackground(i: Int): Int {
+                        return -1
                     }
-                });
-
-                leftRightLinkage();
+                })
+                leftRightLinkage()
             }
-        });
+        })
     }
 }

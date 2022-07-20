@@ -28,6 +28,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dip"
+        android:onClick="onViewClicked"
         android:background="@drawable/selector_orange"
         android:text="重新下载"
         android:textColor="@android:color/white"

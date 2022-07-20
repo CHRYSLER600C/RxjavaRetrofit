@@ -7,7 +7,6 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnKeyListener;
 import android.view.WindowManager;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.PopupWindow;
@@ -69,16 +68,13 @@ public class CustomPopView extends PopupWindow {
      * 设置返回键和菜单键响应
      */
     public void setDefaultKeyListener(View v) {
-        v.setOnKeyListener(new OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((keyCode == KeyEvent.KEYCODE_MENU) && (isShowing())) {
-                    dismiss();
-                } else if (((keyCode == KeyEvent.KEYCODE_BACK) && (isShowing()))) {
-                    dismiss();
-                }
-                return false;
+        v.setOnKeyListener((v1, keyCode, event) -> {
+            if ((keyCode == KeyEvent.KEYCODE_MENU) && (isShowing())) {
+                dismiss();
+            } else if (((keyCode == KeyEvent.KEYCODE_BACK) && (isShowing()))) {
+                dismiss();
             }
+            return false;
         });
     }
 

@@ -1,104 +1,73 @@
-package com.frame.activity;
+package com.frame.activity
 
-
-import android.os.Bundle;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import android.view.View;
-
-import com.blankj.utilcode.util.ObjectUtils;
-import com.frame.R;
-import com.frame.dataclass.DataClass;
-import com.frame.fragment.WxArticleDetailFragment;
-import com.frame.observers.ProgressObserver;
-import com.frame.utils.JU;
-import com.google.gson.internal.LinkedTreeMap;
-import com.scwang.smartrefresh.layout.SmartRefreshLayout;
-import com.scwang.smartrefresh.layout.footer.ClassicsFooter;
-
-import org.byteam.superadapter.SuperAdapter;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import butterknife.BindView;
-import butterknife.OnClick;
-
+import android.os.Bundle
+import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.blankj.utilcode.util.ObjectUtils
+import com.frame.R
+import com.frame.dataclass.DataClass
+import com.frame.fragment.WxArticleDetailFragment
+import com.frame.observers.ProgressObserver
+import com.frame.utils.JU
+import com.google.gson.internal.LinkedTreeMap
+import com.scwang.smartrefresh.layout.footer.ClassicsFooter
+import kotlinx.android.synthetic.main.common_layout_srl_rv.*
+import org.byteam.superadapter.SuperAdapter
+import java.util.*
 
 /**
  */
-public class SearchListActivity extends BaseTitleActivity {
+class SearchListActivity : BaseTitleActivity() {
 
-    @BindView(R.id.srlCommon)
-    SmartRefreshLayout mSmartRefreshLayout;
-    @BindView(R.id.rvCommon)
-    RecyclerView mRecyclerView;
+    private var mCurrKey: String? = null
+    private var mCurrPage = 0
+    private var mSuperAdapter: SuperAdapter<*>? = null
+    private val mList: MutableList<LinkedTreeMap<String, Any>?> = ArrayList()
 
-    private String mCurrKey;
-    private int mCurrPage = 0;
-    private SuperAdapter mSuperAdapter;
-    private List<LinkedTreeMap<String, Object>> mList = new ArrayList<>();
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.common_layout_srl_rv);
-        initControl();
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.common_layout_srl_rv)
+        initControl()
     }
 
-    protected void initControl() {
-        mCurrKey = getIntent().getStringExtra("key");
-        setTitleText(mCurrKey);
-
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mBActivity));
-        mRecyclerView.setAdapter(mSuperAdapter = WxArticleDetailFragment.getSuperAdapter(mBActivity, mList));
-
-        setSmartRefreshLayout();
+    private fun initControl() {
+        mCurrKey = intent.getStringExtra("key")
+        setTitleText(mCurrKey)
+        recyclerView?.layoutManager = LinearLayoutManager(mBActivity)
+        recyclerView?.adapter = WxArticleDetailFragment.getSuperAdapter(mBActivity, mList).also { mSuperAdapter = it }
+        setSmartRefreshLayout()
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    public override fun onResume() {
+        super.onResume()
         if (ObjectUtils.isEmpty(mList)) {
-            getNetData(mCurrKey, mCurrPage = 0, true);
+            getNetData(mCurrKey, 0.also { mCurrPage = it }, true)
         }
     }
 
-    @OnClick(R.id.llGotoTop)
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.llGotoTop:
-                mRecyclerView.smoothScrollToPosition(0);
-                break;
+    fun onViewClicked(view: View) {
+        when (view.id) {
+            R.id.llGotoTop -> recyclerView.smoothScrollToPosition(0)
         }
     }
 
-    private void setSmartRefreshLayout() {
-        mSmartRefreshLayout.setRefreshFooter(new ClassicsFooter(mBActivity));
-        mSmartRefreshLayout.setOnRefreshListener(refreshLayout -> {
-            getNetData(mCurrKey, mCurrPage = 0, false);
-        });
-        mSmartRefreshLayout.setOnLoadMoreListener(refreshLayout -> {
-            getNetData(mCurrKey, ++mCurrPage, false);
-        });
+    private fun setSmartRefreshLayout() {
+        refreshLayout.setRefreshFooter(ClassicsFooter(mBActivity))
+        refreshLayout.setOnRefreshListener { refreshLayout -> getNetData(mCurrKey, 0.also { mCurrPage = it }, false) }
+        refreshLayout.setOnLoadMoreListener { refreshLayout -> getNetData(mCurrKey, ++mCurrPage, false) }
     }
 
-    private void getNetData(String key, int currPage, boolean isLoading) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("k", key);
-        BaseActivity.doCommonPost("article/query/" + currPage + "/json", map, new
-                ProgressObserver<DataClass>(mBActivity, isLoading, mSmartRefreshLayout) {
-                    @Override
-                    public void onNext(DataClass dc) {
-                        LinkedTreeMap<String, Object> data = JU.m(dc.object, "data");
-                        mSmartRefreshLayout.setEnableLoadMore(!JU.b(data, "over"));
-                        if (0 == JU.i(data, "offset")) mList.clear();
-                        mList.addAll(JU.al(data, "datas"));
-                        mSuperAdapter.notifyDataSetChanged();
-                    }
-                });
+    private fun getNetData(key: String?, currPage: Int, isLoading: Boolean) {
+        val map: MutableMap<String?, Any?> = HashMap()
+        map["k"] = key
+        doCommonPost("article/query/$currPage/json", map, object : ProgressObserver<DataClass>(mBActivity, isLoading, refreshLayout) {
+            override fun onNext(dc: DataClass) {
+                val data = JU.m<LinkedTreeMap<String, Any>>(dc.obj, "data")
+                refreshLayout.setEnableLoadMore(!JU.b(data, "over"))
+                if (0 == JU.i(data, "offset")) mList.clear()
+                mList.addAll(JU.al(data, "datas"))
+                mSuperAdapter!!.notifyDataSetChanged()
+            }
+        })
     }
-
 }

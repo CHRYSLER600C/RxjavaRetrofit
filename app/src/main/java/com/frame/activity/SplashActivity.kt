@@ -64,7 +64,7 @@ class SplashActivity : BaseActivity() {
                 .commonGet("https://www.yiqiyiqi.cn/app/appUpdateInfo.htm", map).subscribeOn(Schedulers.io())
         val progressObserver: ProgressObserver<DataClass> = object : ProgressObserver<DataClass>(mBActivity, true) {
             override fun onNext(dc: DataClass) {
-                val data = JU.m<LinkedTreeMap<String, Any>>(dc.`object`, "updateInfo")
+                val data = JU.m<LinkedTreeMap<String, Any>>(dc.obj, "updateInfo")
                 val builder = CommonDialog.Builder(mBActivity, CommonDialog.DialogType.TYPE_SIMPLE)
                         .setTitle("有新版本")
                         .setMessage(JU.s(data, "updateInfo"))

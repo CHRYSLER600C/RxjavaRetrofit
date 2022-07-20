@@ -1,162 +1,144 @@
-package com.frame.fragment;
+package com.frame.fragment
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.LinearLayout;
-
-import com.blankj.utilcode.util.ObjectUtils;
-import com.blankj.utilcode.util.ToastUtils;
-import com.frame.R;
-import com.frame.activity.BaseActivity;
-import com.frame.dataclass.bean.Event;
-import com.frame.view.TitleBar;
-import com.scwang.smartrefresh.layout.SmartRefreshLayout;
-import com.scwang.smartrefresh.layout.footer.ClassicsFooter;
-import com.scwang.smartrefresh.layout.header.ClassicsHeader;
-import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
-import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.fragment.app.Fragment;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.annotation.StringRes
+import androidx.fragment.app.Fragment
+import com.blankj.utilcode.util.ObjectUtils
+import com.blankj.utilcode.util.ToastUtils
+import com.frame.R
+import com.frame.activity.BaseActivity
+import com.frame.dataclass.bean.Event
+import com.frame.utils.gone
+import com.frame.utils.invisible
+import com.frame.view.TitleBar
+import com.scwang.smartrefresh.layout.SmartRefreshLayout
+import com.scwang.smartrefresh.layout.footer.ClassicsFooter
+import com.scwang.smartrefresh.layout.header.ClassicsHeader
+import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 
 /**
  *
  */
-public abstract class BaseTitleFragment extends Fragment {
+abstract class BaseTitleFragment : Fragment() {
 
-    private LinearLayout mRootView;
-    public TitleBar mTitleBar;
-    private Unbinder mUnBinder;
-    protected BaseActivity mBActivity;
+    private var mRootView: LinearLayout? = null
+    lateinit var mTitleBar: TitleBar
+    protected lateinit var mBActivity: BaseActivity
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mBActivity = (BaseActivity) getActivity();
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        mBActivity = activity as BaseActivity
         if (ObjectUtils.isEmpty(mRootView)) {
-            mRootView = (LinearLayout) inflater.inflate(R.layout.fragment_base_title, null);
-            mTitleBar = mRootView.findViewById(R.id.titleBar);
-            View view = setContentView(savedInstanceState);
+            mRootView = inflater.inflate(R.layout.fragment_base_title, null) as LinearLayout
+            mTitleBar = mRootView!!.findViewById(R.id.titleBar)
+            val view = setContentView(savedInstanceState)
             if (ObjectUtils.isNotEmpty(view)) {
-                mRootView.addView(view, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-                mUnBinder = ButterKnife.bind(this, view);
+                mRootView?.addView(view, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
             }
-            if (regEvent()) EventBus.getDefault().register(this);
+            if (regEvent()) EventBus.getDefault().register(this)
         }
-
-        ViewGroup parent = (ViewGroup) mRootView.getParent();
-        if (parent != null) {
-            parent.removeView(mRootView);
-        }
-        return mRootView;
+        val parent = mRootView?.parent as? ViewGroup
+        parent?.removeView(mRootView)
+        return mRootView
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        initControl();
-        initSmartRefreshLayout();
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initControl()
+        initSmartRefreshLayout()
     }
 
-    abstract protected View setContentView(Bundle savedInstanceState);
+    protected abstract fun setContentView(savedInstanceState: Bundle?): View
 
     /**
      * 初始化控件
      */
-    protected void initControl() { }
+    protected open fun initControl() {}
 
     /**
      * 重载后事件点击传递到Fragment
      */
-    public void onViewClicked(View view) {}
+    open fun onViewClicked(view: View?) {}
 
-    public boolean onBackPressed() {
-        return false;
+    fun onBackPressed(): Boolean {
+        return false
     }
 
-
-    private void initSmartRefreshLayout() {
-        SmartRefreshLayout srl = mBActivity.findViewById(R.id.smartRefreshLayout);
+    protected fun initSmartRefreshLayout() {
+        val srl = mBActivity!!.findViewById<SmartRefreshLayout>(R.id.refreshLayout)
         if (srl != null) {
             if (getOnRefreshListener() != null) {
-                srl.setRefreshHeader(new ClassicsHeader(mBActivity)).setOnRefreshListener(getOnRefreshListener());
+                srl.setRefreshHeader(ClassicsHeader(mBActivity)).setOnRefreshListener(getOnRefreshListener())
             }
             if (getOnLoadMoreListener() != null) {
-                srl.setRefreshFooter(new ClassicsFooter(mBActivity)).setOnLoadMoreListener(getOnLoadMoreListener());
+                srl.setRefreshFooter(ClassicsFooter(mBActivity)).setOnLoadMoreListener(getOnLoadMoreListener())
             }
-            srl.setEnableRefresh(getOnRefreshListener() != null);
-            srl.setEnableLoadMore(getOnLoadMoreListener() != null);
+            srl.setEnableRefresh(getOnRefreshListener() != null)
+            srl.setEnableLoadMore(getOnLoadMoreListener() != null)
         }
     }
 
-    protected OnRefreshListener getOnRefreshListener() { return null;}
+    protected open fun getOnRefreshListener(): OnRefreshListener? = null
 
-    protected OnLoadMoreListener getOnLoadMoreListener() { return null;}
+    protected open fun getOnLoadMoreListener(): OnLoadMoreListener? = null
 
-    @Override
-    public void onDestroy() {
-        mRootView = null;
-        if (mUnBinder != null) {
-            mUnBinder.unbind();
-            mUnBinder = null;
-        }
-        if (regEvent()) EventBus.getDefault().unregister(this);
-        super.onDestroy();
+    override fun onDestroy() {
+        mRootView = null
+        if (regEvent()) EventBus.getDefault().unregister(this)
+        super.onDestroy()
     }
 
     /**
      * ===================================== TitleBar Method =====================================
      */
-    public void setLeftBarHide() {
-        mTitleBar.getLeftBar().setVisibility(View.INVISIBLE);
+    fun setLeftBarHide() {
+        mTitleBar.getLeftBar()?.invisible()
     }
 
-    public void setTitleBarHide() {
-        mTitleBar.getTitleBar().setVisibility(View.GONE);
+    fun setTitleBarHide() {
+        mTitleBar.getTitleBar()?.gone()
     }
 
-    public void setTitleText(String title) {
-        mTitleBar.setTitleText(title);
+    fun setTitleText(title: String?) {
+        mTitleBar.setTitleText(title)
     }
 
-    public void setTitleText(int title) {
-        mTitleBar.setTitleText(title);
+    fun setTitleText(title: Int) {
+        mTitleBar.setTitleText(title)
     }
 
-    public void setRightText(String content) {
-        mTitleBar.setRightText(content);
+    fun setRightText(content: String?) {
+        mTitleBar.setRightText(content)
     }
 
-    public void toast(@StringRes int resId) {
-        ToastUtils.showShort(getResources().getString(resId));  //适配多语言
+    fun toast(@StringRes resId: Int) {
+        ToastUtils.showShort(resources.getString(resId)) //适配多语言
     }
 
-    public void toast(String msg) {
-        ToastUtils.showShort(msg);
+    fun toast(msg: String?) {
+        ToastUtils.showShort(msg)
     }
 
     /**
      * ========================================= EventBus =========================================
      * 需要接收事件 重写该方法
      */
-    protected boolean regEvent() {
-        return false;
+    protected fun regEvent(): Boolean {
+        return false
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onCommonEventBus(Event event) {}
+    fun onCommonEventBus(event: Event?) {
+    }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void onCommonEventBusSticky(Event event) {}
-
+    fun onCommonEventBusSticky(event: Event?) {
+    }
 }

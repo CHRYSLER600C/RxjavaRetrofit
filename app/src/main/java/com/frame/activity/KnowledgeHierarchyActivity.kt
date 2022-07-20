@@ -1,120 +1,86 @@
-package com.frame.activity;
+package com.frame.activity
 
-import android.content.Intent;
-import android.os.Bundle;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import android.view.View;
-
-import com.blankj.utilcode.util.ActivityUtils;
-import com.blankj.utilcode.util.ObjectUtils;
-import com.frame.R;
-import com.frame.common.CommonData;
-import com.frame.dataclass.DataClass;
-import com.frame.observers.ProgressObserver;
-import com.frame.utils.CU;
-import com.frame.utils.JU;
-import com.google.gson.internal.LinkedTreeMap;
-import com.scwang.smartrefresh.layout.SmartRefreshLayout;
-
-import org.byteam.superadapter.SuperAdapter;
-import org.byteam.superadapter.SuperViewHolder;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.OnClick;
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.blankj.utilcode.util.ActivityUtils
+import com.blankj.utilcode.util.ObjectUtils
+import com.frame.R
+import com.frame.common.CommonData
+import com.frame.dataclass.DataClass
+import com.frame.observers.ProgressObserver
+import com.frame.utils.CU
+import com.frame.utils.JU
+import com.google.gson.internal.LinkedTreeMap
+import com.scwang.smartrefresh.layout.api.RefreshLayout
+import kotlinx.android.synthetic.main.common_layout_srl_rv.*
+import org.byteam.superadapter.SuperAdapter
+import org.byteam.superadapter.SuperViewHolder
+import java.util.*
 
 /**
  */
-public class KnowledgeHierarchyActivity extends BaseTitleActivity {
+class KnowledgeHierarchyActivity : BaseTitleActivity() {
 
-    @BindView(R.id.srlCommon)
-    SmartRefreshLayout mSmartRefreshLayout;
-    @BindView(R.id.rvCommon)
-    RecyclerView mRecyclerView;
+    private var mSuperAdapter: SuperAdapter<*>? = null
+    private val mList: MutableList<LinkedTreeMap<String, Any>?> = ArrayList()
 
-    private SuperAdapter mSuperAdapter;
-    private List<LinkedTreeMap<String, Object>> mList = new ArrayList<>();
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.common_layout_srl_rv);
-        initControl();
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.common_layout_srl_rv)
+        initControl()
     }
 
-    private void initControl() {
-        setTitleText("知识体系");
-
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mBActivity));
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setAdapter(mSuperAdapter = getSuperAdapter());
-
-        setSmartRefreshLayout();
+    private fun initControl() {
+        setTitleText("知识体系")
+        recyclerView?.layoutManager = LinearLayoutManager(mBActivity)
+        recyclerView?.setHasFixedSize(true)
+        recyclerView?.adapter = getSuperAdapter().also { mSuperAdapter = it }
+        setSmartRefreshLayout()
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (ObjectUtils.isEmpty(mList)) {
-            getNetData();
+    override fun onResume() {
+        super.onResume()
+        if (ObjectUtils.isEmpty(mList)) getNetData()
+    }
+
+    fun onViewClicked(view: View) {
+        when (view.id) {
+            R.id.llGotoTop -> recyclerView?.smoothScrollToPosition(0)
         }
     }
 
-
-    @OnClick(R.id.llGotoTop)
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.llGotoTop:
-                mRecyclerView.smoothScrollToPosition(0);
-                break;
-        }
+    private fun setSmartRefreshLayout() {
+        refreshLayout?.setOnRefreshListener { refreshLayout: RefreshLayout? -> getNetData() }
     }
 
-    private void setSmartRefreshLayout() {
-        mSmartRefreshLayout.setOnRefreshListener(refreshLayout -> {
-            getNetData();
-        });
-    }
-
-    @SuppressWarnings("unchecked")
-    private SuperAdapter getSuperAdapter() {
-        return new SuperAdapter<LinkedTreeMap<String, Object>>(mBActivity, mList, R.layout.item_knowledge_hierarchy) {
-            @Override
-            public void onBind(SuperViewHolder holder, int viewType, int layoutPosition, LinkedTreeMap<String,
-                    Object> map) {
+    private fun getSuperAdapter(): SuperAdapter<*> {
+        return object : SuperAdapter<LinkedTreeMap<String, Any>>(mBActivity, mList, R.layout.item_knowledge_hierarchy) {
+            override fun onBind(holder: SuperViewHolder, viewType: Int, layoutPosition: Int, map: LinkedTreeMap<String, Any>) {
                 holder.setText(R.id.tvKnowledgeHierarchyTitle, JU.s(map, "name"))
-                        .setTextColor(R.id.tvKnowledgeHierarchyTitle, CU.randomColor());
-
-                StringBuilder content = new StringBuilder();
-                List<LinkedTreeMap<String, Object>> list = JU.al(map, "children");
-                for (LinkedTreeMap<String, Object> ltm : list) {
-                    content.append(JU.s(ltm, "name")).append("   ");
+                    .setTextColor(R.id.tvKnowledgeHierarchyTitle, CU.randomColor())
+                val content = StringBuilder()
+                val list = JU.al<List<LinkedTreeMap<String, Any>>>(map, "children")
+                for (ltm in list) {
+                    content.append(JU.s(ltm, "name")).append("   ")
                 }
-                holder.setText(R.id.tvKnowledgeHierarchyContent, content);
-                holder.itemView.setOnClickListener(view -> {
-                            ActivityUtils.startActivity(new Intent(mBActivity, WxArticleActivity.class)
-                                    .putExtra(CommonData.PARAM1, map));
-                        }
-                );
+                holder.setText(R.id.tvKnowledgeHierarchyContent, content)
+                holder.itemView.setOnClickListener { view: View? ->
+                    ActivityUtils.startActivity(Intent(mBActivity, WxArticleActivity::class.java)
+                        .putExtra(CommonData.PARAM1, map))
+                }
             }
-        };
+        }
     }
 
-    private void getNetData() {
-        BaseActivity.doCommonGet("tree/json", null, new ProgressObserver<DataClass>(mBActivity, true,
-                mSmartRefreshLayout) {
-            @Override
-            public void onNext(DataClass dc) {
-                mList.clear();
-                mList.addAll(JU.al(dc.object, "data"));
-                mSuperAdapter.notifyDataSetChanged();
+    private fun getNetData() {
+        doCommonGet("tree/json", null, object : ProgressObserver<DataClass>(mBActivity, true, refreshLayout) {
+            override fun onNext(dc: DataClass) {
+                mList.clear()
+                mList.addAll(JU.al(dc.obj, "data"))
+                mSuperAdapter?.notifyDataSetChanged()
             }
-        });
+        })
     }
-
-
 }

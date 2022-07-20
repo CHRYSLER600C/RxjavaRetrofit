@@ -1,46 +1,32 @@
-package com.frame.fragment;
+package com.frame.fragment
 
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-
-import com.frame.R;
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import com.frame.R
 
 /**
  * TAB2
  */
-public class Tab2Fragment extends BaseTitleFragment implements View.OnClickListener {
-
-
-    @Override
-    protected View setContentView(Bundle savedInstanceState) {
-        return View.inflate(mBActivity, R.layout.fragment_tab2, null);
+class Tab2Fragment : BaseTitleFragment() {
+    override fun setContentView(savedInstanceState: Bundle?): View {
+        return View.inflate(mBActivity, R.layout.fragment_tab2, null)
     }
 
-    @Override
-    protected void initControl() {
-        setTitleText("货源");
-        setLeftBarHide();
+    override fun initControl() {
+        setTitleText("货源")
+        setLeftBarHide()
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    override fun onResume() {
+        super.onResume()
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
-            switch (requestCode) {
+            when (requestCode) {
             }
         }
     }
-
 }

@@ -1,170 +1,138 @@
-package com.frame.view;
+package com.frame.view
 
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.text.Html;
-import android.util.AttributeSet;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.app.Activity
+import android.content.Context
+import android.graphics.drawable.Drawable
+import android.text.Html
+import android.util.AttributeSet
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
+import android.widget.TextView
+import com.frame.R
+import com.frame.utils.visible
+import kotlinx.android.synthetic.main.include_base_title.view.*
 
-import com.frame.R;
+class TitleBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : RelativeLayout(context, attrs) {
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
-public class TitleBar extends RelativeLayout {
-
-    @BindView(R.id.llTitleBar)
-    LinearLayout mLlTitleBar;
-
-    @BindView(R.id.llLeftBar)
-    LinearLayout mLlLeftBar;
-    @BindView(R.id.ivLeft)
-    ImageView mIvLeft;
-    @BindView(R.id.tvLeft)
-    TextView mTvLeft;
-
-    @BindView(R.id.tvTitle)
-    TextView mTvTitle;
-
-    @BindView(R.id.llRightBar)
-    LinearLayout mLlRightBar;
-    @BindView(R.id.ivRight)
-    ImageView mIvRight;
-    @BindView(R.id.tvRight)
-    TextView mTvRight;
-
-    public TitleBar(Context context) {
-        this(context, null);
-    }
-
-    public TitleBar(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initView(context);
+    init {
+        initView(context)
     }
 
     /**
      * 初始化界面
      */
-    private void initView(Context context) {
-        View root = View.inflate(context, R.layout.include_base_title, this);
-        ButterKnife.bind(root);
-        setLeftBackClick();
+    private fun initView(context: Context) {
+        View.inflate(context, R.layout.include_base_title, this)
+        setLeftBackClick()
     }
 
     /**
      * Getter Method
      */
-    public LinearLayout getTitleBar() {  // 可供不需要的时候隐藏
-        return mLlTitleBar;
+    fun getTitleBar(): LinearLayout? {  // 可供不需要的时候隐藏
+        return llTitleBar
     }
 
     // getter left --------------------------------
-    public LinearLayout getLeftBar() {
-        return mLlLeftBar;
+    fun getLeftBar(): LinearLayout? {
+        return llLeftBar
     }
 
-    public TextView getLeftText() {
-        return mTvLeft;
+    fun getLeftText(): TextView? {
+        return tvLeft
     }
 
-    public ImageView getLeftImg() {
-        return mIvLeft;
+    fun getLeftImg(): ImageView? {
+        return ivLeft
     }
 
     // getter title --------------------------------
-    public TextView getTitleText() {
-        return mTvTitle;
+    fun getTitleText(): TextView? {
+        return tvTitle
     }
 
     // getter right --------------------------------
-    public LinearLayout getRightBar() {
-        return mLlRightBar;
+    fun getRightBar(): LinearLayout? {
+        return llRightBar
     }
 
-    public TextView getRightText() {
-        return mTvRight;
+    fun getRightText(): TextView? {
+        return tvRight
     }
 
-    public ImageView getRightImg() {
-        return mIvRight;
+    fun getRightImg(): ImageView? {
+        return ivRight
     }
-
     /**
      * Setter Method
      */
     // setter left --------------------------------
-
-    private void setLeftBackClick() {
-        mLlLeftBar.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                Context ctx = TitleBar.this.getContext();
-                if (ctx instanceof Activity) {
-                    ((Activity) ctx).onBackPressed();
-                }
+    private fun setLeftBackClick() {
+        llLeftBar.setOnClickListener {
+            val ctx = this@TitleBar.context
+            if (ctx is Activity) {
+                ctx.onBackPressed()
             }
-        });
+        }
     }
 
-    public void setLeftText(String text) {
-        mTvLeft.setText(text);
-        mTvLeft.setVisibility(View.VISIBLE);
+    fun setLeftText(text: String?) {
+        tvLeft.text = text
+        tvLeft.visible()
     }
 
-    public void setLeftImageDrawable(Drawable drawable) {
-        mIvLeft.setImageDrawable(drawable);
-        mIvLeft.setVisibility(View.VISIBLE);
+    fun setLeftImageDrawable(drawable: Drawable?) {
+        ivLeft.setImageDrawable(drawable)
+        ivLeft.visible()
     }
 
-    public void setLeftImageResource(int resId) {
-        mIvRight.setImageResource(resId);
-        mIvRight.setVisibility(View.VISIBLE);
+    fun setLeftImageResource(resId: Int) {
+        ivRight.setImageResource(resId)
+        ivRight.visible()
     }
 
     // setter title --------------------------------
-    public void setTitleText(String title) {
-        mTvTitle.setText(Html.fromHtml(title));
+    fun setTitleText(title: String?) {
+        tvTitle.text = Html.fromHtml(title)
     }
 
-    public void setTitleText(int title) {
-        mTvTitle.setText(title);
+    fun setTitleText(title: Int) {
+        tvTitle.setText(title)
     }
 
-    public void setTitleBgColor(int color) {
-        mLlTitleBar.setBackgroundColor(color);
+    fun setTitleBgColor(color: Int) {
+        llTitleBar.setBackgroundColor(color)
     }
 
-    public void setTitleBgDrawable(Drawable background) {
-        mLlTitleBar.setBackgroundDrawable(background);
+    fun setTitleBgDrawable(background: Drawable?) {
+        llTitleBar.setBackgroundDrawable(background)
     }
 
-    public void setTitleBgResource(int resid) {
-        mLlTitleBar.setBackgroundResource(resid);
+    fun setTitleBgResource(resid: Int) {
+        llTitleBar.setBackgroundResource(resid)
     }
 
     // setter right --------------------------------
-    public void setRightText(String text) {
-        mTvRight.setText(text);
-        mTvRight.setVisibility(View.VISIBLE);
+    fun setRightText(text: String?) {
+        tvRight.text = text
+        tvRight.visible()
     }
 
-    public void setRightText(int text) {
-        mTvRight.setText(text);
-        mTvRight.setVisibility(View.VISIBLE);
+    fun setRightText(text: Int) {
+        tvRight.setText(text)
+        tvRight.visible()
     }
 
-    public void setRightImageDrawable(Drawable drawable) {
-        mIvRight.setImageDrawable(drawable);
-        mIvRight.setVisibility(View.VISIBLE);
+    fun setRightImageDrawable(drawable: Drawable?) {
+        ivRight.setImageDrawable(drawable)
+        ivRight.visible()
     }
 
-    public void setRightImageResource(int resId) {
-        mIvRight.setImageResource(resId);
-        mIvRight.setVisibility(View.VISIBLE);
+    fun setRightImageResource(resId: Int) {
+        ivRight.setImageResource(resId)
+        ivRight.visible()
     }
-
 }

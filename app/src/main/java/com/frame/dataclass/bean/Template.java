@@ -1,5 +1,7 @@
 package com.frame.dataclass.bean;
 
+import android.app.Activity;
+
 import java.io.Serializable;
 
 /**
@@ -11,10 +13,10 @@ public class Template implements Serializable {
     public int resId;
     public String content;
     public String url;//模块外跳转链接
-    public Class cls;
+    public Class<? extends Activity> cls;
 
 
-    public Template(int resId, String content, String url, Class<?> cls) {
+    public Template(int resId, String content, String url, Class<? extends Activity> cls) {
         this.resId = resId;
         this.content = content;
         this.url = url;

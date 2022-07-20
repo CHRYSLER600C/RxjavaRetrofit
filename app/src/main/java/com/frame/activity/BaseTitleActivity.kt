@@ -29,7 +29,7 @@ open class BaseTitleActivity : BaseActivity() {
      * TitleBar Method ==========================================================================
      */
     fun setLeftBarHide() {
-        mTitleBar?.leftBar?.visibility = View.GONE
+        mTitleBar?.getLeftBar()?.visibility = View.GONE
     }
 
     fun setTitleBarHide() {

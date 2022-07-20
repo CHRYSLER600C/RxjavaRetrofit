@@ -50,6 +50,7 @@
         android:layout_gravity="right|bottom"
         android:layout_margin="10dp"
         android:background="@drawable/shape_oval_dd"
+        android:onClick="onViewClicked"
         android:gravity="center"
         android:padding="10dp"
         android:visibility="gone"

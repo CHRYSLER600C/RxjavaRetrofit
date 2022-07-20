@@ -12,6 +12,7 @@ import com.frame.injector.component.AppComponent;
 import com.frame.injector.component.ComponentHolder;
 import com.frame.injector.component.DaggerAppComponent;
 import com.frame.injector.module.AppModule;
+import com.frame.observers.RecycleObserver;
 
 import androidx.multidex.MultiDex;
 import io.reactivex.Observable;
@@ -65,7 +66,8 @@ public class App extends Application {
      * =========================================================== Sub Thread ===========================================================
      */
     private void initToolsSubThread() {
-        Observable.create((ObservableOnSubscribe<String>) emitter -> initToolsSubThreadImpl()).subscribeOn(Schedulers.io()).subscribe();
+        Observable.create((ObservableOnSubscribe<String>) emitter ->
+                initToolsSubThreadImpl()).subscribeOn(Schedulers.io()).subscribe(new RecycleObserver<>());
     }
 
     private void initToolsSubThreadImpl() {

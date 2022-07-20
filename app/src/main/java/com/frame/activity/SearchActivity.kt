@@ -126,9 +126,9 @@ class SearchActivity : BaseTitleActivity() {
     }
 
     private fun getNetData() {
-        doCommonGet<DataClass>("hotkey/json", null, object : ProgressObserver<DataClass?>(this, true) {
+        doCommonGet("hotkey/json", null, object : ProgressObserver<DataClass>(this, true) {
             override fun onNext(dc: DataClass) {
-                mList = JU.al<List<LinkedTreeMap<String, Any>?>>(dc.`object`, "data")
+                mList = JU.al<List<LinkedTreeMap<String, Any>?>>(dc.obj, "data")
                 tflSearch?.adapter = object : TagAdapter<LinkedTreeMap<String, Any>?>(mList) {
                     override fun getView(parent: FlowLayout, position: Int, map: LinkedTreeMap<String, Any>?): View {
                         val tv = LayoutInflater.from(mBActivity).inflate(R.layout.flow_layout_tv, parent, false) as TextView

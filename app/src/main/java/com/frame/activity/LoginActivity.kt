@@ -1,97 +1,79 @@
-package com.frame.activity;
+package com.frame.activity
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.View;
-import android.widget.EditText;
-
-import com.blankj.utilcode.util.ActivityUtils;
-import com.frame.R;
-import com.frame.common.CommonData;
-import com.frame.common.SPreferences;
-import com.frame.dataclass.DataClass;
-import com.frame.observers.ProgressObserver;
-import com.frame.utils.CU;
-
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-
-import butterknife.BindView;
-import butterknife.OnClick;
+import android.content.Intent
+import android.os.Bundle
+import android.text.TextUtils
+import android.view.View
+import com.blankj.utilcode.util.ActivityUtils
+import com.frame.R
+import com.frame.common.CommonData
+import com.frame.common.SPreferences
+import com.frame.dataclass.DataClass
+import com.frame.observers.ProgressObserver
+import com.frame.utils.CU
+import kotlinx.android.synthetic.main.activity_login.*
+import java.net.URLEncoder
+import java.util.*
 
 /**
  * 登录界面
  */
-public class LoginActivity extends BaseTitleActivity {
+class LoginActivity : BaseTitleActivity() {
 
-    @BindView(R.id.etUserName)
-    EditText mEtUserName;
-    @BindView(R.id.etPwd)
-    EditText mEtPwd;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        initControl();
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_login)
+        initControl()
     }
 
-    private void initControl() {
-        setTitleText("登录");
-        setTitleBgColor(getResources().getColor(R.color.color_6));
-
-        CommonData.IS_LOGIN = false;
-//        CU.setTVDrawableLeft(mEtUserName, R.drawable.ic_registration_user, 18, 20, 10);
-//        CU.setTVDrawableLeft(mEtPwd, R.drawable.ic_registration_pwd, 18, 22, 10);
+    private fun initControl() {
+        setTitleText("登录")
+        setTitleBgColor(resources.getColor(R.color.color_6))
+        CommonData.IS_LOGIN = false
+//        CU.setTVDrawableLeft(etUserName, R.drawable.ic_registration_user, 18, 20, 10);
+//        CU.setTVDrawableLeft(etPwd, R.drawable.ic_registration_pwd, 18, 22, 10);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        String userName = SPreferences.getData(SPreferences.USER_NAME, "");
+    override fun onResume() {
+        super.onResume()
+        val userName = SPreferences.getData(SPreferences.USER_NAME, "")
         if (!TextUtils.isEmpty(userName)) {
-            mEtUserName.setText(userName);
+            etUserName?.setText(userName)
         }
     }
 
-    @OnClick({R.id.tvLogin, R.id.tvForgetPwd, R.id.tvRegister})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.tvLogin:
-                String name = mEtUserName.getText().toString().trim();
-                String pwd = mEtPwd.getText().toString().trim();
+    fun onViewClicked(view: View) {
+        when (view.id) {
+            R.id.tvLogin -> {
+                val name = etUserName?.text.toString()
+                val pwd = etPwd?.text.toString()
                 if (TextUtils.isEmpty(name)) {
-                    showShort("请输入您的用户名");
-                    return;
+                    showShort("请输入您的用户名")
+                    return
                 }
                 if (TextUtils.isEmpty(pwd)) {
-                    showShort("请输入登录密码");
-                    return;
+                    showShort("请输入登录密码")
+                    return
                 }
-                doLoginRequest(name, pwd);
-                break;
-            case R.id.tvForgetPwd:
-                break;
-            case R.id.tvRegister:
-                ActivityUtils.startActivity(new Intent(this, RegistrationActivity.class));
-                break;
+                doLoginRequest(name, pwd)
+            }
+            R.id.tvForgetPwd -> {
+            }
+            R.id.tvRegister -> ActivityUtils.startActivity(Intent(this, RegistrationActivity::class.java))
         }
     }
 
-    private void doLoginRequest(final String name, String pwd) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("userName", URLEncoder.encode(name));
-        map.put("passWord", CU.encodePwd(pwd));
-        doCommonGet("login", map, new ProgressObserver<DataClass>(this, true) {
-            @Override
-            public void onNext(DataClass dc) {
-                SPreferences.saveData(SPreferences.USER_NAME, name);
-                CommonData.IS_LOGIN = true;
-                setResult(RESULT_OK);
-                finish();
+    private fun doLoginRequest(name: String, pwd: String) {
+        val map: MutableMap<String?, Any?> = HashMap()
+        map["userName"] = URLEncoder.encode(name)
+        map["passWord"] = CU.encodePwd(pwd)
+        doCommonGet("login", map, object : ProgressObserver<DataClass>(this, true) {
+            override fun onNext(dc: DataClass) {
+                SPreferences.saveData(SPreferences.USER_NAME, name)
+                CommonData.IS_LOGIN = true
+                setResult(RESULT_OK)
+                finish()
             }
-        });
+        })
     }
 }

@@ -189,8 +189,8 @@ public class OkHttpUtil {
         public T apply(T data) {
             if (data instanceof DataClass) {
                 DataClass dc = (DataClass) data;
-                int code = JU.i(dc.object, CommonData.CODE);
-                String message = JU.s(dc.object, CommonData.MESSAGE);
+                int code = JU.i(dc.obj, CommonData.CODE);
+                String message = JU.s(dc.obj, CommonData.MESSAGE);
 
                 if (CommonData.RESULT_UNLOGIN == code) {
                     LU.gotoLogin(mObject);

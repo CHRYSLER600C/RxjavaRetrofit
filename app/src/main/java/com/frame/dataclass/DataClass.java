@@ -16,6 +16,6 @@ public class DataClass implements Serializable {
 
     @Expose
     @SerializedName("json")
-    public Object object; // 所有数据都用这个接收
+    public Object obj; // 所有数据都用这个接收
 
 }

@@ -1,218 +1,147 @@
-package com.frame.activity;
+package com.frame.activity
 
-import android.graphics.Bitmap;
-import android.os.Bundle;
-import android.text.InputType;
-import android.text.TextUtils;
-import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.EditText;
-import android.widget.ImageView;
-
-import com.blankj.utilcode.util.ObjectUtils;
-import com.frame.R;
-import com.frame.common.CommonData;
-import com.frame.dataclass.DataClass;
-import com.frame.httputils.OkHttpUtil2;
-import com.frame.httputils.RequestBuilder;
-import com.frame.observers.ProgressObserver;
-import com.frame.observers.RecycleObserver;
-import com.frame.utils.CU;
-import com.frame.utils.ViewUtil;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import butterknife.BindView;
-import butterknife.OnClick;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import android.os.Bundle
+import android.text.InputType
+import android.text.TextUtils
+import android.view.View
+import android.widget.CompoundButton
+import com.blankj.utilcode.util.ObjectUtils
+import com.frame.R
+import com.frame.dataclass.DataClass
+import com.frame.observers.ProgressObserver
+import com.frame.observers.RecycleObserver
+import com.frame.utils.CU
+import com.frame.utils.ViewUtil
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import kotlinx.android.synthetic.main.activity_registration.*
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * 注册界面
  */
-public class RegistrationActivity extends BaseTitleActivity implements OnCheckedChangeListener {
-
-    @BindView(R.id.etRegUserName)
-    EditText mEtRegUserName;
-    @BindView(R.id.etRegPwd)
-    EditText mEtRegPwd;
-    @BindView(R.id.cbRegPwdEye)
-    CheckBox mCbRegPwdEye;
-
-    @BindView(R.id.etRegImgCode)
-    EditText mEtRegImgCode;
-    @BindView(R.id.ivRegCodeImgView)
-    ImageView mIvRegCodeImgView;
-
-    @BindView(R.id.etRegMobile)
-    EditText mEtRegMobile;
-    @BindView(R.id.registrationSmsCode)
-    EditText mRegistrationSmsCode;
-    @BindView(R.id.btnRegSmsCode)
-    Button mBtnRegSmsCode;
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_registration);
-        initControl();
-        getImgCode();
+class RegistrationActivity : BaseTitleActivity(), CompoundButton.OnCheckedChangeListener {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_registration)
+        initControl()
     }
 
-    private void initControl() {
-        setTitleText("注册");
-        mCbRegPwdEye.setOnCheckedChangeListener(this);
+    private fun initControl() {
+        setTitleText("注册")
+        cbRegPwdEye.setOnCheckedChangeListener(this)
 
-//        CU.setTVDrawableLeft(mEtRegUserName, R.drawable.ic_registration_user, 18, 20, 10);
-//        CU.setTVDrawableLeft(mEtRegPwd, R.drawable.ic_registration_pwd, 18, 20, 10);
-//        CU.setTVDrawableLeft(mEtRegImgCode, R.drawable.ic_registration_img_code, 18, 20, 10);
-//        CU.setTVDrawableLeft(mEtRegMobile, R.drawable.ic_registration_mobile, 18, 20, 10);
+//        CU.setTVDrawableLeft(etRegUserName, R.drawable.ic_registration_user, 18, 20, 10);
+//        CU.setTVDrawableLeft(etRegPwd, R.drawable.ic_registration_pwd, 18, 20, 10);
+//        CU.setTVDrawableLeft(etRegImgCode, R.drawable.ic_registration_img_code, 18, 20, 10);
+//        CU.setTVDrawableLeft(etRegMobile, R.drawable.ic_registration_mobile, 18, 20, 10);
 //        CU.setTVDrawableLeft(mRegistrationSmsCode, R.drawable.ic_registration_sms_code, 18, 20, 10);
     }
 
-
-    @OnClick({R.id.ivRegCodeImgView, R.id.btnRegSmsCode, R.id.btnRegistration})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.ivRegCodeImgView:
-                getImgCode();
-                break;
-            case R.id.btnRegSmsCode:
-                String mobileSms = ViewUtil.getEtTrim(mEtRegMobile);
-                String imgCodeSms = ViewUtil.getEtTrim(mEtRegImgCode);
-
-                if (TextUtils.isEmpty(mobileSms) || mobileSms.length() < 11) {
-                    showShort("请输入11位手机号码");
-                    return;
+    fun onViewClicked(view: View) {
+        when (view.id) {
+            R.id.btnRegSmsCode -> {
+                val mobileSms = ViewUtil.getEtTrim(etRegMobile)
+                val imgCodeSms = ViewUtil.getEtTrim(etRegImgCode)
+                if (TextUtils.isEmpty(mobileSms) || mobileSms.length < 11) {
+                    showShort("请输入11位手机号码")
+                    return
                 }
                 if (TextUtils.isEmpty(imgCodeSms)) {
-                    showShort("请输入图中字符");
-                    return;
+                    showShort("请输入图中字符")
+                    return
                 }
-                verifyImgCode(imgCodeSms);
-                break;
-            case R.id.btnRegistration:
-                String name = ViewUtil.getEtTrim(mEtRegUserName);
-                String pwd = ViewUtil.getEtTrim(mEtRegPwd);
-                String imgCode = ViewUtil.getEtTrim(mEtRegImgCode);
-                String mobile = ViewUtil.getEtTrim(mEtRegMobile);
-                String smsCode = ViewUtil.getEtTrim(mRegistrationSmsCode);
-                if (TextUtils.isEmpty(name) || name.length() < 6 || name.length() > 20) {
-                    showShort("请输入6-20位用户名");
-                    return;
+                verifyImgCode(imgCodeSms)
+            }
+            R.id.btnRegistration -> {
+                val name = ViewUtil.getEtTrim(etRegUserName)
+                val pwd = ViewUtil.getEtTrim(etRegPwd)
+                val imgCode = ViewUtil.getEtTrim(etRegImgCode)
+                val mobile = ViewUtil.getEtTrim(etRegMobile)
+                val smsCode = ViewUtil.getEtTrim(registrationSmsCode)
+                if (TextUtils.isEmpty(name) || name.length < 6 || name.length > 20) {
+                    showShort("请输入6-20位用户名")
+                    return
                 }
-                if (TextUtils.isEmpty(pwd) || pwd.length() < 6 || pwd.length() > 14) {
-                    showShort("请输入6-14位密码");
-                    return;
+                if (TextUtils.isEmpty(pwd) || pwd.length < 6 || pwd.length > 14) {
+                    showShort("请输入6-14位密码")
+                    return
                 }
-
                 if (TextUtils.isEmpty(imgCode)) {
-                    showShort("请输入图中字符");
-                    return;
+                    showShort("请输入图中字符")
+                    return
                 }
-                if (TextUtils.isEmpty(mobile) || mobile.length() < 11) {
-                    showShort("请输入11位手机号码");
-                    return;
+                if (TextUtils.isEmpty(mobile) || mobile.length < 11) {
+                    showShort("请输入11位手机号码")
+                    return
                 }
                 if (TextUtils.isEmpty(smsCode)) {
-                    showShort("请输入短信验证码");
-                    return;
+                    showShort("请输入短信验证码")
+                    return
                 }
-
-                Map<String, Object> map = new HashMap<>();
-                map.put("name", name);
-                map.put("pwd", CU.encodePwd(pwd));
-                map.put("mobile", mobile);
-                map.put("smsCode", smsCode);
-                doRegistrationRequest(map);
-                break;
+                val map: MutableMap<String?, Any?> = HashMap()
+                map["name"] = name
+                map["pwd"] = CU.encodePwd(pwd)
+                map["mobile"] = mobile
+                map["smsCode"] = smsCode
+                doRegistrationRequest(map)
+            }
         }
     }
 
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (buttonView.equals(mCbRegPwdEye)) {
-            mEtRegPwd.setInputType(isChecked ? InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-                    : InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+    override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
+        if (buttonView == cbRegPwdEye) {
+            etRegPwd.inputType = if (isChecked) InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            else InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         }
     }
 
-    private void doRegistrationRequest(Map<String, Object> map) {
-        doCommonGet("registerGRSubmit", map, new ProgressObserver<DataClass>(this, true) {
-            @Override
-            public void onNext(DataClass dc) {
+    private fun doRegistrationRequest(map: Map<String?, Any?>) {
+        doCommonGet("registerGRSubmit", map, object : ProgressObserver<DataClass>(this, true) {
+            override fun onNext(dc: DataClass) {
 //                showShort(dc.message);
-                finish();
+                finish()
             }
-        });
+        })
     }
 
-    private void verifyImgCode(String imgCode) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("imgCode", imgCode);
-        doCommonGet("verifyImgCode", map, new ProgressObserver<DataClass>(this, true) {
-            @Override
-            public void onNext(DataClass dc) {
-                sendSmsCode();
+    private fun verifyImgCode(imgCode: String) {
+        val map: MutableMap<String?, Any?> = HashMap()
+        map["imgCode"] = imgCode
+        doCommonGet("verifyImgCode", map, object : ProgressObserver<DataClass>(this, true) {
+            override fun onNext(dc: DataClass) {
+                sendSmsCode()
             }
-        });
+        })
     }
 
-    private void sendSmsCode() {
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("mobile", ViewUtil.getEtTrim(mEtRegMobile));
-        map.put("business", "register");
-        String imgCode = ViewUtil.getEtTrim(mEtRegImgCode);
+    private fun sendSmsCode() {
+        val map: MutableMap<String?, Any?> = HashMap()
+        map["mobile"] = ViewUtil.getEtTrim(etRegMobile)
+        map["business"] = "register"
+        val imgCode = ViewUtil.getEtTrim(etRegImgCode)
         if (ObjectUtils.isNotEmpty(imgCode)) {
-            map.put("imgCode", imgCode);
+            map["imgCode"] = imgCode
         }
-        doCommonGet("sendSmsCode", map, new ProgressObserver<DataClass>(this, true) {
-            @Override
-            public void onNext(DataClass dc) {
-                mBtnRegSmsCode.setClickable(false);
+        doCommonGet("sendSmsCode", map, object : ProgressObserver<DataClass>(this, true) {
+            override fun onNext(dc: DataClass) {
+                btnRegSmsCode.isClickable = false
                 add2Disposable(Observable.interval(0, 1, TimeUnit.SECONDS, AndroidSchedulers.mainThread()) // 倒计时
-                        .take(61)
-                        .subscribeWith(new RecycleObserver<Long>() {
-                            @Override
-                            public void onNext(Long aLong) {
-                                ViewUtil.setViewText(mBtnRegSmsCode, String.format("%02d秒", 60 - aLong));
-                            }
+                    .take(61)
+                    .subscribeWith(object : RecycleObserver<Long?>() {
+                        override fun onNext(aLong: Long) {
+                            ViewUtil.setViewText(btnRegSmsCode, String.format("%02d秒", 60 - aLong))
+                        }
 
-                            @Override
-                            public void onComplete() {
-                                super.onComplete();
-                                mBtnRegSmsCode.setClickable(true);
-                                ViewUtil.setViewText(mBtnRegSmsCode, "获取验证码");
-                            }
-                        }));
+                        override fun onComplete() {
+                            super.onComplete()
+                            btnRegSmsCode.isClickable = true
+                            ViewUtil.setViewText(btnRegSmsCode, "获取验证码")
+                        }
+                    }))
             }
-        });
+        })
     }
 
-    private void getImgCode() {
-        RequestBuilder.RequestObject request = new RequestBuilder.RequestObject();
-        request.method = "getImgCode";
-        downLoadImage(RequestBuilder.build(request), new OkHttpUtil2.IRequestCallback() {
-            @Override
-            public <T> void ObjResponse(Boolean isSuccess, T responseObj, IOException e) {
-                if (isSuccess) {
-                    if (ObjectUtils.isNotEmpty(responseObj)) {
-                        mIvRegCodeImgView.setImageBitmap((Bitmap) responseObj);
-                    } else {
-                        showShort(CommonData.NETWORK_ERROR_MSG);
-                    }
-                } else {
-                    showShort(CommonData.NETWORK_ERROR_MSG);
-                }
-            }
-        });
-    }
 }

@@ -144,9 +144,6 @@ dependencies {
     /**
      * Utils
      */
-    //Butterknife
-    implementation 'com.jakewharton:butterknife:10.2.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1'
     //LeakCanary
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
     //EventBus
