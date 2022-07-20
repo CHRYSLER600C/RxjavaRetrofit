@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.activity_group.*
 
 class GroupActivity : BaseActivity() {
 
-    private var mCurrentFragment: BaseTitleFragment? = null           //当前选中的Fragment
+    private var mCurrentFragment: BaseTitleFragment? = null           // 当前选中的Fragment
     private val mTab1Fragment = Tab1Fragment()
     private val mTab2Fragment = Tab2Fragment()
     private val mTab3Fragment = Tab3Fragment()
