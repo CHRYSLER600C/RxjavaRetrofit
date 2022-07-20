@@ -52,7 +52,7 @@ class KnowledgeHierarchyActivity : BaseTitleActivity() {
     }
 
     private fun setSmartRefreshLayout() {
-        refreshLayout?.setOnRefreshListener { refreshLayout: RefreshLayout? -> getNetData() }
+        refreshLayout?.setOnRefreshListener { getNetData() }
     }
 
     private fun getSuperAdapter(): SuperAdapter<*> {

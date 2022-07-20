@@ -84,7 +84,7 @@ class Tab1Fragment : BaseTitleFragment() {
     private fun setSmartRefreshLayout() {
         srlTab1.setRefreshHeader(PhoenixHeader(mBActivity))
         srlTab1.setRefreshFooter(BallPulseFooter(mBActivity))
-        srlTab1.setOnRefreshListener { refreshLayout ->
+        srlTab1.setOnRefreshListener {
             getBannerData()
             getNetData(0.also { mCurrPage = it }, false)
         }

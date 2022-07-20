@@ -66,8 +66,8 @@ class WxArticleDetailFragment : BaseTitleFragment() {
 
     private fun setSmartRefreshLayout() {
         refreshLayout.setRefreshFooter(ClassicsFooter(mBActivity))
-        refreshLayout.setOnRefreshListener { refreshLayout -> getNetData(mCurrId, 1.also { mCurrPage = it }, false) }
-        refreshLayout.setOnLoadMoreListener { refreshLayout -> getNetData(mCurrId, ++mCurrPage, false) }
+        refreshLayout.setOnRefreshListener { getNetData(mCurrId, 1.also { mCurrPage = it }, false) }
+        refreshLayout.setOnLoadMoreListener { getNetData(mCurrId, ++mCurrPage, false) }
     }
 
     private fun getNetData(id: Int, currPage: Int, isLoading: Boolean) {

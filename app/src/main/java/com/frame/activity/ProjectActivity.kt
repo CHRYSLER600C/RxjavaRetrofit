@@ -80,8 +80,8 @@ class ProjectActivity : BaseTitleActivity() {
 
     private fun setSmartRefreshLayout() {
         refreshLayout?.setRefreshFooter(ClassicsFooter(mBActivity))
-        refreshLayout?.setOnRefreshListener { refreshLayout: RefreshLayout? -> getNetData(mCurrId, 1.also { mCurrPage = it }, false) }
-        refreshLayout?.setOnLoadMoreListener { refreshLayout: RefreshLayout? -> getNetData(mCurrId, ++mCurrPage, false) }
+        refreshLayout?.setOnRefreshListener { getNetData(mCurrId, 1.also { mCurrPage = it }, false) }
+        refreshLayout?.setOnLoadMoreListener { getNetData(mCurrId, ++mCurrPage, false) }
     }
 
     private fun getSuperAdapterType(): SuperAdapter<*> {

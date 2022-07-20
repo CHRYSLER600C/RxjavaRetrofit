@@ -53,8 +53,8 @@ class SearchListActivity : BaseTitleActivity() {
 
     private fun setSmartRefreshLayout() {
         refreshLayout.setRefreshFooter(ClassicsFooter(mBActivity))
-        refreshLayout.setOnRefreshListener { refreshLayout -> getNetData(mCurrKey, 0.also { mCurrPage = it }, false) }
-        refreshLayout.setOnLoadMoreListener { refreshLayout -> getNetData(mCurrKey, ++mCurrPage, false) }
+        refreshLayout.setOnRefreshListener { getNetData(mCurrKey, 0.also { mCurrPage = it }, false) }
+        refreshLayout.setOnLoadMoreListener { getNetData(mCurrKey, ++mCurrPage, false) }
     }
 
     private fun getNetData(key: String?, currPage: Int, isLoading: Boolean) {

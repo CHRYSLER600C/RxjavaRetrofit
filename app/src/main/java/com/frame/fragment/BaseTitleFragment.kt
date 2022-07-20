@@ -52,7 +52,6 @@ abstract class BaseTitleFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initControl()
-        initSmartRefreshLayout()
     }
 
     protected abstract fun setContentView(savedInstanceState: Bundle?): View
@@ -70,24 +69,6 @@ abstract class BaseTitleFragment : Fragment() {
     fun onBackPressed(): Boolean {
         return false
     }
-
-    protected fun initSmartRefreshLayout() {
-        val srl = mBActivity!!.findViewById<SmartRefreshLayout>(R.id.refreshLayout)
-        if (srl != null) {
-            if (getOnRefreshListener() != null) {
-                srl.setRefreshHeader(ClassicsHeader(mBActivity)).setOnRefreshListener(getOnRefreshListener())
-            }
-            if (getOnLoadMoreListener() != null) {
-                srl.setRefreshFooter(ClassicsFooter(mBActivity)).setOnLoadMoreListener(getOnLoadMoreListener())
-            }
-            srl.setEnableRefresh(getOnRefreshListener() != null)
-            srl.setEnableLoadMore(getOnLoadMoreListener() != null)
-        }
-    }
-
-    protected open fun getOnRefreshListener(): OnRefreshListener? = null
-
-    protected open fun getOnLoadMoreListener(): OnLoadMoreListener? = null
 
     override fun onDestroy() {
         mRootView = null

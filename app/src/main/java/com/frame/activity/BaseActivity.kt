@@ -81,7 +81,6 @@ open class BaseActivity : SlideBackAppCompatActivity() {
         root.addView(view, ViewGroup.LayoutParams(-1, -1))
         super.setContentView(root)
         setShadowResource(R.drawable.shape_sliding_back_shadow) //设置Slide Back的阴影
-        initSmartRefreshLayout()
     }
 
     /**
@@ -138,24 +137,6 @@ open class BaseActivity : SlideBackAppCompatActivity() {
     fun dismissProgressDialog() {
         mProgressDialogHandler?.obtainMessage(ProgressDialogHandler.DISMISS_PROGRESS_DIALOG)?.sendToTarget()
     }
-
-    protected fun initSmartRefreshLayout() {
-        val srl = findViewById<SmartRefreshLayout>(R.id.refreshLayout)
-        if (srl != null) {
-            if (getOnRefreshListener() != null) {
-                srl.setRefreshHeader(ClassicsHeader(mBActivity)).setOnRefreshListener(getOnRefreshListener())
-            }
-            if (getOnLoadMoreListener() != null) {
-                srl.setRefreshFooter(ClassicsFooter(mBActivity)).setOnLoadMoreListener(getOnLoadMoreListener())
-            }
-            srl.setEnableRefresh(getOnRefreshListener() != null)
-            srl.setEnableLoadMore(getOnLoadMoreListener() != null)
-        }
-    }
-
-    protected open fun getOnRefreshListener(): OnRefreshListener? = null
-
-    protected open fun getOnLoadMoreListener(): OnLoadMoreListener? = null
 
     fun add2Disposable(any: Any?) {
         if (mCompositeDisposable == null) {
