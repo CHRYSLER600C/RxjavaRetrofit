@@ -23,7 +23,6 @@ import java.util.*
  */
 class KnowledgeHierarchyActivity : BaseTitleActivity() {
 
-    private var mSuperAdapter: SuperAdapter<*>? = null
     private val mList: MutableList<LinkedTreeMap<String, Any>?> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +35,7 @@ class KnowledgeHierarchyActivity : BaseTitleActivity() {
         setTitleText("知识体系")
         recyclerView?.layoutManager = LinearLayoutManager(mBActivity)
         recyclerView?.setHasFixedSize(true)
-        recyclerView?.adapter = getSuperAdapter().also { mSuperAdapter = it }
+        recyclerView?.adapter = getSuperAdapter()
         setSmartRefreshLayout()
     }
 
@@ -79,7 +78,7 @@ class KnowledgeHierarchyActivity : BaseTitleActivity() {
             override fun onNext(dc: DataClass) {
                 mList.clear()
                 mList.addAll(JU.al(dc.obj, "data"))
-                mSuperAdapter?.notifyDataSetChanged()
+                recyclerView?.adapter?.notifyDataSetChanged()
             }
         })
     }

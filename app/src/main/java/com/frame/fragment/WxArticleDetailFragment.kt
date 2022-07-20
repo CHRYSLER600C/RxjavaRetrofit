@@ -30,7 +30,6 @@ class WxArticleDetailFragment : BaseTitleFragment() {
 
     private var mCurrId = 0 //当前公众号id
     private var mCurrPage = 1
-    private var mSuperAdapter: SuperAdapter<*>? = null
     private val mList: MutableList<LinkedTreeMap<String, Any>?> = ArrayList()
 
     override fun setContentView(savedInstanceState: Bundle?): View {
@@ -46,8 +45,8 @@ class WxArticleDetailFragment : BaseTitleFragment() {
             e.printStackTrace()
         }
         if (mCurrId == 0) return
-        recyclerView.layoutManager = LinearLayoutManager(mBActivity)
-        recyclerView.adapter = getSuperAdapter(mBActivity, mList).also { mSuperAdapter = it }
+        recyclerView?.layoutManager = LinearLayoutManager(mBActivity)
+        recyclerView?.adapter = getSuperAdapter(mBActivity, mList)
         setSmartRefreshLayout()
     }
 
@@ -78,7 +77,7 @@ class WxArticleDetailFragment : BaseTitleFragment() {
                     refreshLayout.setEnableLoadMore(!JU.b(data, "over"))
                     if (0 == JU.i(data, "offset")) mList.clear()
                     mList.addAll(JU.al(data, "datas"))
-                    mSuperAdapter!!.notifyDataSetChanged()
+                    recyclerView?.adapter?.notifyDataSetChanged()
                 }
             })
     }

@@ -38,7 +38,6 @@ import java.util.*
 class NavigationActivity : BaseTitleActivity() {
 
     private var mManager: LinearLayoutManager? = null
-    private var mSuperAdapter: SuperAdapter<*>? = null
     private val mList: MutableList<LinkedTreeMap<String, Any>?>? = ArrayList()
     private var needScroll = false
     private var index = 0
@@ -55,7 +54,7 @@ class NavigationActivity : BaseTitleActivity() {
         mManager = LinearLayoutManager(mBActivity)
         rvNavigation?.layoutManager = mManager
         rvNavigation?.setHasFixedSize(true)
-        rvNavigation?.adapter = getSuperAdapter().also { mSuperAdapter = it }
+        rvNavigation?.adapter = getSuperAdapter()
     }
 
     override fun onResume() {
@@ -199,7 +198,7 @@ class NavigationActivity : BaseTitleActivity() {
         doCommonGet("navi/json", null, object : ProgressObserver<DataClass>(this, true) {
             override fun onNext(dc: DataClass) {
                 mList?.addAll(JU.al(dc.obj, "data"))
-                mSuperAdapter?.notifyDataSetChanged()
+                rvNavigation?.adapter?.notifyDataSetChanged()
                 vtlNavigation?.setTabAdapter(object : TabAdapter {
                     override fun getCount(): Int {
                         return mList?.size ?: 0

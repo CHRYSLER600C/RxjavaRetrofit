@@ -21,7 +21,6 @@ class SearchListActivity : BaseTitleActivity() {
 
     private var mCurrKey: String? = null
     private var mCurrPage = 0
-    private var mSuperAdapter: SuperAdapter<*>? = null
     private val mList: MutableList<LinkedTreeMap<String, Any>?> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +33,7 @@ class SearchListActivity : BaseTitleActivity() {
         mCurrKey = intent.getStringExtra("key")
         setTitleText(mCurrKey)
         recyclerView?.layoutManager = LinearLayoutManager(mBActivity)
-        recyclerView?.adapter = WxArticleDetailFragment.getSuperAdapter(mBActivity, mList).also { mSuperAdapter = it }
+        recyclerView?.adapter = WxArticleDetailFragment.getSuperAdapter(mBActivity, mList)
         setSmartRefreshLayout()
     }
 
@@ -66,7 +65,7 @@ class SearchListActivity : BaseTitleActivity() {
                 refreshLayout.setEnableLoadMore(!JU.b(data, "over"))
                 if (0 == JU.i(data, "offset")) mList.clear()
                 mList.addAll(JU.al(data, "datas"))
-                mSuperAdapter!!.notifyDataSetChanged()
+                recyclerView?.adapter?.notifyDataSetChanged()
             }
         })
     }

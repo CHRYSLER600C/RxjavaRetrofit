@@ -29,8 +29,6 @@ import java.util.*
  */
 class ProjectActivity : BaseTitleActivity() {
 
-    private var mSuperAdapterType: SuperAdapter<*>? = null
-    private var mSuperAdapter: SuperAdapter<*>? = null
     private val mListType: MutableList<LinkedTreeMap<String, Any>?> = ArrayList()
     private val mList: MutableList<LinkedTreeMap<String, Any>> = ArrayList()
     private var mCurrId = 0
@@ -52,10 +50,10 @@ class ProjectActivity : BaseTitleActivity() {
         }
         rvSlide?.layoutManager = LinearLayoutManager(mBActivity)
         rvSlide?.setHasFixedSize(true)
-        rvSlide?.adapter = getSuperAdapterType().also { mSuperAdapterType = it }
+        rvSlide?.adapter = getSuperAdapterType()
         rvProject?.layoutManager = LinearLayoutManager(mBActivity)
         rvProject?.setHasFixedSize(true)
-        rvProject?.adapter = getSuperAdapter().also { mSuperAdapter = it }
+        rvProject?.adapter = getSuperAdapter()
         setSmartRefreshLayout()
     }
 
@@ -93,7 +91,7 @@ class ProjectActivity : BaseTitleActivity() {
                 }
                 holder.itemView.setOnClickListener { view: View? ->
                     mLastClickPos = layoutPosition
-                    mSuperAdapterType?.notifyDataSetChanged()
+                    rvSlide?.adapter?.notifyDataSetChanged()
                     drawerLayout?.closeDrawer(GravityCompat.END)
                     setTitleText(JU.s(mListType[mLastClickPos], "name"))
                     mCurrId = JU.i(mListType[mLastClickPos], "id")
@@ -128,7 +126,7 @@ class ProjectActivity : BaseTitleActivity() {
             override fun onNext(dc: DataClass) {
                 mListType.clear()
                 mListType.addAll(JU.al(dc.obj, "data"))
-                mSuperAdapterType?.notifyDataSetChanged()
+                rvSlide?.adapter?.notifyDataSetChanged()
                 if (mListType.size > 0) {
                     setTitleText(JU.s(mListType[0], "name"))
                     mCurrId = JU.i(mListType[0], "id")
@@ -146,7 +144,7 @@ class ProjectActivity : BaseTitleActivity() {
                     refreshLayout?.setEnableLoadMore(!JU.b(data, "over"))
                     if (0 == JU.i(data, "offset")) mList.clear()
                     mList.addAll(JU.al(data, "datas"))
-                    mSuperAdapter?.notifyDataSetChanged()
+                    rvProject?.adapter?.notifyDataSetChanged()
                 }
             })
     }
