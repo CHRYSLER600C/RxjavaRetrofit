@@ -138,8 +138,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.7'
     //Glide
     implementation 'com.github.bumptech.glide:glide:4.11.0'
-    //SuperAdapter
-    implementation 'org.byteam.superadapter:superadapter:3.6.8'
+    //BaseRecyclerViewAdapterHelper
+    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.7'
 
     /**
      * Utils

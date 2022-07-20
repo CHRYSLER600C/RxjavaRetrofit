@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ConvertUtils
 import com.blankj.utilcode.util.ObjectUtils
+import com.chad.library.adapter.base.BaseQuickAdapter
+import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import com.frame.R
 import com.frame.dataclass.DataClass
 import com.frame.observers.ProgressObserver
@@ -23,8 +25,6 @@ import com.zhy.view.flowlayout.FlowLayout
 import com.zhy.view.flowlayout.TagAdapter
 import com.zhy.view.flowlayout.TagFlowLayout
 import kotlinx.android.synthetic.main.activity_navigation.*
-import org.byteam.superadapter.SuperAdapter
-import org.byteam.superadapter.SuperViewHolder
 import q.rorbin.verticaltablayout.VerticalTabLayout.OnTabSelectedListener
 import q.rorbin.verticaltablayout.adapter.TabAdapter
 import q.rorbin.verticaltablayout.widget.ITabView.*
@@ -38,7 +38,7 @@ import java.util.*
 class NavigationActivity : BaseTitleActivity() {
 
     private var mManager: LinearLayoutManager? = null
-    private val mList: MutableList<LinkedTreeMap<String, Any>?>? = ArrayList()
+    private val mList: MutableList<LinkedTreeMap<String, Any>> = ArrayList()
     private var needScroll = false
     private var index = 0
     private var isClickTab = false
@@ -54,7 +54,7 @@ class NavigationActivity : BaseTitleActivity() {
         mManager = LinearLayoutManager(mBActivity)
         rvNavigation?.layoutManager = mManager
         rvNavigation?.setHasFixedSize(true)
-        rvNavigation?.adapter = getSuperAdapter()
+        rvNavigation?.adapter = getAdapter()
     }
 
     override fun onResume() {
@@ -163,11 +163,11 @@ class NavigationActivity : BaseTitleActivity() {
         }
     }
 
-    private fun getSuperAdapter(): SuperAdapter<*> {
-        return object : SuperAdapter<LinkedTreeMap<String, Any>>(mBActivity, mList, R.layout.item_navigation) {
-            override fun onBind(h: SuperViewHolder, viewType: Int, layoutPosition: Int, map: LinkedTreeMap<String, Any>) {
+    private fun getAdapter(): BaseQuickAdapter<*, *> {
+        return object : BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>(R.layout.item_navigation, mList) {
+            override fun convert(h: BaseViewHolder, map: LinkedTreeMap<String, Any>) {
                 h.setText(R.id.tvNavigationTitle, JU.s(map, "name"))
-                val tagFlowLayout = h.findViewById<TagFlowLayout>(R.id.tflNavigation)
+                val tagFlowLayout = h.getView<TagFlowLayout>(R.id.tflNavigation)
                 val list = JU.al<List<LinkedTreeMap<String, Any>>>(map, "articles")
                 tagFlowLayout.adapter = object : TagAdapter<LinkedTreeMap<String, Any>>(list) {
                     override fun getView(parent: FlowLayout, position: Int, map2: LinkedTreeMap<String, Any>): View {

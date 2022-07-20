@@ -1,9 +1,5 @@
 package com.frame.fragment
 
-import android.app.Activity
-import android.app.ActivityOptions
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -13,6 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ConvertUtils
 import com.blankj.utilcode.util.ScreenUtils
+import com.chad.library.adapter.base.BaseQuickAdapter
+import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import com.frame.R
 import com.frame.activity.BaseActivity.Companion.doCommonGet
 import com.frame.activity.SearchActivity
@@ -26,8 +24,6 @@ import com.google.gson.internal.LinkedTreeMap
 import com.scwang.smartrefresh.header.PhoenixHeader
 import com.scwang.smartrefresh.layout.footer.BallPulseFooter
 import kotlinx.android.synthetic.main.fragment_tab1.*
-import org.byteam.superadapter.SuperAdapter
-import org.byteam.superadapter.SuperViewHolder
 import java.util.*
 
 /**
@@ -36,8 +32,8 @@ import java.util.*
 class Tab1Fragment : BaseTitleFragment() {
 
     private var mCurrPage = 0
-    private var mSAdapterArticle: SuperAdapter<*>? = null
     private val mList: MutableList<LinkedTreeMap<String, Any>> = ArrayList()
+
     override fun setContentView(savedInstanceState: Bundle?): View {
         return View.inflate(mBActivity, R.layout.fragment_tab1, null)
     }
@@ -49,12 +45,12 @@ class Tab1Fragment : BaseTitleFragment() {
         val lp = mTitleBar.getRightImg()?.layoutParams as LinearLayout.LayoutParams
         lp.width = ConvertUtils.dp2px(25f)
         mTitleBar.getRightBar()?.setOnClickListener { view: View? -> ActivityUtils.startActivity(SearchActivity::class.java) }
-        rvBlock.layoutManager = GridLayoutManager(mBActivity, 4)
-        rvBlock.adapter = getSuperAdapterBlock()
-        rvTab1.layoutManager = LinearLayoutManager(mBActivity)
-        rvTab1.adapter = WxArticleDetailFragment.getSuperAdapter(mBActivity, mList).also { mSAdapterArticle = it }
-        rvTab1.isNestedScrollingEnabled = false
-        nsvTab1.setOnScrollChangeListener { _: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
+        rvBlock?.layoutManager = GridLayoutManager(mBActivity, 4)
+        rvBlock?.adapter = getAdapter()
+        rvTab1?.layoutManager = LinearLayoutManager(mBActivity)
+        rvTab1?.adapter = WxArticleDetailFragment.getAdapter(mBActivity, mList)
+        rvTab1?.isNestedScrollingEnabled = false
+        nsvTab1?.setOnScrollChangeListener { _: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
             llGotoTop.visibility = if (scrollY >= ScreenUtils.getScreenHeight() / 2) View.VISIBLE else View.GONE
         }
         setSmartRefreshLayout()
@@ -88,21 +84,12 @@ class Tab1Fragment : BaseTitleFragment() {
             getBannerData()
             getNetData(0.also { mCurrPage = it }, false)
         }
-        srlTab1.setOnLoadMoreListener { refreshLayout -> getNetData(++mCurrPage, false) }
+        srlTab1.setOnLoadMoreListener { getNetData(++mCurrPage, false) }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                else -> {
-                }
-            }
-        }
-    }
-
-    private fun getSuperAdapterBlock(): SuperAdapter<*> {
-        return object : SuperAdapter<Template>(mBActivity, LU.getBlockList(), R.layout.item_block_list) {
-            override fun onBind(holder: SuperViewHolder, viewType: Int, layoutPosition: Int, template: Template) {
+    private fun getAdapter(): BaseQuickAdapter<*, *> {
+        return object : BaseQuickAdapter<Template, BaseViewHolder>(R.layout.item_block_list, LU.getBlockList()) {
+            override fun convert(holder: BaseViewHolder, template: Template) {
                 holder.setImageResource(R.id.ivIconBlock, template.resId)
                 holder.setText(R.id.tvTextBlock, template.content)
                 holder.itemView.setOnClickListener { view: View? ->
@@ -127,7 +114,7 @@ class Tab1Fragment : BaseTitleFragment() {
                 srlTab1.setEnableLoadMore(!JU.b(data, "over"))
                 if (0 == JU.i(data, "offset")) mList.clear()
                 mList.addAll(JU.al(data, "datas"))
-                mSAdapterArticle!!.notifyDataSetChanged()
+                rvTab1?.adapter?.notifyDataSetChanged()
             }
         })
     }

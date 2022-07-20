@@ -1,15 +1,14 @@
 package com.frame.activity
 
-import android.app.ActivityOptions
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ObjectUtils
+import com.chad.library.adapter.base.BaseQuickAdapter
+import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import com.frame.R
 import com.frame.dataclass.DataClass
 import com.frame.httputils.ImageLoaderUtil
@@ -18,11 +17,8 @@ import com.frame.utils.CU
 import com.frame.utils.JU
 import com.frame.utils.KLU
 import com.google.gson.internal.LinkedTreeMap
-import com.scwang.smartrefresh.layout.api.RefreshLayout
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter
 import kotlinx.android.synthetic.main.activity_project.*
-import org.byteam.superadapter.SuperAdapter
-import org.byteam.superadapter.SuperViewHolder
 import java.util.*
 
 /**
@@ -50,10 +46,10 @@ class ProjectActivity : BaseTitleActivity() {
         }
         rvSlide?.layoutManager = LinearLayoutManager(mBActivity)
         rvSlide?.setHasFixedSize(true)
-        rvSlide?.adapter = getSuperAdapterType()
+        rvSlide?.adapter = getAdapterType()
         rvProject?.layoutManager = LinearLayoutManager(mBActivity)
         rvProject?.setHasFixedSize(true)
-        rvProject?.adapter = getSuperAdapter()
+        rvProject?.adapter = getAdapter()
         setSmartRefreshLayout()
     }
 
@@ -82,15 +78,15 @@ class ProjectActivity : BaseTitleActivity() {
         refreshLayout?.setOnLoadMoreListener { getNetData(mCurrId, ++mCurrPage, false) }
     }
 
-    private fun getSuperAdapterType(): SuperAdapter<*> {
-        return object : SuperAdapter<LinkedTreeMap<String, Any>>(mBActivity, mListType, R.layout.item_project_type) {
-            override fun onBind(holder: SuperViewHolder, viewType: Int, layoutPosition: Int, map: LinkedTreeMap<String, Any>) {
+    private fun getAdapterType(): BaseQuickAdapter<*, *> {
+        return object : BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>(R.layout.item_project_type, mList) {
+            override fun convert(holder: BaseViewHolder, map: LinkedTreeMap<String, Any>) {
                 holder.setText(R.id.tvProjectType, JU.sh(map, "name"))
-                if (mLastClickPos == layoutPosition) {
+                if (mLastClickPos == holder.adapterPosition) {
                     holder.setBackgroundColor(R.id.tvProjectType, Color.parseColor("#d1d1d1"))
                 }
                 holder.itemView.setOnClickListener { view: View? ->
-                    mLastClickPos = layoutPosition
+                    mLastClickPos = holder.adapterPosition
                     rvSlide?.adapter?.notifyDataSetChanged()
                     drawerLayout?.closeDrawer(GravityCompat.END)
                     setTitleText(JU.s(mListType[mLastClickPos], "name"))
@@ -101,10 +97,10 @@ class ProjectActivity : BaseTitleActivity() {
         }
     }
 
-    private fun getSuperAdapter(): SuperAdapter<*> {
-        return object : SuperAdapter<LinkedTreeMap<String, Any>>(mBActivity, mList, R.layout.item_project_list) {
-            override fun onBind(holder: SuperViewHolder, viewType: Int, layoutPosition: Int, map: LinkedTreeMap<String, Any>) {
-                ImageLoaderUtil.loadImage(mBActivity, JU.s(map, "envelopePic"), holder.findViewById(R.id.ivItemProject), 0, 0)
+    private fun getAdapter(): BaseQuickAdapter<*, *> {
+        return object : BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>(R.layout.item_project_list, mList) {
+            override fun convert(holder: BaseViewHolder, map: LinkedTreeMap<String, Any>) {
+                ImageLoaderUtil.loadImage(mBActivity, JU.s(map, "envelopePic"), holder.getView(R.id.ivItemProject), 0, 0)
                 holder.setText(R.id.tvItemProjectTitle, JU.s(map, "title"))
                 holder.setTextColor(R.id.tvItemProjectTitle, CU.randomColor())
                 holder.setText(R.id.tvItemProjectContent, JU.s(map, "desc"))

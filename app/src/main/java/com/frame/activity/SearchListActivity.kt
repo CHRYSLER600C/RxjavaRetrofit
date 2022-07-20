@@ -12,7 +12,6 @@ import com.frame.utils.JU
 import com.google.gson.internal.LinkedTreeMap
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter
 import kotlinx.android.synthetic.main.common_layout_srl_rv.*
-import org.byteam.superadapter.SuperAdapter
 import java.util.*
 
 /**
@@ -21,7 +20,7 @@ class SearchListActivity : BaseTitleActivity() {
 
     private var mCurrKey: String? = null
     private var mCurrPage = 0
-    private val mList: MutableList<LinkedTreeMap<String, Any>?> = ArrayList()
+    private val mList: MutableList<LinkedTreeMap<String, Any>> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +32,7 @@ class SearchListActivity : BaseTitleActivity() {
         mCurrKey = intent.getStringExtra("key")
         setTitleText(mCurrKey)
         recyclerView?.layoutManager = LinearLayoutManager(mBActivity)
-        recyclerView?.adapter = WxArticleDetailFragment.getSuperAdapter(mBActivity, mList)
+        recyclerView?.adapter = WxArticleDetailFragment.getAdapter(mBActivity, mList)
         setSmartRefreshLayout()
     }
 

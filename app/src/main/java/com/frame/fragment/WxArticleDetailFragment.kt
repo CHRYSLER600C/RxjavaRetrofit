@@ -1,14 +1,13 @@
 package com.frame.fragment
 
 import android.app.Activity
-import android.app.ActivityOptions
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ObjectUtils
+import com.chad.library.adapter.base.BaseQuickAdapter
+import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import com.frame.R
 import com.frame.activity.BaseActivity.Companion.doCommonGet
 import com.frame.activity.WebViewActivity
@@ -20,8 +19,6 @@ import com.frame.utils.KLU
 import com.google.gson.internal.LinkedTreeMap
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter
 import kotlinx.android.synthetic.main.common_layout_srl_rv.*
-import org.byteam.superadapter.SuperAdapter
-import org.byteam.superadapter.SuperViewHolder
 import java.util.*
 
 /**
@@ -30,7 +27,7 @@ class WxArticleDetailFragment : BaseTitleFragment() {
 
     private var mCurrId = 0 //当前公众号id
     private var mCurrPage = 1
-    private val mList: MutableList<LinkedTreeMap<String, Any>?> = ArrayList()
+    private val mList: MutableList<LinkedTreeMap<String, Any>> = ArrayList()
 
     override fun setContentView(savedInstanceState: Bundle?): View {
         return View.inflate(mBActivity, R.layout.common_layout_srl_rv, null)
@@ -46,7 +43,7 @@ class WxArticleDetailFragment : BaseTitleFragment() {
         }
         if (mCurrId == 0) return
         recyclerView?.layoutManager = LinearLayoutManager(mBActivity)
-        recyclerView?.adapter = getSuperAdapter(mBActivity, mList)
+        recyclerView?.adapter = getAdapter(mBActivity, mList)
         setSmartRefreshLayout()
     }
 
@@ -92,9 +89,9 @@ class WxArticleDetailFragment : BaseTitleFragment() {
             return fragment
         }
 
-        fun getSuperAdapter(activity: Activity, list: List<LinkedTreeMap<String, Any>?>?): SuperAdapter<*> {
-            return object : SuperAdapter<LinkedTreeMap<String, Any>>(activity, list, R.layout.item_article_list) {
-                override fun onBind(holder: SuperViewHolder, viewType: Int, layoutPosition: Int, map: LinkedTreeMap<String, Any>) {
+        fun getAdapter(activity: Activity, list: MutableList<LinkedTreeMap<String, Any>>) : BaseQuickAdapter<*, *> {
+            return object : BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>(R.layout.item_article_list, list) {
+                override fun convert(holder: BaseViewHolder, map: LinkedTreeMap<String, Any>) {
                     holder.setText(R.id.tvArticleTitle, JU.sh(map, "title"))
                         .setText(R.id.tvChapterName, JU.s(map, "chapterName"))
                         .setText(R.id.tvSuperChapterName, JU.s(map, "superChapterName"))
