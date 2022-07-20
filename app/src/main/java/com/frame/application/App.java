@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.blankj.utilcode.util.CrashUtils;
 import com.blankj.utilcode.util.Utils;
-import com.frame.BuildConfig;
 import com.frame.common.CommonData;
 import com.frame.core.dao.DaoMaster;
 import com.frame.core.dao.DaoSession;
@@ -13,16 +12,16 @@ import com.frame.injector.component.AppComponent;
 import com.frame.injector.component.ComponentHolder;
 import com.frame.injector.component.DaggerAppComponent;
 import com.frame.injector.module.AppModule;
-import com.squareup.leakcanary.LeakCanary;
 
 import androidx.multidex.MultiDex;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
-import static com.frame.utils.LogUtilKt.logi;
-import static com.frame.utils.LogUtilKt.logd;
+
 import static com.frame.common.CommonData.TAG;
+import static com.frame.utils.LogUtilKt.logd;
+import static com.frame.utils.LogUtilKt.logi;
 
 
 public class App extends Application {
@@ -70,7 +69,6 @@ public class App extends Application {
     }
 
     private void initToolsSubThreadImpl() {
-        if (BuildConfig.IS_OPEN_LEAK_CANARY) LeakCanary.install(this);  // 仅开发时打开LeakCanary
         CrashUtils.init();         // need android.permission.WRITE_EXTERNAL_STORAGE
         RxJavaPlugins.setErrorHandler(Throwable::printStackTrace);  //这里处理所有的Rxjava异常
         initGreenDao();            // GreenDao

@@ -29,7 +29,6 @@ android {
     buildTypes {
         release { //ForRelease
             buildConfigField "boolean", "IS_DEBUG", "false"
-            buildConfigField "boolean", "IS_OPEN_LEAK_CANARY", "false" //leakcanary
             signingConfig signingConfigs.release   // 指定签名为release，否则不会签名
             minifyEnabled true
             shrinkResources true
@@ -38,7 +37,6 @@ android {
         }
         debugTest { //ForTest
             buildConfigField "boolean", "IS_DEBUG", "true"
-            buildConfigField "boolean", "IS_OPEN_LEAK_CANARY", "false" //leakcanary
             signingConfig signingConfigs.release   // 指定签名为release，否则不会签名
             minifyEnabled true
             shrinkResources true
@@ -47,7 +45,6 @@ android {
         }
         debug { //ForDevelop
             buildConfigField "boolean", "IS_DEBUG", "true"
-            buildConfigField "boolean", "IS_OPEN_LEAK_CANARY", "true" //leakcanary
             signingConfig signingConfigs.release   // 指定签名为release，否则不会签名
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -96,7 +93,7 @@ android {
 
 //获取时间
 def releaseTime() {
-    return new Date().format("yyyy-MM-dd_HHmmss", TimeZone.getTimeZone("UTC"))
+    return new Date().format("yyyy-MM-dd_HHmmss", TimeZone.getDefault())
 }
 
 greendao {
@@ -112,7 +109,7 @@ dependencies {
     /**
      * Base Androidx
      */
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.multidex:multidex:2.0.1'
@@ -135,12 +132,12 @@ dependencies {
      * Net Request
      */
     //Retrofit2
-    implementation 'com.squareup.retrofit2:retrofit:2.6.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.6.4'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.6.0'
     //Gson
-    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.code.gson:gson:2.8.7'
     //Glide
-    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
     //SuperAdapter
     implementation 'org.byteam.superadapter:superadapter:3.6.8'
 
@@ -148,16 +145,14 @@ dependencies {
      * Utils
      */
     //Butterknife
-    implementation 'com.jakewharton:butterknife:10.0.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
-    //LeakCanary（增加debugTestImplementation给debugTest打包用）
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
-    debugTestImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
-    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
+    implementation 'com.jakewharton:butterknife:10.2.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1'
+    //LeakCanary
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
     //EventBus
-    implementation 'org.greenrobot:eventbus:3.1.1'
+    implementation 'org.greenrobot:eventbus:3.2.0'
     //AndroidUtilCode
-    implementation 'com.blankj:utilcodex:1.26.0'
+    implementation 'com.blankj:utilcodex:1.31.0'
     //GreenDao
     implementation 'org.greenrobot:greendao:3.2.2' // add library
     //SlideBack
@@ -183,7 +178,7 @@ dependencies {
     /**
      * Kotlin
      */
-    implementation "androidx.core:core-ktx:1.1.0"
+    implementation "androidx.core:core-ktx:1.3.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 repositories {
