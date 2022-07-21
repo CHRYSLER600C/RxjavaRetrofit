@@ -1,118 +1,97 @@
-package com.frame.activity;
+package com.frame.activity
 
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.viewpager.widget.ViewPager
+import com.blankj.utilcode.util.ObjectUtils
+import com.blankj.utilcode.util.RegexUtils
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
+import com.frame.R
+import com.frame.adapter.ViewPagerAdapter
+import com.frame.view.MyViewPager
+import java.util.*
 
-import com.blankj.utilcode.util.RegexUtils;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
-import com.frame.R;
-import com.frame.adapter.ViewPagerAdapter;
-import com.frame.view.MyViewPager;
+class BigPicActivity : BaseActivity() {
 
-import java.util.ArrayList;
-import java.util.List;
+    private var mViewPager: MyViewPager? = null
+    private val mViews: MutableList<View> = ArrayList()
+    private var mPicUrls: MutableList<String> = ArrayList()
+    private var mPicIds: MutableList<Int> = ArrayList()
+    private var mViewPagerAdapter: ViewPagerAdapter? = null
+    private var mIndexStart = 0
+    private var mTvTitle: TextView? = null
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
-
-public class BigPicActivity extends BaseActivity {
-
-    private MyViewPager mViewPager;
-    private List<View> mViews = new ArrayList<>();
-    private List<String> mPicUrls = new ArrayList<>();
-    private List<Integer> mPicIds = new ArrayList<>();
-    private ViewPagerAdapter mViewPagerAdapter;
-    private int mIndexStart = 0;
-    private TextView mTvTitle;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_big_pic);
-
-        getIntentParams();
-        initControls();
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_big_pic)
+        intentParams()
+        initControls()
     }
 
-    protected void getIntentParams() {
-        mIndexStart = getIntent().getIntExtra("index", 0);
-        mPicUrls = getIntent().getStringArrayListExtra("picUrls");
-        mPicIds = getIntent().getIntegerArrayListExtra("picIds");
-        mTvTitle = findViewById(R.id.tvTitleContent);
-        if (mPicUrls != null) {
-            mTvTitle.setText((mIndexStart + 1) + "/" + mPicUrls.size());
-        } else if (mPicIds != null) {
-            mTvTitle.setText((mIndexStart + 1) + "/" + mPicIds.size());
+    private fun intentParams() {
+        mIndexStart = intent.getIntExtra("index", 0)
+        intent.getStringArrayListExtra("picUrls")?.let { mPicUrls.addAll(it) }
+        intent.getIntegerArrayListExtra("picIds")?.let { mPicIds.addAll(it) }
+
+        mTvTitle = findViewById(R.id.tvTitleContent)
+        if (ObjectUtils.isNotEmpty(mPicUrls)) {
+            mTvTitle?.text = (mIndexStart + 1).toString() + "/" + mPicUrls.size
+        } else if (ObjectUtils.isNotEmpty(mPicIds)) {
+            mTvTitle?.text = (mIndexStart + 1).toString() + "/" + mPicIds.size
         }
     }
 
-    private void initControls() {
-        findViewById(R.id.ivTitleLeft).setOnClickListener(v -> finish());
-        mViewPager = findViewById(R.id.myViewPager);
-
-        if (mPicUrls != null) {
-            for (int i = 0; i < mPicUrls.size(); i++) {
-                View vParent = View.inflate(this, R.layout.big_pic_loading, null);
-                loadUrlImage(vParent, i);
-                mViews.add(vParent);
+    private fun initControls() {
+        findViewById<View>(R.id.ivTitleLeft).setOnClickListener { v: View? -> finish() }
+        mViewPager = findViewById(R.id.myViewPager)
+        if (ObjectUtils.isNotEmpty(mPicUrls)) {
+            for (i in mPicUrls.indices) {
+                val vParent = View.inflate(this, R.layout.big_pic_loading, null)
+                loadUrlImage(vParent, i)
+                mViews.add(vParent)
             }
-        } else if (mPicIds != null) {
-            for (int i = 0; i < mPicIds.size(); i++) {
-                View rv = View.inflate(this, R.layout.big_pic_loading, null);
-                ImageView iv = rv.findViewById(R.id.ivBigPicLoading);
-                iv.setImageResource(mPicIds.get(i));
-                rv.findViewById(R.id.pbBigPicLoading).setVisibility(View.GONE);
-                mViews.add(rv);
+        } else if (ObjectUtils.isNotEmpty(mPicIds)) {
+            for (i in mPicIds.indices) {
+                val rv = View.inflate(this, R.layout.big_pic_loading, null)
+                val iv = rv.findViewById<ImageView>(R.id.ivBigPicLoading)
+                iv.setImageResource(mPicIds!![i])
+                rv.findViewById<View>(R.id.pbBigPicLoading).visibility = View.GONE
+                mViews.add(rv)
             }
         }
-
-        mViewPagerAdapter = new ViewPagerAdapter(mViews);
-        mViewPager.setAdapter(mViewPagerAdapter);
-        mViewPager.addOnPageChangeListener(new GuidePageChangeListener());
-        mViewPager.setCurrentItem(mIndexStart);
+        mViewPagerAdapter = ViewPagerAdapter(mViews)
+        mViewPager?.adapter = mViewPagerAdapter
+        mViewPager?.addOnPageChangeListener(GuidePageChangeListener())
+        mViewPager?.currentItem = mIndexStart
     }
 
-    private void loadUrlImage(View vParent, int position) {// 加载网络图片
-        String picUrl = mPicUrls.get(position);
+    private fun loadUrlImage(vParent: View, position: Int) { // 加载网络图片
+        val picUrl = mPicUrls!![position]
         if (RegexUtils.isURL(picUrl)) {
-            Glide.with(mBActivity).load(picUrl).into(new SimpleTarget<Drawable>() {
-                @Override
-                public void onResourceReady(@NonNull Drawable resource,
-                                            @Nullable Transition<? super Drawable> transition) {
-                    ImageView ivCompanyPic = vParent.findViewById(R.id.ivBigPicLoading);
-                    vParent.findViewById(R.id.pbBigPicLoading).setVisibility(View.GONE);
-                    ivCompanyPic.setImageDrawable(resource);
+            Glide.with(mBActivity).load(picUrl).into(object : SimpleTarget<Drawable?>() {
+                override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable?>?) {
+                    val ivCompanyPic = vParent.findViewById<ImageView>(R.id.ivBigPicLoading)
+                    vParent.findViewById<View>(R.id.pbBigPicLoading).visibility = View.GONE
+                    ivCompanyPic.setImageDrawable(resource)
                 }
-            });
+            })
         }
-
     }
 
-    private final class GuidePageChangeListener implements OnPageChangeListener {
-
-        @Override
-        public void onPageScrollStateChanged(int arg0) {
-
-        }
-
-        @Override
-        public void onPageScrolled(int arg0, float arg1, int arg2) {
-
-        }
-
-        @Override
-        public void onPageSelected(int arg0) {
-            if (mPicUrls != null) {
-                mTvTitle.setText((arg0 + 1) + "/" + mPicUrls.size());
-                loadUrlImage(mViews.get(arg0), arg0);
-            } else if (mPicIds != null) {
-                mTvTitle.setText((arg0 + 1) + "/" + mPicIds.size());
+    private inner class GuidePageChangeListener : ViewPager.OnPageChangeListener {
+        override fun onPageScrollStateChanged(arg0: Int) {}
+        override fun onPageScrolled(arg0: Int, arg1: Float, arg2: Int) {}
+        override fun onPageSelected(arg0: Int) {
+            if (ObjectUtils.isNotEmpty(mPicUrls)) {
+                mTvTitle?.text = (arg0 + 1).toString() + "/" + mPicUrls.size
+                loadUrlImage(mViews[arg0], arg0)
+            } else if (ObjectUtils.isNotEmpty(mPicIds)) {
+                mTvTitle?.text = (arg0 + 1).toString() + "/" + mPicIds.size
             }
         }
     }
