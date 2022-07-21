@@ -39,10 +39,6 @@ fun loge(tag: String, msg: String, tr: Throwable) {
     if (isPrintLog) Log.e(tag, msg, tr)
 }
 
-fun loge(msg: String) {
-    if (isPrintLog) Log.e("ifmvo", getThreadName(msg))
-}
-
 fun logm(tag: String, msg: String) { // 带方法名
     Log.v(tag, Exception().stackTrace[1].methodName + ": " + getThreadName(msg))
 }
