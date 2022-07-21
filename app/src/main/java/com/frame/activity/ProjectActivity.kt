@@ -15,21 +15,21 @@ import com.frame.httputils.ImageLoaderUtil
 import com.frame.observers.ProgressObserver
 import com.frame.utils.CU
 import com.frame.utils.JU
-import com.frame.utils.KLU
+import com.frame.utils.LU
 import com.google.gson.internal.LinkedTreeMap
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter
 import kotlinx.android.synthetic.main.activity_project.*
-import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  */
 class ProjectActivity : BaseTitleActivity() {
 
-    private val mListType: MutableList<LinkedTreeMap<String, Any>?> = ArrayList()
-    private val mList: MutableList<LinkedTreeMap<String, Any>> = ArrayList()
+    private val mListType: MutableList<LinkedTreeMap<String, Any>> = ArrayList()
     private var mCurrId = 0
     private var mCurrPage = 1
     private var mLastClickPos = -1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_project)
@@ -46,10 +46,10 @@ class ProjectActivity : BaseTitleActivity() {
         }
         rvSlide?.layoutManager = LinearLayoutManager(mBActivity)
         rvSlide?.setHasFixedSize(true)
-        rvSlide?.adapter = getAdapterType()
+        rvSlide?.adapter = getQuickAdapterType()
         rvProject?.layoutManager = LinearLayoutManager(mBActivity)
         rvProject?.setHasFixedSize(true)
-        rvProject?.adapter = getAdapter()
+        rvProject?.adapter = getQuickAdapter()
         setSmartRefreshLayout()
     }
 
@@ -68,7 +68,7 @@ class ProjectActivity : BaseTitleActivity() {
 
     fun onViewClicked(view: View) {
         when (view.id) {
-            R.id.llGotoTop -> rvProject?.smoothScrollToPosition(0)
+            R.id.ivGotoTop -> rvProject?.smoothScrollToPosition(0)
         }
     }
 
@@ -78,8 +78,8 @@ class ProjectActivity : BaseTitleActivity() {
         refreshLayout?.setOnLoadMoreListener { getNetData(mCurrId, ++mCurrPage, false) }
     }
 
-    private fun getAdapterType(): BaseQuickAdapter<*, *> {
-        return object : BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>(R.layout.item_project_type, mList) {
+    private fun getQuickAdapterType(): BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder> {
+        return object : BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>(R.layout.item_project_type, mListType) {
             override fun convert(holder: BaseViewHolder, map: LinkedTreeMap<String, Any>) {
                 holder.setText(R.id.tvProjectType, JU.sh(map, "name"))
                 if (mLastClickPos == holder.adapterPosition) {
@@ -97,8 +97,8 @@ class ProjectActivity : BaseTitleActivity() {
         }
     }
 
-    private fun getAdapter(): BaseQuickAdapter<*, *> {
-        return object : BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>(R.layout.item_project_list, mList) {
+    private fun getQuickAdapter(): BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder> {
+        return object : BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>(R.layout.item_project_list) {
             override fun convert(holder: BaseViewHolder, map: LinkedTreeMap<String, Any>) {
                 ImageLoaderUtil.loadImage(mBActivity, JU.s(map, "envelopePic"), holder.getView(R.id.ivItemProject), 0, 0)
                 holder.setText(R.id.tvItemProjectTitle, JU.s(map, "title"))
@@ -107,11 +107,10 @@ class ProjectActivity : BaseTitleActivity() {
                 holder.setText(R.id.tvItemProjectAuthor, "作者：" + JU.s(map, "author"))
                 holder.setText(R.id.tvItemProjectTime, JU.s(map, "niceDate"))
                 holder.itemView.setOnClickListener { view: View? ->
-                    val i = Intent(mBActivity, WebViewActivity::class.java)
+                    LU.gotoActivityAnim(view, Intent(mBActivity, WebViewActivity::class.java)
                         .putExtra(WebViewActivity.TYPE, WebViewActivity.TYPE_LOAD_URL)
                         .putExtra("title", JU.s(map, "title"))
-                        .putExtra("url", JU.s(map, "link"))
-                    KLU.gotoActivityAnim(mBActivity, i, view)
+                        .putExtra("url", JU.s(map, "link")))
                 }
             }
         }
@@ -138,9 +137,11 @@ class ProjectActivity : BaseTitleActivity() {
                 override fun onNext(dc: DataClass) {
                     val data = JU.m<LinkedTreeMap<String, Any>>(dc.obj, "data")
                     refreshLayout?.setEnableLoadMore(!JU.b(data, "over"))
-                    if (0 == JU.i(data, "offset")) mList.clear()
-                    mList.addAll(JU.al(data, "datas"))
-                    rvProject?.adapter?.notifyDataSetChanged()
+
+                    val adapter = rvProject?.adapter as? BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>
+                    JU.al<ArrayList<LinkedTreeMap<String, Any>>>(data, "datas")?.let {
+                        if (0 == JU.i(data, "offset")) adapter?.setList(it) else adapter?.addData(it)
+                    }
                 }
             })
     }

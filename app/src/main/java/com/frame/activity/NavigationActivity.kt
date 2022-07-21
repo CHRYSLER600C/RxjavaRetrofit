@@ -1,8 +1,6 @@
 package com.frame.activity
 
-import android.app.ActivityOptions
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +8,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ConvertUtils
 import com.blankj.utilcode.util.ObjectUtils
 import com.chad.library.adapter.base.BaseQuickAdapter
@@ -20,6 +17,7 @@ import com.frame.dataclass.DataClass
 import com.frame.observers.ProgressObserver
 import com.frame.utils.CU
 import com.frame.utils.JU
+import com.frame.utils.LU
 import com.google.gson.internal.LinkedTreeMap
 import com.zhy.view.flowlayout.FlowLayout
 import com.zhy.view.flowlayout.TagAdapter
@@ -51,10 +49,11 @@ class NavigationActivity : BaseTitleActivity() {
 
     private fun initControl() {
         setTitleText("导航")
-        mManager = LinearLayoutManager(mBActivity)
-        rvNavigation?.layoutManager = mManager
-        rvNavigation?.setHasFixedSize(true)
-        rvNavigation?.adapter = getAdapter()
+        rvNavigation?.run {
+            layoutManager = LinearLayoutManager(mBActivity).also { mManager = it }
+            setHasFixedSize(true)
+            adapter = getQuickAdapter()
+        }
     }
 
     override fun onResume() {
@@ -64,7 +63,7 @@ class NavigationActivity : BaseTitleActivity() {
 
     fun onViewClicked(view: View) {
         when (view.id) {
-            R.id.llGotoTop -> {
+            R.id.ivGotoTop -> {
                 rvNavigation?.smoothScrollToPosition(0)
                 vtlNavigation?.setTabSelected(0)
             }
@@ -141,9 +140,7 @@ class NavigationActivity : BaseTitleActivity() {
         if (isClickTab) {
             isClickTab = false
         } else {
-            if (vtlNavigation == null) {
-                return
-            }
+            if (vtlNavigation == null) return
             vtlNavigation?.setTabSelected(index)
         }
         index = position
@@ -152,18 +149,22 @@ class NavigationActivity : BaseTitleActivity() {
     private fun smoothScrollToPosition(currentPosition: Int) {
         val firstPosition = mManager?.findFirstVisibleItemPosition() ?: 0
         val lastPosition = mManager?.findLastVisibleItemPosition() ?: 0
-        if (currentPosition <= firstPosition) {
-            rvNavigation?.smoothScrollToPosition(currentPosition)
-        } else if (currentPosition <= lastPosition) {
-            val top = rvNavigation?.getChildAt(currentPosition - firstPosition)?.top ?: 0
-            rvNavigation?.smoothScrollBy(0, top)
-        } else {
-            rvNavigation?.smoothScrollToPosition(currentPosition)
-            needScroll = true
+        when {
+            currentPosition <= firstPosition -> {
+                rvNavigation?.smoothScrollToPosition(currentPosition)
+            }
+            currentPosition <= lastPosition -> {
+                val top = rvNavigation?.getChildAt(currentPosition - firstPosition)?.top ?: 0
+                rvNavigation?.smoothScrollBy(0, top)
+            }
+            else -> {
+                rvNavigation?.smoothScrollToPosition(currentPosition)
+                needScroll = true
+            }
         }
     }
 
-    private fun getAdapter(): BaseQuickAdapter<*, *> {
+    private fun getQuickAdapter(): BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder> {
         return object : BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>(R.layout.item_navigation, mList) {
             override fun convert(h: BaseViewHolder, map: LinkedTreeMap<String, Any>) {
                 h.setText(R.id.tvNavigationTitle, JU.s(map, "name"))
@@ -172,22 +173,17 @@ class NavigationActivity : BaseTitleActivity() {
                 tagFlowLayout.adapter = object : TagAdapter<LinkedTreeMap<String, Any>>(list) {
                     override fun getView(parent: FlowLayout, position: Int, map2: LinkedTreeMap<String, Any>): View {
                         val tv = LayoutInflater.from(parent.context).inflate(R.layout.flow_layout_tv, tagFlowLayout, false) as TextView
-                        tv.setPadding(ConvertUtils.dp2px(10f), ConvertUtils.dp2px(6f), ConvertUtils.dp2px(10f),
-                            ConvertUtils.dp2px(6f))
+                        tv.setPadding(ConvertUtils.dp2px(10f), ConvertUtils.dp2px(6f), ConvertUtils.dp2px(10f), ConvertUtils.dp2px(6f))
                         tv.text = JU.s(map2, "title")
                         tv.setTextColor(CU.randomColor())
                         return tv
                     }
                 }
-                tagFlowLayout.setOnTagClickListener { view: View, position1: Int, parent1: FlowLayout? ->
-                    val options = ActivityOptions.makeScaleUpAnimation(view, view.width / 2, view.height / 2, 0, 0)
-                    val i = Intent(mBActivity, WebViewActivity::class.java)
+                tagFlowLayout.setOnTagClickListener { view: View, position1: Int, _: FlowLayout? ->
+                    LU.gotoActivityAnim(view, Intent(mBActivity, WebViewActivity::class.java)
                         .putExtra(WebViewActivity.TYPE, WebViewActivity.TYPE_LOAD_URL)
                         .putExtra("title", JU.s(list[position1], "title"))
-                        .putExtra("url", JU.s(list[position1], "link"))
-                    if (options != null && !Build.MANUFACTURER.contains("samsung") && (Build.VERSION.SDK_INT                                >= Build.VERSION_CODES.M)) {
-                        ActivityUtils.startActivity(i, options.toBundle())
-                    } else ActivityUtils.startActivity(i)
+                        .putExtra("url", JU.s(list[position1], "link")))
                     true
                 }
             }
@@ -197,11 +193,11 @@ class NavigationActivity : BaseTitleActivity() {
     private fun getNetData() {
         doCommonGet("navi/json", null, object : ProgressObserver<DataClass>(this, true) {
             override fun onNext(dc: DataClass) {
-                mList?.addAll(JU.al(dc.obj, "data"))
+                mList.addAll(JU.al(dc.obj, "data"))
                 rvNavigation?.adapter?.notifyDataSetChanged()
                 vtlNavigation?.setTabAdapter(object : TabAdapter {
                     override fun getCount(): Int {
-                        return mList?.size ?: 0
+                        return mList.size
                     }
 
                     override fun getBadge(i: Int): TabBadge? {
@@ -215,8 +211,8 @@ class NavigationActivity : BaseTitleActivity() {
                     override fun getTitle(i: Int): TabTitle {
                         return TabTitle.Builder()
                             .setContent(JU.s(mList!![i], "name"))
-                            .setTextColor(ContextCompat.getColor(mBActivity!!, R.color.shallow_green),
-                                ContextCompat.getColor(mBActivity!!, R.color.shallow_grey))
+                            .setTextColor(ContextCompat.getColor(mBActivity, R.color.shallow_green),
+                                ContextCompat.getColor(mBActivity, R.color.shallow_grey))
                             .build()
                     }
 

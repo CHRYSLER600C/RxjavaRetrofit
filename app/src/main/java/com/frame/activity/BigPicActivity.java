@@ -23,7 +23,7 @@ import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
 
 public class BigPicActivity extends BaseActivity {
 
-    private MyViewPager mVpBigPic;
+    private MyViewPager mViewPager;
     private List<View> mViews = new ArrayList<>();
     private List<String> mPicUrls = new ArrayList<>();
     private List<Integer> mPicIds = new ArrayList<>();
@@ -54,7 +54,7 @@ public class BigPicActivity extends BaseActivity {
 
     private void initControls() {
         findViewById(R.id.ivTitleLeft).setOnClickListener(v -> finish());
-        mVpBigPic = findViewById(R.id.myViewPager);
+        mViewPager = findViewById(R.id.myViewPager);
 
         if (mPicUrls != null) {
             for (int i = 0; i < mPicUrls.size(); i++) {
@@ -73,9 +73,9 @@ public class BigPicActivity extends BaseActivity {
         }
 
         mViewPagerAdapter = new ViewPagerAdapter(mViews);
-        mVpBigPic.setAdapter(mViewPagerAdapter);
-        mVpBigPic.addOnPageChangeListener(new GuidePageChangeListener());
-        mVpBigPic.setCurrentItem(mIndexStart);
+        mViewPager.setAdapter(mViewPagerAdapter);
+        mViewPager.addOnPageChangeListener(new GuidePageChangeListener());
+        mViewPager.setCurrentItem(mIndexStart);
     }
 
     private void loadUrlImage(View vParent, int position) {// 加载网络图片

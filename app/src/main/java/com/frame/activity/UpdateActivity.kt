@@ -22,6 +22,7 @@ import java.io.IOException
 class UpdateActivity : BaseTitleActivity() {
 
     private var mUpdateURL: String? = null
+
     private val mHandler = Handler { msg ->
         when (msg.what) {
             REFRESH_PROGRESS -> {
@@ -35,6 +36,11 @@ class UpdateActivity : BaseTitleActivity() {
             }
         }
         false
+    }
+
+    companion object {
+        private const val REFRESH_PROGRESS = 0x0000
+        private const val DOWNLOAD_ERROR = 0x0001
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,8 +80,4 @@ class UpdateActivity : BaseTitleActivity() {
         }
     }
 
-    companion object {
-        private const val REFRESH_PROGRESS = 0x0000
-        private const val DOWNLOAD_ERROR = 0x0001
-    }
 }

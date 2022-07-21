@@ -1,9 +1,8 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent">
 
     <com.scwang.smartrefresh.layout.SmartRefreshLayout
         android:id="@+id/srlTab1"
@@ -26,39 +25,25 @@
                     android:id="@+id/bannerAdv"
                     android:layout_width="match_parent"
                     android:layout_height="160dp"
-                    android:padding="5dp"/>
+                    android:padding="5dp" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvBlock"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:background="@color/white"/>
+                    android:background="@color/white"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="4" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvTab1"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
     </com.scwang.smartrefresh.layout.SmartRefreshLayout>
 
-    <LinearLayout
-        android:id="@+id/llGotoTop"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="right|bottom"
-        android:layout_margin="10dp"
-        android:background="@drawable/shape_oval_dd"
-        android:onClick="onViewClicked"
-        android:gravity="center"
-        android:padding="10dp"
-        android:visibility="gone"
-        tools:ignore="RtlHardcoded">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/ic_arrow_upward_black_24dp"/>
-    </LinearLayout>
-</FrameLayout>
+    <include layout="@layout/layout_goto_top" />
+</androidx.constraintlayout.widget.ConstraintLayout>

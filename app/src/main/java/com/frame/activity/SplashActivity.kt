@@ -50,7 +50,7 @@ class SplashActivity : BaseActivity() {
 
     private fun goToUpdate(updateUrl: String) {
         ActivityUtils.startActivity(Intent(this, UpdateActivity::class.java)
-                .putExtra("updateUrl", updateUrl))
+            .putExtra("updateUrl", updateUrl))
         finish()
     }
 
@@ -60,26 +60,29 @@ class SplashActivity : BaseActivity() {
         map["verName"] = AppUtils.getAppVersionName()
         map["channelCode"] = CU.getAppChanel()
         map["type"] = "ANDROID"
-        val observable = OkHttpUtil.getInstance().mRequestService
-                .commonGet("https://www.yiqiyiqi.cn/app/appUpdateInfo.htm", map).subscribeOn(Schedulers.io())
-        val progressObserver: ProgressObserver<DataClass> = object : ProgressObserver<DataClass>(mBActivity, true) {
+        val observableReq = OkHttpUtil.getInstance().mRequestService
+            .commonGet("https://www.yiqiyiqi.cn/app/appUpdateInfo.htm", map).subscribeOn(Schedulers.io())
+
+        val observer = object : ProgressObserver<DataClass>(mBActivity, true) {
             override fun onNext(dc: DataClass) {
                 val data = JU.m<LinkedTreeMap<String, Any>>(dc.obj, "updateInfo")
                 val builder = CommonDialog.Builder(mBActivity, CommonDialog.DialogType.TYPE_SIMPLE)
-                        .setTitle("有新版本")
-                        .setMessage(JU.s(data, "updateInfo"))
-                        .setCancelBtn("立即升级") { goToUpdate(JU.s(data, "updateUrl")) }
+                    .setTitle("有新版本")
+                    .setMessage(JU.s(data, "updateInfo"))
+                    .setCancelBtn("立即升级") { goToUpdate(JU.s(data, "updateUrl")) }
 
-                if (AppUtils.getAppVersionCode() < JU.d(data, "forceUpdateCode")) { // 强制更新
-                    val dialog = builder.create()
-                    dialog.setOnCancelListener { finish() }
-                    dialog.show()
-                } else if (AppUtils.getAppVersionCode() < JU.d(data, "optionalUpdateCode")) { // 可选更新
-                    val dialog = builder.setOkBtn("下次再说") { _: View?, _: String? -> goToGroup() }.create()
-                    dialog.setCancelable(false)
-                    dialog.show()
-                } else {
-                    pauseAndEnter()
+                when {
+                    AppUtils.getAppVersionCode() < JU.d(data, "forceUpdateCode") -> { // 强制更新
+                        val dialog = builder.create()
+                        dialog.setOnCancelListener { finish() }
+                        dialog.show()
+                    }
+                    AppUtils.getAppVersionCode() < JU.d(data, "optionalUpdateCode") -> { // 可选更新
+                        val dialog = builder.setOkBtn("下次再说") { _: View?, _: String? -> goToGroup() }.create()
+                        dialog.setCancelable(false)
+                        dialog.show()
+                    }
+                    else -> pauseAndEnter()
                 }
             }
 
@@ -88,11 +91,11 @@ class SplashActivity : BaseActivity() {
                 goToGroup()
             }
         }
-        add2Disposable(Observable.zip(Observable.timer(2000, TimeUnit.MILLISECONDS), observable,
-                BiFunction<Long, DataClass, DataClass?> { _: Long?, dc: DataClass? -> dc!! })
-                .doOnSubscribe { progressObserver.showProgressDialogObserver() }
-                .subscribeOn(AndroidSchedulers.mainThread()) // 指定doOnSubscribe运行在主线程
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(progressObserver))
+        val observableTimer = Observable.timer(2000, TimeUnit.MILLISECONDS)
+        add2Disposable(Observable.zip(observableReq, observableTimer, { dc: DataClass, _: Long -> dc })
+            .doOnSubscribe { observer.showProgressDialogObserver() }
+            .subscribeOn(AndroidSchedulers.mainThread()) // 指定doOnSubscribe运行在主线程
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(observer))
     }
 }

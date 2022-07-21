@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ivGotoTop"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:layout_margin="10dp"
+    android:background="@drawable/shape_oval_dd"
+    android:onClick="onViewClicked"
+    android:padding="8dp"
+    android:src="@drawable/ic_arrow_upward_black_24dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent" />

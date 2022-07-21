@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import androidx.core.widget.NestedScrollView
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ConvertUtils
 import com.blankj.utilcode.util.ScreenUtils
@@ -18,12 +16,12 @@ import com.frame.dataclass.DataClass
 import com.frame.dataclass.bean.Template
 import com.frame.observers.ProgressObserver
 import com.frame.utils.JU
-import com.frame.utils.KLU
 import com.frame.utils.LU
 import com.google.gson.internal.LinkedTreeMap
 import com.scwang.smartrefresh.header.PhoenixHeader
 import com.scwang.smartrefresh.layout.footer.BallPulseFooter
 import kotlinx.android.synthetic.main.fragment_tab1.*
+import kotlinx.android.synthetic.main.layout_goto_top.*
 import java.util.*
 
 /**
@@ -32,7 +30,6 @@ import java.util.*
 class Tab1Fragment : BaseTitleFragment() {
 
     private var mCurrPage = 0
-    private val mList: MutableList<LinkedTreeMap<String, Any>> = ArrayList()
 
     override fun setContentView(savedInstanceState: Bundle?): View {
         return View.inflate(mBActivity, R.layout.fragment_tab1, null)
@@ -42,16 +39,14 @@ class Tab1Fragment : BaseTitleFragment() {
         setLeftBarHide()
         setTitleText("首页")
         mTitleBar.setRightImageResource(R.drawable.ic_search_white_24dp)
-        val lp = mTitleBar.getRightImg()?.layoutParams as LinearLayout.LayoutParams
-        lp.width = ConvertUtils.dp2px(25f)
-        mTitleBar.getRightBar()?.setOnClickListener { view: View? -> ActivityUtils.startActivity(SearchActivity::class.java) }
-        rvBlock?.layoutManager = GridLayoutManager(mBActivity, 4)
-        rvBlock?.adapter = getAdapter()
-        rvTab1?.layoutManager = LinearLayoutManager(mBActivity)
-        rvTab1?.adapter = WxArticleDetailFragment.getAdapter(mBActivity, mList)
+        (mTitleBar.getRightImg()?.layoutParams as? LinearLayout.LayoutParams)?.width = ConvertUtils.dp2px(25f)
+        mTitleBar.getRightBar()?.setOnClickListener { ActivityUtils.startActivity(SearchActivity::class.java) }
+
+        rvBlock?.adapter = getQuickAdapter()
+        rvTab1?.adapter = WxArticleDetailFragment.getQuickAdapter(mBActivity)
         rvTab1?.isNestedScrollingEnabled = false
         nsvTab1?.setOnScrollChangeListener { _: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
-            llGotoTop.visibility = if (scrollY >= ScreenUtils.getScreenHeight() / 2) View.VISIBLE else View.GONE
+            ivGotoTop.visibility = if (scrollY >= ScreenUtils.getScreenHeight() / 2) View.VISIBLE else View.GONE
         }
         setSmartRefreshLayout()
         getBannerData()
@@ -70,7 +65,7 @@ class Tab1Fragment : BaseTitleFragment() {
 
     override fun onViewClicked(view: View?) {
         when (view?.id) {
-            R.id.llGotoTop -> {
+            R.id.ivGotoTop -> {
                 nsvTab1.fling(0)
                 nsvTab1.smoothScrollTo(0, 0)
             }
@@ -79,22 +74,20 @@ class Tab1Fragment : BaseTitleFragment() {
 
     private fun setSmartRefreshLayout() {
         srlTab1.setRefreshHeader(PhoenixHeader(mBActivity))
-        srlTab1.setRefreshFooter(BallPulseFooter(mBActivity))
-        srlTab1.setOnRefreshListener {
-            getBannerData()
-            getNetData(0.also { mCurrPage = it }, false)
-        }
-        srlTab1.setOnLoadMoreListener { getNetData(++mCurrPage, false) }
+            .setRefreshFooter(BallPulseFooter(mBActivity))
+            .setOnRefreshListener {
+                getBannerData()
+                getNetData(0.also { mCurrPage = it }, false)
+            }
+            .setOnLoadMoreListener { getNetData(++mCurrPage, false) }
     }
 
-    private fun getAdapter(): BaseQuickAdapter<*, *> {
+    private fun getQuickAdapter(): BaseQuickAdapter<Template, BaseViewHolder> {
         return object : BaseQuickAdapter<Template, BaseViewHolder>(R.layout.item_block_list, LU.getBlockList()) {
             override fun convert(holder: BaseViewHolder, template: Template) {
                 holder.setImageResource(R.id.ivIconBlock, template.resId)
-                holder.setText(R.id.tvTextBlock, template.content)
-                holder.itemView.setOnClickListener { view: View? ->
-                    KLU.gotoActivityAnim(mBActivity, template.cls, view)
-                }
+                    .setText(R.id.tvTextBlock, template.content)
+                holder.itemView.setOnClickListener { view: View? -> LU.gotoActivityAnim(view, template.cls) }
             }
         }
     }
@@ -112,9 +105,11 @@ class Tab1Fragment : BaseTitleFragment() {
             override fun onNext(dc: DataClass) {
                 val data = JU.m<LinkedTreeMap<String, Any>>(dc.obj, "data")
                 srlTab1.setEnableLoadMore(!JU.b(data, "over"))
-                if (0 == JU.i(data, "offset")) mList.clear()
-                mList.addAll(JU.al(data, "datas"))
-                rvTab1?.adapter?.notifyDataSetChanged()
+
+                val adapter = rvTab1?.adapter as? BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>
+                JU.al<ArrayList<LinkedTreeMap<String, Any>>>(data, "datas")?.let {
+                    if (0 == JU.i(data, "offset")) adapter?.setList(it) else adapter?.addData(it)
+                }
             }
         })
     }

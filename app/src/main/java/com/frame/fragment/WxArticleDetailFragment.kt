@@ -14,8 +14,9 @@ import com.frame.activity.WebViewActivity
 import com.frame.common.CommonData
 import com.frame.dataclass.DataClass
 import com.frame.observers.ProgressObserver
+import com.frame.utils.CU
 import com.frame.utils.JU
-import com.frame.utils.KLU
+import com.frame.utils.LU
 import com.google.gson.internal.LinkedTreeMap
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter
 import kotlinx.android.synthetic.main.common_layout_srl_rv.*
@@ -27,7 +28,7 @@ class WxArticleDetailFragment : BaseTitleFragment() {
 
     private var mCurrId = 0 //当前公众号id
     private var mCurrPage = 1
-    private val mList: MutableList<LinkedTreeMap<String, Any>> = ArrayList()
+    private var mQuickAdapter: BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>? = null
 
     override fun setContentView(savedInstanceState: Bundle?): View {
         return View.inflate(mBActivity, R.layout.common_layout_srl_rv, null)
@@ -36,27 +37,23 @@ class WxArticleDetailFragment : BaseTitleFragment() {
     override fun initControl() {
         super.initControl()
         setTitleBarHide()
-        try {
-            mCurrId = requireArguments().getString(CommonData.PARAM1)?.toDouble()?.toInt() ?: 0
-        } catch (e: NumberFormatException) {
-            e.printStackTrace()
-        }
+        mCurrId = CU.parserInt(requireArguments().getString(CommonData.PARAM1))
         if (mCurrId == 0) return
         recyclerView?.layoutManager = LinearLayoutManager(mBActivity)
-        recyclerView?.adapter = getAdapter(mBActivity, mList)
+        recyclerView?.adapter = getQuickAdapter(mBActivity).also { mQuickAdapter = it }
         setSmartRefreshLayout()
     }
 
     override fun onResume() {
         super.onResume()
-        if (ObjectUtils.isEmpty(mList)) {
+        if (ObjectUtils.isEmpty(mQuickAdapter?.data)) {
             getNetData(mCurrId, 1.also { mCurrPage = it }, true)
         }
     }
 
     override fun onViewClicked(view: View?) {
         when (view?.id) {
-            R.id.llGotoTop -> recyclerView.smoothScrollToPosition(0)
+            R.id.ivGotoTop -> recyclerView.smoothScrollToPosition(0)
         }
     }
 
@@ -72,9 +69,10 @@ class WxArticleDetailFragment : BaseTitleFragment() {
                 override fun onNext(dc: DataClass) {
                     val data = JU.m<LinkedTreeMap<String, Any>>(dc.obj, "data")
                     refreshLayout.setEnableLoadMore(!JU.b(data, "over"))
-                    if (0 == JU.i(data, "offset")) mList.clear()
-                    mList.addAll(JU.al(data, "datas"))
-                    recyclerView?.adapter?.notifyDataSetChanged()
+
+                    JU.al<ArrayList<LinkedTreeMap<String, Any>>>(data, "datas")?.let {
+                        if (0 == JU.i(data, "offset")) mQuickAdapter?.setList(it) else mQuickAdapter?.addData(it)
+                    }
                 }
             })
     }
@@ -89,8 +87,8 @@ class WxArticleDetailFragment : BaseTitleFragment() {
             return fragment
         }
 
-        fun getAdapter(activity: Activity, list: MutableList<LinkedTreeMap<String, Any>>) : BaseQuickAdapter<*, *> {
-            return object : BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>(R.layout.item_article_list, list) {
+        fun getQuickAdapter(activity: Activity): BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder> {
+            return object : BaseQuickAdapter<LinkedTreeMap<String, Any>, BaseViewHolder>(R.layout.item_article_list) {
                 override fun convert(holder: BaseViewHolder, map: LinkedTreeMap<String, Any>) {
                     holder.setText(R.id.tvArticleTitle, JU.sh(map, "title"))
                         .setText(R.id.tvChapterName, JU.s(map, "chapterName"))
@@ -98,11 +96,10 @@ class WxArticleDetailFragment : BaseTitleFragment() {
                         .setText(R.id.tvAuthor, "作者：" + JU.s(map, "author"))
                         .setText(R.id.tvDate, JU.s(map, "niceDate"))
                     holder.itemView.setOnClickListener { view: View? ->
-                        val i = Intent(activity, WebViewActivity::class.java)
+                        LU.gotoActivityAnim(view, Intent(activity, WebViewActivity::class.java)
                             .putExtra(WebViewActivity.TYPE, WebViewActivity.TYPE_LOAD_URL)
                             .putExtra("title", JU.s(map, "title"))
-                            .putExtra("url", JU.s(map, "link"))
-                        KLU.gotoActivityAnim(activity, i, view)
+                            .putExtra("url", JU.s(map, "link")))
 
                     }
                 }

@@ -193,7 +193,7 @@ public class OkHttpUtil {
                 String message = JU.s(dc.obj, CommonData.MESSAGE);
 
                 if (CommonData.RESULT_UNLOGIN == code) {
-                    LU.gotoLogin(mObject);
+                    LU.INSTANCE.gotoLogin(mObject);
                     throw new ApiException(message);
                 } else if (CommonData.RESULT_SUCCESS != code) {
                     throw new ApiException(message);

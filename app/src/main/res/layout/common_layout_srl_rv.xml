@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:background="@color/color_common_bg"
-             android:orientation="vertical">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_common_bg"
+    android:orientation="vertical">
 
     <com.scwang.smartrefresh.layout.SmartRefreshLayout
         android:id="@+id/refreshLayout"
@@ -13,31 +14,14 @@
 
         <com.scwang.smartrefresh.layout.header.ClassicsHeader
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/white"/>
+            android:background="@color/white" />
     </com.scwang.smartrefresh.layout.SmartRefreshLayout>
 
-    <LinearLayout
-        android:id="@+id/llGotoTop"
-        tools:ignore="RtlHardcoded"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="right|bottom"
-        android:layout_margin="10dp"
-        android:onClick="onViewClicked"
-        android:background="@drawable/shape_oval_dd"
-        android:gravity="center"
-        android:padding="10dp"
-        android:visibility="visible">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/ic_arrow_upward_black_24dp"/>
-    </LinearLayout>
-</FrameLayout>
+    <include layout="@layout/layout_goto_top" />
+</androidx.constraintlayout.widget.ConstraintLayout>

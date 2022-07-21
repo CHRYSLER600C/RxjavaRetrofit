@@ -1,58 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <q.rorbin.verticaltablayout.VerticalTabLayout
+        android:id="@+id/vtlNavigation"
+        android:layout_width="100dp"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
+        android:background="@color/color_e"
         android:visibility="visible"
-        tools:ignore="UselessParent">
+        app:indicator_color="@color/white"
+        app:indicator_gravity="fill"
+        app:layout_constraintStart_toStartOf="parent"
+        app:tab_height="50dp"
+        app:tab_margin="5dp"
+        app:tab_mode="scrollable" />
 
-        <q.rorbin.verticaltablayout.VerticalTabLayout
-            android:id="@+id/vtlNavigation"
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:background="@color/color_e"
-            app:tab_height="50dp"
-            app:indicator_color="@color/white"
-            app:indicator_gravity="fill"
-            app:tab_margin="5dp"
-            app:tab_mode="scrollable"
-            android:visibility="visible" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvNavigation"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/vtlNavigation" />
 
-        <View
-            android:id="@+id/navigation_divider"
-            android:layout_width="0.5dp"
-            android:layout_height="match_parent"
-            android:background="@color/color_d"
-            android:visibility="visible" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvNavigation"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/llGotoTop"
-        tools:ignore="RtlHardcoded"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="right|bottom"
-        android:onClick="onViewClicked"
-        android:layout_margin="10dp"
-        android:background="@drawable/shape_oval_dd"
-        android:gravity="center"
-        android:padding="10dp"
-        android:visibility="visible">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/ic_arrow_upward_black_24dp"/>
-    </LinearLayout>
-</FrameLayout>
+    <include layout="@layout/layout_goto_top" />
+</androidx.constraintlayout.widget.ConstraintLayout>

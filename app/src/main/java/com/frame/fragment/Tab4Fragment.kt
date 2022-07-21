@@ -27,19 +27,18 @@ class Tab4Fragment : BaseTitleFragment() {
         setLeftBarHide()
         setTitleText("我的")
 
-        rvTab4.layoutManager = LinearLayoutManager(mBActivity)
-        rvTab4.adapter = getAdapter(LU.getListTab4())
+        recyclerView.adapter = getQuickAdapter(LU.getListTab4())
         setSmartRefreshLayout()
     }
 
     private fun setSmartRefreshLayout() {
-        srlTab4.setEnableRefresh(false)
-        srlTab4.setEnableLoadMore(false)
-        srlTab4.setOnRefreshListener { refreshLayout -> }
+        smartRefreshLayout.setEnableRefresh(false)
+            .setEnableLoadMore(false)
+            .setOnRefreshListener { }
     }
 
-    private fun getAdapter(list: MutableList<Template>): BaseQuickAdapter<*, *> {
-        return object : BaseQuickAdapter<Template, BaseViewHolder>( R.layout.fg_item_text_text, list) {
+    private fun getQuickAdapter(list: MutableList<Template>): BaseQuickAdapter<Template, BaseViewHolder> {
+        return object : BaseQuickAdapter<Template, BaseViewHolder>(R.layout.fg_item_text_text, list) {
             override fun convert(h: BaseViewHolder, item: Template) {
                 CU.setTVDrawableLeft(h.getView(R.id.tvItemContent), item.resId, 25, 25, 15)
                 CU.setTVDrawableRight(h.getView(R.id.tvItemMsg), R.drawable.ic_arrow_right, 10, 16, 20)
