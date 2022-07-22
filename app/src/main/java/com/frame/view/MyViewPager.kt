@@ -1,320 +1,276 @@
 /*
  * 功能描述：扩展ViewPager
  */
-package com.frame.view;
+package com.frame.view
 
-import android.content.Context;
-import android.graphics.Matrix;
-import android.graphics.Point;
-import android.graphics.PointF;
-import android.graphics.Rect;
-import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
-import android.widget.RelativeLayout;
-
-import com.frame.R;
-import com.frame.adapter.ViewPagerAdapter;
-
-import androidx.viewpager.widget.ViewPager;
-
-import static com.frame.utils.LogUtilKt.logi;
+import android.content.Context
+import android.graphics.Matrix
+import android.graphics.Point
+import android.graphics.PointF
+import android.graphics.Rect
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.widget.ImageView
+import android.widget.ImageView.ScaleType
+import android.widget.RelativeLayout
+import androidx.viewpager.widget.ViewPager
+import com.frame.R
+import com.frame.adapter.ViewPagerAdapter
+import com.frame.utils.logi
+import kotlin.math.sqrt
 
 /**
  * 扩展ViewPager
- * 
+ *
  */
-public class MyViewPager extends ViewPager {
+class MyViewPager : ViewPager {
 
-	private final String TAG = "MyViewPager";
+    private val TAG = "MyViewPager"
+    var mScrollEnable = true
+    private var mOnSimpleTouchListener: OnSimpleTouchListener? = null
+    private var mImageView: ImageView? = null
 
-	public boolean mScrollEnable = true;
-	private OnSimpleOnTouchListener mOnSimpleOnTouchListener;
-	private ImageView imgView;
+    private var mViewSize: Point? = null // 图片控件的大小（x记录宽、y记录高）
+    private var mImageSize: Point? = null // 原始图片大小（同样适用x记录宽、y记录高）
+    private var mCurrentImageSize: Point? = null// 当前图片大小（缩放后会更新该值，同样适用x记录宽、y记录高）
+    private var mCurrentPadding: Rect? = null// 当前图片距离图片控件的边距
 
-	private Point mViewSize; // 图片控件的大小（x记录宽、y记录高）
-	private Point mImageSize; // 原始图片大小（同样适用x记录宽、y记录高）
-	private Point mCurrentImageSize; // 当前图片大小（缩放后会更新该值，同样适用x记录宽、y记录高）
-	private Rect mCurrentPadding; // 当前图片距离图片控件的边距
-	private int mMaxBig = 20; // 图片放大的最大倍数（以图片控件为基准）
+    private val mMaxBig = 20 // 图片放大的最大倍数（以图片控件为基准）
+    private val mMatrix = Matrix()
+    private val savedMatrix = Matrix()
+    private var mode = NONE
+    var mStartPoint = PointF()
+    var mMiddlePoint = PointF()
+    var oldDist = 1f
 
-	private Matrix matrix = new Matrix();
-	private Matrix savedMatrix = new Matrix();
+    companion object {
+        private const val NONE = 0
+        private const val DRAG = 1
+        private const val ZOOM = 2
+    }
 
-	private static final int NONE = 0;
-	private static final int DRAG = 1;
-	private static final int ZOOM = 2;
-	private int mode = NONE;
+    fun setOnSimpleOnTouchListener(listener: OnSimpleTouchListener?) {
+        mOnSimpleTouchListener = listener
+    }
 
-	PointF mStartPoint = new PointF();
-	PointF mMidddlePoint = new PointF();
-	float oldDist = 1f;
+    fun setHorizontalScrollEnable(enable: Boolean) {
+        mScrollEnable = enable
+    }
 
-	public void setOnSimpleOnTouchListener(OnSimpleOnTouchListener listener) {
-		this.mOnSimpleOnTouchListener = listener;
-	}
+    constructor(context: Context?) : super(context!!)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs)
 
-	/**
-	 * 是否可以左右滑动
-	 * 
-	 * @param enable
-	 */
-	public void setScrollEnable(boolean enable) {
-		this.mScrollEnable = enable;
-	}
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        var flag = false
+        val adapter = adapter as? ViewPagerAdapter ?: return super.dispatchTouchEvent(event)
 
-	public MyViewPager(Context context, AttributeSet attrs) {
-		super(context, attrs);
-	}
+        adapter.getItem(currentItem)?.run {
+            if (this is RelativeLayout) { // 加了转圈圈
+                mImageView = this.findViewById(R.id.ivBigPicLoading)
+            } else if (this is ImageView) {
+                mImageView = this
+            }
+        }
 
-	public MyViewPager(Context context) {
-		super(context);
-	}
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            mOnSimpleTouchListener?.onKeyDown()
+        } else if (event.action == MotionEvent.ACTION_UP) {
+            mOnSimpleTouchListener?.onKeyUp()
+        }
 
-	@Override
-	public boolean dispatchTouchEvent(MotionEvent event) {
-		boolean flag = false;
-		ViewPagerAdapter adapter = (ViewPagerAdapter) getAdapter();
-		if (adapter == null) {
-			return super.dispatchTouchEvent(event);
-		}
-		View v = (View) adapter.getItem(getCurrentItem());
-		if (v instanceof RelativeLayout) { // 加了转圈圈
-			imgView = (ImageView) v.findViewById(R.id.ivBigPicLoading);
-		} else if (v instanceof ImageView) {
-			imgView = (ImageView) adapter.getItem(getCurrentItem());
-		}
+        if ( /*mImageView.getTag() == null || */mImageView?.drawable == null) {
+            return super.dispatchTouchEvent(event)
+        }
+        val values = FloatArray(9)
+        mImageView?.imageMatrix?.getValues(values)
+        if (mViewSize == null) {
+            // 图片控件的高宽
+            mViewSize = Point(mImageView!!.width, mImageView!!.height)
+            logi(TAG, "test(控件宽高):" + mImageView!!.width + "," + mImageView!!.height)
 
-		if (mOnSimpleOnTouchListener != null) {
-			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				mOnSimpleOnTouchListener.onKeyDown();
+            // 当前图片的高宽和间距
+            saveCurrentImageSizeAndPadding(mImageView, values)
+            // 原始图片的高宽
+            mImageSize = Point(mCurrentImageSize!!.x, mCurrentImageSize!!.y)
+        }
+        mImageView?.scaleType = ScaleType.MATRIX
+        when (event.action and MotionEvent.ACTION_MASK) {
+            MotionEvent.ACTION_DOWN -> {
+                mMatrix.set(mImageView!!.imageMatrix)
+                savedMatrix.set(mMatrix)
+                mStartPoint[event.x] = event.y
+                mode = DRAG
+            }
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                oldDist = spacing(event)
+                if (oldDist > 10f) {
+                    savedMatrix.set(mMatrix)
+                    midPoint(mMiddlePoint, event)
+                    mode = ZOOM
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                if (mode == DRAG) {
+                    // 当前图片的高宽和间距
+                    saveCurrentImageSizeAndPadding(mImageView, values)
+                    // 居中显示
+                    movieImageToCenter()
+                }
+                mode = NONE
+            }
+            MotionEvent.ACTION_POINTER_UP -> {
+                if (mode == ZOOM) {
+                    // 当前图片的高宽和间距
+                    saveCurrentImageSizeAndPadding(mImageView, values)
+                    // 如果图片小于了原始大小，设置成原始大小
+                    if (mCurrentImageSize!!.x < mImageSize!!.x) {
+                        // matrix.reset();
+                        val scale = mImageSize!!.x / 1f / mCurrentImageSize!!.x
+                        logi(TAG, "放大(缩放比例)=$scale")
+                        mMatrix.postScale(scale, scale, mMiddlePoint.x, mMiddlePoint.y)
+                    } else {
+                        // 如果图片放大超过图片控件的最大倍数
+                        logi(TAG, "放大(当前尺寸)=" + mCurrentImageSize!!.x + "," + mCurrentImageSize!!.y)
+                        logi(TAG, "放大(最大尺寸)=" + mViewSize!!.x * 2 + "," + mViewSize!!.y * 2)
+                        if (mCurrentImageSize!!.x > mViewSize!!.x * mMaxBig) {
+                            val scale = mViewSize!!.x * mMaxBig / 1f / mCurrentImageSize!!.x
+                            logi(TAG, "放大(缩放比例)=$scale")
+                            mMatrix.postScale(scale, scale, mMiddlePoint.x, mMiddlePoint.y)
+                        }
+                    }
 
-			} else if (event.getAction() == MotionEvent.ACTION_UP) {
-				mOnSimpleOnTouchListener.onKeyUp();
+                    // 当前图片的高宽和间距
+                    mMatrix.getValues(values)
+                    saveCurrentImageSizeAndPadding(mImageView, values)
+                    movieImageToCenter()
+                }
+                mode = NONE
+            }
+            MotionEvent.ACTION_MOVE -> if (mode == DRAG) {
+                val dx = event.x - mStartPoint.x
+                val dy = event.y - mStartPoint.y
+                flag = if (dx > 0 && mCurrentPadding!!.left >= 0) { // 拖动达到最左边
+                    logi(TAG, "hit=left")
+                    return super.dispatchTouchEvent(event)
+                } else if (dx < 0 && mCurrentPadding!!.right >= 0) { // 拖动达到最右边
+                    logi(TAG, "hit=right")
+                    return super.dispatchTouchEvent(event)
+                } else {
+                    true
+                }
+                mMatrix.set(savedMatrix)
+                mMatrix.postTranslate(dx, dy)
+                mMatrix.getValues(values)
+                saveCurrentImageSizeAndPadding(mImageView, values)
+            } else if (mode == ZOOM) {
+                val newDist = spacing(event)
+                if (newDist > 10f) {
+                    mMatrix.set(savedMatrix)
+                    val scale = newDist / oldDist
+                    mMatrix.postScale(scale, scale, mMiddlePoint.x, mMiddlePoint.y)
+                    flag = true
+                }
+            }
+        }
+        mImageView!!.imageMatrix = mMatrix
+        return if (flag) {
+            true
+        } else {
+            super.dispatchTouchEvent(event)
+        }
+    }
 
-			}
-		}
+    interface OnSimpleTouchListener {
+        fun onKeyDown()
+        fun onKeyUp()
+    }
 
-		if (imgView.getTag() == null || imgView.getDrawable() == null) {
-			return super.dispatchTouchEvent(event);
-		}
+    /**
+     * 移动图片到中心
+     */
+    private fun movieImageToCenter() {
+        // 居中显示
+        var dx = 0f
+        if (mViewSize!!.x >= mCurrentImageSize!!.x) { // 图片宽度小于控件宽度
+            dx = ((mViewSize!!.x - mCurrentImageSize!!.x) / 2 - mCurrentPadding!!.left).toFloat()
+        } else {
+            if (mCurrentPadding!!.left > 0) { // 左边拖出留了空
+                dx = -mCurrentPadding!!.left.toFloat()
+            } else if (mCurrentPadding!!.right > 0) { // 右边拖出留了空
+                dx = mCurrentPadding!!.right.toFloat()
+            }
+        }
+        var dy = 0f
+        if (mViewSize!!.y >= mCurrentImageSize!!.y) { // 图片高度小于控件高度
+            dy = ((mViewSize!!.y - mCurrentImageSize!!.y) / 2 - mCurrentPadding!!.top).toFloat()
+        } else {
+            if (mCurrentPadding!!.top > 0) { // 上边拖出留了空
+                dy = -mCurrentPadding!!.top.toFloat()
+            } else if (mCurrentPadding!!.bottom > 0) { // 下边拖出留了空
+                dy = mCurrentPadding!!.bottom.toFloat()
+            }
+        }
+        mMatrix.postTranslate(dx, dy)
+        temp()
+    }
 
-		float[] values = new float[9];
-		imgView.getImageMatrix().getValues(values);
+    fun temp() {
+        logi(TAG, "test-movie(目标位置)=" + (mViewSize!!.x - mCurrentImageSize!!.x) / 2 + ","
+                + (mViewSize!!.y - mCurrentImageSize!!.y) / 2)
+        logi(TAG, "test-movie(当前间距)=" + +mCurrentPadding!!.left + "," + mCurrentPadding!!.top)
+        val dx = ((mViewSize!!.x - mCurrentImageSize!!.x) / 2 - mCurrentPadding!!.left).toFloat()
+        val dy = ((mViewSize!!.y - mCurrentImageSize!!.y) / 2 - mCurrentPadding!!.top).toFloat()
+        logi(TAG, "test-movie(移动距离)$dx,$dy")
+    }
 
-		if (mViewSize == null) {
-			// 图片控件的高宽
-			mViewSize = new Point(imgView.getWidth(), imgView.getHeight());
-			logi(TAG, "test(控件宽高):" + imgView.getWidth() + "," + imgView.getHeight());
+    /**
+     * 记录当前图片与图片控件的间距
+     *
+     * @param imageView
+     * @param values
+     */
+    private fun saveCurrentImageSizeAndPadding(imageView: ImageView?, values: FloatArray) {
+        if (mCurrentImageSize == null) {
+            mCurrentImageSize = Point()
+        }
+        val rect = imageView!!.drawable.bounds
+        mCurrentImageSize!!.x = (rect.width() * values[0]).toInt()
+        mCurrentImageSize!!.y = (rect.height() * values[0]).toInt()
+        logi(TAG, "当前图片大小：" + mCurrentImageSize!!.x + "," + mCurrentImageSize!!.y)
+        if (mCurrentPadding == null) {
+            mCurrentPadding = Rect()
+        }
+        mCurrentPadding!!.left = values[2].toInt()
+        mCurrentPadding!!.top = values[5].toInt()
 
-			// 当前图片的高宽和间距
-			saveCurrentImageSizeAndPadding(imgView, values);
-			// 原始图片的高宽
-			mImageSize = new Point(mCurrentImageSize.x, mCurrentImageSize.y);
-		}
+        // 图片控件宽度 - 图片距离左边的边距 - 图片自身的宽度 = 图片距离右边的边距
+        mCurrentPadding!!.right = mViewSize!!.x - mCurrentPadding!!.left - mCurrentImageSize!!.x
+        mCurrentPadding!!.bottom = mViewSize!!.y - mCurrentPadding!!.top - mCurrentImageSize!!.y
+        logi(TAG, "test(边距):" + mCurrentPadding!!.left + "," + mCurrentPadding!!.right + "," + mCurrentPadding!!.top
+                + "," + mCurrentPadding!!.bottom)
+    }
 
-		imgView.setScaleType(ScaleType.MATRIX);
-		switch (event.getAction() & MotionEvent.ACTION_MASK) {
-		case MotionEvent.ACTION_DOWN:
-			matrix.set(imgView.getImageMatrix());
-			savedMatrix.set(matrix);
-			mStartPoint.set(event.getX(), event.getY());
-			mode = DRAG;
-			break;
-		case MotionEvent.ACTION_POINTER_DOWN:
-			oldDist = spacing(event);
-			if (oldDist > 10f) {
-				savedMatrix.set(matrix);
-				midPoint(mMidddlePoint, event);
-				mode = ZOOM;
-			}
-			break;
-		case MotionEvent.ACTION_UP:
-			if (mode == DRAG) {
-				// 当前图片的高宽和间距
-				saveCurrentImageSizeAndPadding(imgView, values);
-				// 居中显示
-				movieImageToCenter();
-			}
-			mode = NONE;
-			break;
-		case MotionEvent.ACTION_POINTER_UP:
-			if (mode == ZOOM) {
-				// 当前图片的高宽和间距
-				saveCurrentImageSizeAndPadding(imgView, values);
-				// 如果图片小于了原始大小，设置成原始大小
-				if (mCurrentImageSize.x < mImageSize.x) {
-					// matrix.reset();
-					float scale = mImageSize.x / 1f / mCurrentImageSize.x;
-					logi(TAG, "放大(缩放比例)=" + scale);
-					matrix.postScale(scale, scale, mMidddlePoint.x, mMidddlePoint.y);
+    /**
+     * 计算两触摸点之间的距离
+     *
+     * @param event
+     * @return
+     */
+    private fun spacing(event: MotionEvent): Float {
+        val x = (event.getX(0) - event.getX(1)).toDouble()
+        val y = (event.getY(0) - event.getY(1)).toDouble()
+        return sqrt(x * x + y * y).toFloat()
+    }
 
-				} else {
-					// 如果图片放大超过图片控件的最大倍数
-					logi(TAG, "放大(当前尺寸)=" + mCurrentImageSize.x + "," + mCurrentImageSize.y);
-					logi(TAG, "放大(最大尺寸)=" + (mViewSize.x * 2) + "," + (mViewSize.y * 2));
-					if (mCurrentImageSize.x > mViewSize.x * mMaxBig) {
-						float scale = mViewSize.x * mMaxBig / 1f / mCurrentImageSize.x;
-						logi(TAG, "放大(缩放比例)=" + scale);
-						matrix.postScale(scale, scale, mMidddlePoint.x, mMidddlePoint.y);
-					}
-
-				}
-
-				// 当前图片的高宽和间距
-				matrix.getValues(values);
-				saveCurrentImageSizeAndPadding(imgView, values);
-				movieImageToCenter();
-			}
-			mode = NONE;
-			break;
-		case MotionEvent.ACTION_MOVE:
-			if (mode == DRAG) {
-				float dx = event.getX() - mStartPoint.x;
-				float dy = event.getY() - mStartPoint.y;
-				if (dx > 0 && mCurrentPadding.left >= 0) { // 拖动达到最左边
-					logi(TAG, "hit=left");
-
-					return super.dispatchTouchEvent(event);
-
-				} else if (dx < 0 && mCurrentPadding.right >= 0) { // 拖动达到最右边
-					logi(TAG, "hit=right");
-
-					return super.dispatchTouchEvent(event);
-
-				} else {
-					flag = true;
-				}
-
-				matrix.set(savedMatrix);
-				matrix.postTranslate(dx, dy);
-				matrix.getValues(values);
-				saveCurrentImageSizeAndPadding(imgView, values);
-
-			} else if (mode == ZOOM) {
-				float newDist = spacing(event);
-				if (newDist > 10f) {
-					matrix.set(savedMatrix);
-					float scale = newDist / oldDist;
-					matrix.postScale(scale, scale, mMidddlePoint.x, mMidddlePoint.y);
-					flag = true;
-				}
-			}
-			break;
-		}
-
-		imgView.setImageMatrix(matrix);
-		if (flag) {
-			return true;
-		} else {
-			return super.dispatchTouchEvent(event);
-		}
-	}
-
-	public interface OnSimpleOnTouchListener {
-		void onKeyDown();
-
-		void onKeyUp();
-	}
-
-	/**
-	 * 移动图片到中心
-	 */
-	private void movieImageToCenter() {
-		// 居中显示
-		float dx = 0;
-		if (mViewSize.x >= mCurrentImageSize.x) { // 图片宽度小于控件宽度
-			dx = (mViewSize.x - mCurrentImageSize.x) / 2 - mCurrentPadding.left;
-
-		} else {
-			if (mCurrentPadding.left > 0) { // 左边拖出留了空
-				dx = -mCurrentPadding.left;
-
-			} else if (mCurrentPadding.right > 0) { // 右边拖出留了空
-				dx = mCurrentPadding.right;
-			}
-		}
-
-		float dy = 0;
-		if (mViewSize.y >= mCurrentImageSize.y) { // 图片高度小于控件高度
-			dy = (mViewSize.y - mCurrentImageSize.y) / 2 - mCurrentPadding.top;
-
-		} else {
-			if (mCurrentPadding.top > 0) { // 上边拖出留了空
-				dy = -mCurrentPadding.top;
-
-			} else if (mCurrentPadding.bottom > 0) { // 下边拖出留了空
-				dy = mCurrentPadding.bottom;
-
-			}
-		}
-		matrix.postTranslate(dx, dy);
-		temp();
-	}
-
-	public void temp() {
-		logi(TAG, "test-movie(目标位置)=" + ((mViewSize.x - mCurrentImageSize.x) / 2) + ","
-				+ ((mViewSize.y - mCurrentImageSize.y) / 2));
-		logi(TAG, "test-movie(当前间距)=" + +mCurrentPadding.left + "," + mCurrentPadding.top);
-		float dx = (mViewSize.x - mCurrentImageSize.x) / 2 - mCurrentPadding.left;
-		float dy = (mViewSize.y - mCurrentImageSize.y) / 2 - mCurrentPadding.top;
-		logi(TAG, "test-movie(移动距离)" + dx + "," + dy);
-	}
-
-	/**
-	 * 记录当前图片与图片控件的间距
-	 * 
-	 * @param imgView
-	 * @param values
-	 */
-	private void saveCurrentImageSizeAndPadding(ImageView imgView, float[] values) {
-
-		if (mCurrentImageSize == null) {
-			mCurrentImageSize = new Point();
-		}
-
-		Rect rect = imgView.getDrawable().getBounds();
-		mCurrentImageSize.x = (int) (rect.width() * values[0]);
-		mCurrentImageSize.y = (int) (rect.height() * values[0]);
-		logi(TAG, "当前图片大小：" + mCurrentImageSize.x + "," + mCurrentImageSize.y);
-
-		if (mCurrentPadding == null) {
-			mCurrentPadding = new Rect();
-		}
-
-		mCurrentPadding.left = (int) values[2];
-		mCurrentPadding.top = (int) values[5];
-
-		// 图片控件宽度 - 图片距离左边的边距 - 图片自身的宽度 = 图片距离右边的边距
-		mCurrentPadding.right = mViewSize.x - mCurrentPadding.left - mCurrentImageSize.x;
-		mCurrentPadding.bottom = mViewSize.y - mCurrentPadding.top - mCurrentImageSize.y;
-		logi(TAG, "test(边距):" + mCurrentPadding.left + "," + mCurrentPadding.right + "," + mCurrentPadding.top
-				+ "," + mCurrentPadding.bottom);
-	}
-
-	/**
-	 * 计算两触摸点之间的距离
-	 * 
-	 * @param event
-	 * @return
-	 */
-	private float spacing(MotionEvent event) {
-		double x = event.getX(0) - event.getX(1);
-		double y = event.getY(0) - event.getY(1);
-		return (float) Math.sqrt(x * x + y * y);
-	}
-
-	/**
-	 * 计算两点之间的中间点
-	 * 
-	 * @param point
-	 * @param event
-	 */
-	private void midPoint(PointF point, MotionEvent event) {
-		float x = event.getX(0) + event.getX(1);
-		float y = event.getY(0) + event.getY(1);
-		point.set(x / 2, y / 2);
-	}
+    /**
+     * 计算两点之间的中间点
+     *
+     * @param point
+     * @param event
+     */
+    private fun midPoint(point: PointF, event: MotionEvent) {
+        val x = event.getX(0) + event.getX(1)
+        val y = event.getY(0) + event.getY(1)
+        point[x / 2] = y / 2
+    }
 }

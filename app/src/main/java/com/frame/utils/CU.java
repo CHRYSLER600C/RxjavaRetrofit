@@ -223,7 +223,7 @@ public class CU {
                     String dayStr = (day > 9 ? "" : "0") + day;
 
                     String timeStart = year + "年" + monthStr + "月" + dayStr + "日";
-                    ViewUtil.setViewText(tv, timeStart);
+                    tv.setText(timeStart);
                 }, yearInt, monthInt, dayInt);
         Window window = datePickerDialog.getWindow();
         window.setGravity(Gravity.BOTTOM); // 此处可以设置dialog显示的位置

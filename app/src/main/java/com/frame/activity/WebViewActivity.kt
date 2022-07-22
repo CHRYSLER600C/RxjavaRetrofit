@@ -16,7 +16,6 @@ import android.widget.Toast
 import com.blankj.utilcode.util.ObjectUtils
 import com.frame.R
 import com.frame.utils.CU
-import com.frame.utils.ViewUtil
 import kotlinx.android.synthetic.main.activity_webview.*
 import java.io.DataOutputStream
 import java.net.HttpURLConnection
@@ -120,14 +119,14 @@ class WebViewActivity : BaseTitleActivity() {
         @JavascriptInterface
         fun callAndroid(message: String?) {
             // 特别注意：JS代码调用一定要在 onPageFinished（）回调之后才能调用。
-            val script = ViewUtil.formatScript("callJS", message)
-            ViewUtil.callJavaScriptFunction(webView, script)
+            val script = formatScript("callJS", message)
+            callJavaScriptFunction(webView, script)
         }
 
         @JavascriptInterface
         fun setWebViewTextCallback() {
-            val script = ViewUtil.formatScript("setText", "This is a text from Android which is set in the html")
-            ViewUtil.callJavaScriptFunction(webView, script)
+            val script = formatScript("setText", "This is a text from Android which is set in the html")
+            callJavaScriptFunction(webView, script)
         }
 
         @JavascriptInterface
@@ -297,5 +296,33 @@ class WebViewActivity : BaseTitleActivity() {
         const val TYPE_POST_URL = "type_post_url" // 加载网络url
         const val TYPE_LOAD_CONTENT = "type_load_content" // 直接加载内容
         const val TYPE_LOAD_FILE = "type_load_file" // 直接加载文件
+
+        /**
+         * WebViewUtils: 调用JS方法
+         */
+        fun callJavaScriptFunction(webView: WebView?, script: String) {
+            webView?.post {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    webView.evaluateJavascript(script, null)
+                } else {
+                    //  String script = displayAlert('Hello World' , true);
+                    webView.loadUrl("javascript:$script")
+                }
+            }
+        }
+
+        /**
+         * WebViewUtils: 组装调用JS的代码
+         */
+        fun formatScript(function: String, vararg params: Any?): String {
+            val builder = StringBuilder(function).append('(')
+            val length = params.size
+            for (i in params.indices) {
+                if (params[i] is String) builder.append("\'" + params[i] + "\'")
+                if (i != length - 1) builder.append(",")
+            }
+            builder.append(')')
+            return builder.toString()
+        }
     }
 }

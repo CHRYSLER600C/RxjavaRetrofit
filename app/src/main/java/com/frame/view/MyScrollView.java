@@ -29,8 +29,7 @@ public class MyScrollView extends ScrollView {
 
 	@Override
 	public void requestChildFocus(View child, View focused) {
-		if (focused instanceof WebView)
-			return;
+		if (focused instanceof WebView) return;
 		super.requestChildFocus(child, focused);
 	}
 

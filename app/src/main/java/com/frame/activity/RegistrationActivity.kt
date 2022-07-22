@@ -11,7 +11,7 @@ import com.frame.dataclass.DataClass
 import com.frame.observers.ProgressObserver
 import com.frame.observers.RecycleObserver
 import com.frame.utils.CU
-import com.frame.utils.ViewUtil
+import com.frame.utils.LU
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_registration.*
@@ -42,8 +42,8 @@ class RegistrationActivity : BaseTitleActivity(), CompoundButton.OnCheckedChange
     fun onViewClicked(view: View) {
         when (view.id) {
             R.id.btnRegSmsCode -> {
-                val mobileSms = ViewUtil.getEtTrim(etRegMobile)
-                val imgCodeSms = ViewUtil.getEtTrim(etRegImgCode)
+                val mobileSms = LU.getEtTrim(etRegMobile)
+                val imgCodeSms = LU.getEtTrim(etRegImgCode)
                 if (TextUtils.isEmpty(mobileSms) || mobileSms.length < 11) {
                     showShort("请输入11位手机号码")
                     return
@@ -55,11 +55,11 @@ class RegistrationActivity : BaseTitleActivity(), CompoundButton.OnCheckedChange
                 verifyImgCode(imgCodeSms)
             }
             R.id.btnRegistration -> {
-                val name = ViewUtil.getEtTrim(etRegUserName)
-                val pwd = ViewUtil.getEtTrim(etRegPwd)
-                val imgCode = ViewUtil.getEtTrim(etRegImgCode)
-                val mobile = ViewUtil.getEtTrim(etRegMobile)
-                val smsCode = ViewUtil.getEtTrim(registrationSmsCode)
+                val name = LU.getEtTrim(etRegUserName)
+                val pwd = LU.getEtTrim(etRegPwd)
+                val imgCode = LU.getEtTrim(etRegImgCode)
+                val mobile = LU.getEtTrim(etRegMobile)
+                val smsCode = LU.getEtTrim(registrationSmsCode)
                 if (TextUtils.isEmpty(name) || name.length < 6 || name.length > 20) {
                     showShort("请输入6-20位用户名")
                     return
@@ -118,30 +118,34 @@ class RegistrationActivity : BaseTitleActivity(), CompoundButton.OnCheckedChange
 
     private fun sendSmsCode() {
         val map: MutableMap<String?, Any?> = HashMap()
-        map["mobile"] = ViewUtil.getEtTrim(etRegMobile)
+        map["mobile"] = LU.getEtTrim(etRegMobile)
         map["business"] = "register"
-        val imgCode = ViewUtil.getEtTrim(etRegImgCode)
+        val imgCode = LU.getEtTrim(etRegImgCode)
         if (ObjectUtils.isNotEmpty(imgCode)) {
             map["imgCode"] = imgCode
         }
         doCommonGet("sendSmsCode", map, object : ProgressObserver<DataClass>(this, true) {
             override fun onNext(dc: DataClass) {
-                btnRegSmsCode.isClickable = false
-                add2Disposable(Observable.interval(0, 1, TimeUnit.SECONDS, AndroidSchedulers.mainThread()) // 倒计时
-                    .take(61)
-                    .subscribeWith(object : RecycleObserver<Long?>() {
-                        override fun onNext(aLong: Long) {
-                            ViewUtil.setViewText(btnRegSmsCode, String.format("%02d秒", 60 - aLong))
-                        }
-
-                        override fun onComplete() {
-                            super.onComplete()
-                            btnRegSmsCode.isClickable = true
-                            ViewUtil.setViewText(btnRegSmsCode, "获取验证码")
-                        }
-                    }))
+                countDown()
             }
         })
+    }
+
+    private fun countDown() {
+        btnRegSmsCode.isClickable = false
+        add2Disposable(Observable.interval(0, 1, TimeUnit.SECONDS, AndroidSchedulers.mainThread()) // 倒计时
+            .take(61)
+            .subscribeWith(object : RecycleObserver<Long?>() {
+                override fun onNext(aLong: Long) {
+                    btnRegSmsCode.text = String.format("%02d秒", 60 - aLong)
+                }
+
+                override fun onComplete() {
+                    super.onComplete()
+                    btnRegSmsCode.isClickable = true
+                    btnRegSmsCode.text = "获取验证码"
+                }
+            }))
     }
 
 }

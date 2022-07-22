@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.view.View
+import android.widget.EditText
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ObjectUtils
@@ -13,13 +15,14 @@ import com.frame.R
 import com.frame.activity.*
 import com.frame.common.CommonData
 import com.frame.dataclass.bean.Template
+import com.frame.httputils.ImageLoaderUtil
 import com.frame.httputils.OkHttpUtil
 import com.frame.httputils.OkHttpUtil2
-import com.frame.other.BannerImageLoader
 import com.google.gson.internal.LinkedTreeMap
 import com.youth.banner.Banner
 import com.youth.banner.BannerConfig
 import com.youth.banner.Transformer
+import com.youth.banner.loader.ImageLoader
 
 /**
  * 逻辑处理类
@@ -91,6 +94,11 @@ object LU {
         }
     }
 
+    class BannerImageLoader : ImageLoader() {
+        override fun displayImage(context: Context, o: Any, iv: ImageView) {
+            ImageLoaderUtil.loadImage(context, o as String, iv, R.drawable.ic_default, 0)
+        }
+    }
     //Banner of Tab1
     fun initBanner(context: Context?, banner: Banner, list: ArrayList<LinkedTreeMap<String, Any>>) {
         if (ObjectUtils.isEmpty(list)) return
@@ -127,6 +135,11 @@ object LU {
             }
         }
         banner.start() //banner设置方法全部调用完毕时最后调用
+    }
+
+
+    fun getEtTrim(et: EditText?): String {
+        return et?.text?.toString()?.trim() ?: ""
     }
 
 }

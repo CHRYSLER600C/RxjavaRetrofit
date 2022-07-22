@@ -8,17 +8,14 @@ public class SquareRelLayout extends RelativeLayout {
 
 	public SquareRelLayout(Context context) {
 		super(context);
-		// TODO Auto-generated constructor stub
 	}
 
 	public SquareRelLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		// TODO Auto-generated constructor stub
 	}
 
 	public SquareRelLayout(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -28,7 +25,7 @@ public class SquareRelLayout extends RelativeLayout {
 		// Children are just made to fill our space.
 		widthMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY);
 		heightMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY);
-		int smallSize = widthMeasureSpec > heightMeasureSpec ? heightMeasureSpec : widthMeasureSpec;
+		int smallSize = Math.min(widthMeasureSpec, heightMeasureSpec);
 		super.onMeasure(smallSize, smallSize);
 	}
 }
