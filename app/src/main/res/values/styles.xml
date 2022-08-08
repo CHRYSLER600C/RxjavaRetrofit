@@ -61,10 +61,10 @@
         <item name="android:button">@null</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:drawablePadding">2dp</item>
-        <item name="android:layout_marginBottom">3.5dp</item>
-        <item name="android:layout_marginTop">3.5dp</item>
-        <item name="android:textSize">10.5sp</item>
+        <item name="android:drawablePadding">3dp</item>
+        <item name="android:layout_marginBottom">5dp</item>
+        <item name="android:layout_marginTop">5dp</item>
+        <item name="android:textSize">11sp</item>
         <item name="android:textColor">@color/selector_tab_item_text</item>
     </style>
 

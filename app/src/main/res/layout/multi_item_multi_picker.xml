@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="@drawable/selector_underline_05dip"
-              android:orientation="horizontal"
-              android:padding="10dp">
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:background="@drawable/selector_underline_05dip"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
 
     <TextView
         android:id="@+id/tvSelectName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
         android:textColor="@color/color_3"
-        android:textSize="16sp"/>
+        android:textSize="15sp" />
 
     <LinearLayout
         android:id="@+id/llSelectContent"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="horizontal">
 
@@ -26,46 +27,38 @@
             android:layout_width="0dp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
+            android:drawableEnd="@drawable/ic_arrow_down"
             android:drawablePadding="5dip"
-            android:drawableRight="@drawable/ic_arrow_down"
-            android:gravity="right"
+            android:gravity="center_vertical|end"
             android:hint="请选择"
             android:paddingRight="5dp"
             android:textColor="@color/color_3"
-            android:textSize="16sp"/>
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/tvSelectContent2"
             android:layout_width="0dp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
+            android:drawableEnd="@drawable/ic_arrow_down"
             android:drawablePadding="5dip"
-            android:drawableRight="@drawable/ic_arrow_down"
-            android:gravity="right"
+            android:gravity="center_vertical|end"
             android:hint="请选择"
             android:paddingRight="5dp"
             android:textColor="@color/color_3"
-            android:textSize="16sp"/>
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/tvSelectContent3"
             android:layout_width="0dp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
+            android:drawableEnd="@drawable/ic_arrow_down"
             android:drawablePadding="5dip"
-            android:drawableRight="@drawable/ic_arrow_down"
-            android:gravity="right"
+            android:gravity="center_vertical|end"
             android:hint="请选择"
             android:paddingRight="5dp"
             android:textColor="@color/color_3"
-            android:textSize="16sp"/>
+            android:textSize="15sp" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvSelectUnit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:textColor="@color/color_3"
-        android:textSize="16sp"/>
 </LinearLayout>

@@ -42,8 +42,7 @@ public class PickerDialog extends Dialog {
             this.context = context;
         }
 
-        public Builder setBtnOk(PickerValue pickerValue, String place, IPickerDialogOkCallBack
-                listener) {
+        public Builder setBtnOk(PickerValue pickerValue, String place, IPickerDialogOkCallBack listener) {
             this.mPickerValue = pickerValue;
             this.place = place;
             this.okBtnListener = listener;
@@ -67,41 +66,28 @@ public class PickerDialog extends Dialog {
                     break;
             }
             View view = LayoutInflater.from(context).inflate(R.layout.common_picker_dialog, null);
-            final PickerView pickerView = (PickerView) view.findViewById(R.id.pickerView);
-            final TextView tvOk = (TextView) view.findViewById(R.id.tvPickerDlgOk);
-            final TextView tvCancel = (TextView) view.findViewById(R.id.tvPickerDlgCancel);
+            final PickerView pickerView = view.findViewById(R.id.pickerView);
+            final TextView tvOk = view.findViewById(R.id.tvPickerDlgOk);
+            final TextView tvCancel = view.findViewById(R.id.tvPickerDlgCancel);
 
             pickerView.setPickerData(mPickerItem, mPickerValue);
-            pickerView.setOnSelectingListener(new PickerView.OnPickerSelectingListener() {
-
-                @Override
-                public void selected(boolean selected) {
-                    nameValue1 = pickerView.getSelectedNameValue1();
-                    nameValue2 = pickerView.getSelectedNameValue2();
-                    nameValue3 = pickerView.getSelectedNameValue3();
-                }
+            pickerView.setOnSelectingListener(selected -> {
+                nameValue1 = pickerView.getSelectedNameValue1();
+                nameValue2 = pickerView.getSelectedNameValue2();
+                nameValue3 = pickerView.getSelectedNameValue3();
             });
-            tvOk.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    if (okBtnListener != null) {
-                        if (nameValue1 == null) { // 未滑动时为空
-                            nameValue1 = pickerView.getSelectedNameValue1();
-                            nameValue2 = pickerView.getSelectedNameValue2();
-                            nameValue3 = pickerView.getSelectedNameValue3();
-                        }
-                        okBtnListener.handleBtnOk(nameValue1, nameValue2, nameValue3);
+            tvOk.setOnClickListener(v -> {
+                if (okBtnListener != null) {
+                    if (nameValue1 == null) { // 未滑动时为空
+                        nameValue1 = pickerView.getSelectedNameValue1();
+                        nameValue2 = pickerView.getSelectedNameValue2();
+                        nameValue3 = pickerView.getSelectedNameValue3();
                     }
-                    pickerDialog.dismiss();
+                    okBtnListener.handleBtnOk(nameValue1, nameValue2, nameValue3);
                 }
+                pickerDialog.dismiss();
             });
-            tvCancel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    pickerDialog.dismiss();
-                }
-            });
+            tvCancel.setOnClickListener(v -> pickerDialog.dismiss());
             pickerDialog.setContentView(view);
             return pickerDialog;
 
@@ -112,9 +98,7 @@ public class PickerDialog extends Dialog {
      * 确定按钮回调方法
      **/
     public interface IPickerDialogOkCallBack {
-        public abstract void handleBtnOk(NameValue nv1, NameValue nv2, NameValue nv3);
+        void handleBtnOk(NameValue nv1, NameValue nv2, NameValue nv3);
     }
-
-    ;
 
 }

@@ -41,8 +41,9 @@ class PhotoDialog(var mContext: Activity) : Dialog(mContext, R.style.PhotoDialog
         btnGalleryPick?.setOnClickListener(this)
     }
 
-    fun setCaptureFile(storeFile: String) {
+    fun setCaptureFile(storeFile: String): PhotoDialog {
         mStoreFile = storeFile
+        return this
     }
 
     fun getCaptureFilePath(): String = if (TextUtils.isEmpty(mStoreFile)) mFilePath else mStoreFile
@@ -81,22 +82,28 @@ class PhotoDialog(var mContext: Activity) : Dialog(mContext, R.style.PhotoDialog
          * @param input  原始图片
          * @param output 裁剪后图片
          */
-        fun cropImage(activity: Activity, input: Uri?, output: Uri?) {
+        fun cropImage(activity: Activity, input: Uri?, output: Uri?, aspectX: Int, aspectY: Int) {
+            val preFile = File(output?.path)
+            if (preFile.exists()) preFile.delete()
             val intentCamera = Intent("com.android.camera.action.CROP")
             intentCamera.setDataAndType(input, "image/*") // 源文件地址
             intentCamera.putExtra("crop", true)
-            // intentCamera.putExtra("scale", false);
-            // intentCamera.putExtra("noFaceDetection", true);//不需要人脸识别功能
-            // intentCamera.putExtra("circleCrop", true);//设定此方法选定区域会是圆形区域
+            //        intentCamera.putExtra("scale", false);
+//        intentCamera.putExtra("noFaceDetection", true);//不需要人脸识别功能
+//        intentCamera.putExtra("circleCrop", true);//设定此方法选定区域会是圆形区域
             // aspectX aspectY是宽高比例
-            intentCamera.putExtra("aspectX", 1)
-            intentCamera.putExtra("aspectY", 1)
+            intentCamera.putExtra("aspectX", aspectX)
+            intentCamera.putExtra("aspectY", aspectY)
             // outputX outputY 是裁剪图片的宽高
-            intentCamera.putExtra("outputX", 1000)
+            intentCamera.putExtra("outputX", 1000 * aspectX / aspectY)
             intentCamera.putExtra("outputY", 1000)
             intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, output) // 输出地址
             intentCamera.putExtra("return-data", false)
             activity.startActivityForResult(intentCamera, CommonData.PHOTO_CROP)
+        }
+
+        fun cropImage(activity: Activity?, input: Uri?, output: Uri?) {
+            cropImage(activity!!, input, output, 1, 1)
         }
     }
 }

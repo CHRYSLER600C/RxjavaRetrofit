@@ -1,34 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="@drawable/selector_underline_05dip"
-              android:gravity="center_vertical"
-              android:orientation="horizontal"
-              android:padding="10dp">
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/bg_underline_d1_05dip"
+    android:foreground="?selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingEnd="16dp"
+    android:paddingStart="16dp">
 
     <TextView
-        android:id="@+id/tvItemNameTt"
+        android:id="@+id/tvItemContent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:gravity="center_vertical"
+        tools:text="图片"
         android:maxWidth="200dp"
         android:singleLine="true"
         android:textColor="@color/color_3"
-        android:textSize="17sp"/>
+        android:textSize="15sp" />
 
     <TextView
-        android:id="@+id/tvItemContentTt"
+        android:id="@+id/tvItemMsg"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:drawablePadding="5dip"
-        android:drawableRight="@drawable/ic_arrow_right"
         android:gravity="right|center_vertical"
         android:paddingRight="5dp"
         android:singleLine="true"
-        android:textColor="@color/color_6"
-        android:textSize="17sp"/>
+        android:textColor="#FFBCBCBC"
+        android:textSize="15sp" />
 
 </LinearLayout>

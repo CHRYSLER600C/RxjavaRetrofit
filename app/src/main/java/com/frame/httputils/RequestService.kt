@@ -1,69 +1,66 @@
-package com.frame.httputils;
+package com.frame.httputils
 
-import com.frame.dataclass.DataClass;
-
-import java.util.Map;
-
-import io.reactivex.Observable;
-import okhttp3.RequestBody;
-import retrofit2.http.Body;
-import retrofit2.http.FieldMap;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.GET;
-import retrofit2.http.Headers;
-import retrofit2.http.POST;
-import retrofit2.http.QueryMap;
-import retrofit2.http.Url;
+import com.frame.dataclass.DataClass
+import io.reactivex.Observable
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.http.*
 
 /**
  * Created by dongxie on 16/3/9.
- * <p>
- * 定义所有的接口参数，非common的自行定义
+ *
+ *
+ * 定义所有的接口参数，非common的可自行定义
  */
-public interface RequestService {
-
-
-    // ============================== All GET Method Declaration ==============================
-
+interface RequestService {
+    /**
+     ============================== All GET Method Declaration ==============================
+     */
     // 通用GET请求
     @GET
-    Observable<DataClass> commonGet(@Url String url);
+    fun commonGet(@Url url: String): Observable<DataClass>?
 
     @GET
-    Observable<DataClass> commonGet(@Url String url, @QueryMap Map<String, Object> map);
+    fun commonGet(@Url url: String, @QueryMap map: Map<String, Any>?): Observable<DataClass>?
 
     // 通用GET请求，返回原始数据
     @GET
-    Observable<String> commonGetRaw(@Url String url);
+    fun commonGetRaw(@Url url: String): Observable<String?>?
 
     @GET
-    Observable<String> commonGetRaw(@Url String url, @QueryMap Map<String, Object> map);
+    fun commonGetRaw(@Url url: String, @QueryMap map: Map<String, Any>?): Observable<String?>?
 
-    // ============================== All POST Method Declaration ==============================
-
+    /**
+     ============================== All POST Method Declaration ==============================
+     */
     // 通用POST请求
     @POST
-    Observable<DataClass> commonPost(@Url String url);
+    fun commonPost(@Url url: String): Observable<DataClass>?
 
     @FormUrlEncoded
     @POST
-    Observable<DataClass> commonPost(@Url String url, @FieldMap Map<String, Object> map);
+    fun commonPost(@Url url: String, @FieldMap map: Map<String, Any>?): Observable<DataClass>?
 
     //添加Headers，以json字符串传送
-    @Headers({"Content-Type: application/json", "Accept: application/json"})
+    @Headers("Content-Type: application/json", "Accept: application/json")
     @POST
-    Observable<DataClass> commonPostJson(@Url String url, @Body RequestBody strJson);
+    fun commonPostJson(@Url url: String, @Body strJson: RequestBody?): Observable<DataClass>?
 
     // 通用POST请求，返回原始数据
     @POST
-    Observable<String> commonPostRaw(@Url String url);
+    fun commonPostRaw(@Url url: String): Observable<String?>?
 
     @FormUrlEncoded
     @POST
-    Observable<String> commonPostRaw(@Url String url, @FieldMap Map<String, Object> map);
+    fun commonPostRaw(@Url url: String, @FieldMap map: Map<String, Any>?): Observable<String?>?
 
     //添加Headers，以json字符串传送
-    @Headers({"Content-Type: application/json", "Accept: application/json"})
+    @Headers("Content-Type: application/json", "Accept: application/json")
     @POST
-    Observable<String> commonPostJsonRaw(@Url String url, @Body RequestBody strJson);
+    fun commonPostJsonRaw(@Url url: String, @Body strJson: RequestBody?): Observable<String?>?
+
+    // 上传单个文件
+    @Multipart
+    @POST
+    fun uploadFile(@Url url: String, @Part file: MultipartBody.Part?): Observable<DataClass>?
 }
