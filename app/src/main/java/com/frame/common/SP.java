@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 
 import com.frame.application.App;
 
-public class SPreferences {
+public class SP {
 
     private static final String SP_NAME = "sp_info";
 

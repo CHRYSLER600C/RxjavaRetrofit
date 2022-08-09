@@ -7,7 +7,7 @@ import android.view.View
 import com.blankj.utilcode.util.ActivityUtils
 import com.frame.R
 import com.frame.common.CommonData
-import com.frame.common.SPreferences
+import com.frame.common.SP
 import com.frame.dataclass.DataClass
 import com.frame.observers.ProgressObserver
 import com.frame.utils.CU
@@ -36,7 +36,7 @@ class LoginActivity : BaseTitleActivity() {
 
     override fun onResume() {
         super.onResume()
-        val userName = SPreferences.getData(SPreferences.USER_NAME, "")
+        val userName = SP.getData(SP.USER_NAME, "")
         if (!TextUtils.isEmpty(userName)) {
             etUserName?.setText(userName)
         }
@@ -69,7 +69,7 @@ class LoginActivity : BaseTitleActivity() {
         map["passWord"] = CU.encodePwd(pwd)
         doCommonGet("login", map, object : ProgressObserver<DataClass>(this, true) {
             override fun onNext(dc: DataClass) {
-                SPreferences.saveData(SPreferences.USER_NAME, name)
+                SP.saveData(SP.USER_NAME, name)
                 CommonData.IS_LOGIN = true
                 setResult(RESULT_OK)
                 finish()

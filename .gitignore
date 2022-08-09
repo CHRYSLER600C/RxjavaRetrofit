@@ -2,3 +2,6 @@
 /app/build/
 /.gradle/
 /.idea/
+/app/src/main/java/com/frame/core/dao/DaoMaster.java
+/app/src/main/java/com/frame/core/dao/DaoSession.java
+/app/src/main/java/com/frame/core/dao/HistoryDataDao.java
