@@ -13,9 +13,9 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 
-import static com.frame.utils.LogUtilKt.logd;
-import static com.frame.utils.LogUtilKt.logi;
-import static com.frame.utils.LogUtilKt.logv;
+import static com.frame.utils.GUKt.logd;
+import static com.frame.utils.GUKt.logi;
+import static com.frame.utils.GUKt.logv;
 
 
 /**

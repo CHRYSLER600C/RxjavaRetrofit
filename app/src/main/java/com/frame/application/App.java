@@ -21,8 +21,8 @@ import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.frame.common.CommonData.TAG;
-import static com.frame.utils.LogUtilKt.logd;
-import static com.frame.utils.LogUtilKt.logi;
+import static com.frame.utils.GUKt.logd;
+import static com.frame.utils.GUKt.logi;
 
 
 public class App extends Application {

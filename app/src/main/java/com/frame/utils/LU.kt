@@ -25,7 +25,7 @@ import com.youth.banner.Transformer
 import com.youth.banner.loader.ImageLoader
 
 /**
- * 逻辑处理类
+ * Logic Util : 逻辑处理类
  */
 
 object LU {
