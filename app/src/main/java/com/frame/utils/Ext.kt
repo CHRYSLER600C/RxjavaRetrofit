@@ -54,13 +54,6 @@ var View.isGone: Boolean
     get() = visibility == View.GONE
     set(value) = if (value) gone() else visible()
 
-/**
- * Set padding
- * @param size top, bottom, left, right padding are same
- */
-fun View.setPadding(size: Int) {
-    setPadding(size, size, size, size)
-}
 
 /**
  * Causes the Runnable which contains action() to be added to the message queue, to be run
