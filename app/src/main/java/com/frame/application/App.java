@@ -13,6 +13,7 @@ import com.frame.injector.component.ComponentHolder;
 import com.frame.injector.component.DaggerAppComponent;
 import com.frame.injector.module.AppModule;
 import com.frame.observers.RecycleObserver;
+import com.frame.utils.LU;
 
 import androidx.multidex.MultiDex;
 import io.reactivex.Observable;
@@ -34,6 +35,8 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        if (!getPackageName().equals(LU.INSTANCE.getProcessName(android.os.Process.myPid()))) return;
+
         mInstance = this;
         mStartAppTime = System.currentTimeMillis();
 

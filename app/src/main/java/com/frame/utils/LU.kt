@@ -1,6 +1,7 @@
 package com.frame.utils
 
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
@@ -13,6 +14,7 @@ import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ObjectUtils
 import com.frame.R
 import com.frame.activity.*
+import com.frame.application.App
 import com.frame.common.CommonData
 import com.frame.dataclass.bean.Template
 import com.frame.httputils.ImageLoaderUtil
@@ -99,6 +101,7 @@ object LU {
             ImageLoaderUtil.loadImage(context, o as String, iv, R.drawable.ic_default, 0)
         }
     }
+
     //Banner of Tab1
     fun initBanner(context: Context?, banner: Banner, list: ArrayList<LinkedTreeMap<String, Any>>) {
         if (ObjectUtils.isEmpty(list)) return
@@ -140,6 +143,14 @@ object LU {
 
     fun getEtTrim(et: EditText?): String {
         return et?.text?.toString()?.trim() ?: ""
+    }
+
+    fun getProcessName(pid: Int): String? {
+        val am = App.getInstance().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        am.runningAppProcesses?.forEach {
+            if (it.pid == pid) return it.processName
+        }
+        return ""
     }
 
 }
