@@ -15,11 +15,6 @@ import com.frame.dataclass.bean.Event
 import com.frame.utils.gone
 import com.frame.utils.invisible
 import com.frame.view.TitleBar
-import com.scwang.smartrefresh.layout.SmartRefreshLayout
-import com.scwang.smartrefresh.layout.footer.ClassicsFooter
-import com.scwang.smartrefresh.layout.header.ClassicsHeader
-import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener
-import com.scwang.smartrefresh.layout.listener.OnRefreshListener
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -32,6 +27,10 @@ abstract class BaseTitleFragment : Fragment() {
     private var mRootView: LinearLayout? = null
     lateinit var mTitleBar: TitleBar
     protected lateinit var mBActivity: BaseActivity
+
+    //user for lazy load fragment
+    private var mIsViewCreated = false
+    private var mIsViewShow = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mBActivity = activity as BaseActivity
@@ -54,12 +53,33 @@ abstract class BaseTitleFragment : Fragment() {
         initControl()
     }
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        mIsViewCreated = true //user for lazy load fragment
+        checkLazyLoad()
+    }
+
+    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        super.setUserVisibleHint(isVisibleToUser)
+        mIsViewShow = true    //user for lazy load fragment
+        checkLazyLoad()
+    }
+
     protected abstract fun setContentView(savedInstanceState: Bundle?): View
 
     /**
      * 初始化控件
      */
     protected open fun initControl() {}
+
+    /**
+     * 懒加载，需要在控件初始化和可见之后
+     */
+    private fun checkLazyLoad() {
+        if (mIsViewCreated && mIsViewShow) lazyLoad()
+    }
+
+    protected open fun lazyLoad() {}
 
     /**
      * 重载后事件点击传递到Fragment
@@ -71,6 +91,10 @@ abstract class BaseTitleFragment : Fragment() {
     }
 
     override fun onDestroy() {
+        //需手动重置，因为销毁的时候有缓存
+        mIsViewCreated = false
+        mIsViewShow = false
+
         mRootView = null
         if (regEvent()) EventBus.getDefault().unregister(this)
         super.onDestroy()
