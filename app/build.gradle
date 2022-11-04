@@ -25,6 +25,7 @@ android {
         versionName rootProject.ext.otherInfo.versionName
         flavorDimensions "default" //必须要保证所有的flavor 都属于同一个维度
         multiDexEnabled true
+        vectorDrawables.useSupportLibrary = true  //To use VectorDrawableCompat
     }
     buildTypes {
         release { //ForRelease

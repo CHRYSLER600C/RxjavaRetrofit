@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/llTitleBar"
     android:layout_width="match_parent"
@@ -17,11 +18,12 @@
 
         <ImageView
             android:id="@+id/ivLeft"
-            android:layout_width="wrap_content"
-            android:layout_height="28dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:contentDescription="@null"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_arrow_left" />
+            app:srcCompat="@drawable/ic_back"
+            app:tint="@color/selector_iv_back" />
 
         <TextView
             android:id="@+id/tvLeft"

@@ -64,20 +64,18 @@ class ExampleActivity : BaseTitleActivity() {
                         when (item.extend) {
                             "image" -> {
                                 val imgList = ArrayList<String>()
-                                imgList.add("https://pics5.baidu.com/feed/0d338744ebf81a4c9f3f23ea1e4cdb5c252da675" +
-                                        ".jpeg?token=79091d07753b5b65acb005b78f73bfcb&s=86BC7C84C6CB1747788D50960300D080")
-                                imgList.add("https://pics6.baidu.com/feed/c2fdfc039245d6887d1325116ca4c61bd31b24da" +
-                                        ".jpeg?token=b2c1c0e64c38691d7ed12b72a2f65309&s=A32A68A5565311D2183BA0810300308B")
+                                imgList.add("https://pics5.baidu.com/feed/0d338744ebf81a4c9f3f23ea1e4cdb5c252da675.jpeg")
+                                imgList.add("https://pics6.baidu.com/feed/c2fdfc039245d6887d1325116ca4c61bd31b24da.jpeg")
                                 ActivityUtils.startActivity(Intent(mBActivity, BigPicActivity::class.java)
                                     .putExtra("index", 0)
                                     .putExtra("picUrls", imgList)
                                     .putExtra("picIds", ""))
+                                return
                             }
                         }
                         ActivityUtils.startActivity(intent)
                     }
                 }
-
             })
     }
 

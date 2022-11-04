@@ -9,14 +9,14 @@
         android:layout_height="50dip"
         android:background="#3a3a3a">
 
-        <ImageButton
+        <ImageView
             android:id="@+id/ivTitleLeft"
-            android:layout_width="wrap_content"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
             android:layout_alignParentStart="true"
             android:background="@color/transparent"
-            android:padding="8dip"
-            android:src="@drawable/ic_arrow_left" />
+            android:padding="12dip"
+            android:src="@drawable/ic_back" />
 
         <TextView
             android:id="@+id/tvTitleContent"

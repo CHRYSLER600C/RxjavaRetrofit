@@ -35,10 +35,10 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (!getPackageName().equals(LU.INSTANCE.getProcessName(android.os.Process.myPid()))) return;
 
         mInstance = this;
         mStartAppTime = System.currentTimeMillis();
+        if (!getPackageName().equals(LU.INSTANCE.getProcessName(android.os.Process.myPid()))) return;
 
         initToolsMainThread();
         initToolsSubThread();
