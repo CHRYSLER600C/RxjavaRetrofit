@@ -26,6 +26,7 @@ android {
         flavorDimensions "default" //必须要保证所有的flavor 都属于同一个维度
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true  //To use VectorDrawableCompat
+        resConfig "zh"  // 指定打包到apk/rescources.arsc里面的string的语言类型只有中文
     }
     buildTypes {
         release { //ForRelease
