@@ -29,6 +29,15 @@ import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
+/**
+ * @Name可以标识获取同一个对象的不同方法, eg.
+ * @Name("key1") @Provides function1()
+ * @Name("key2") @Provides function2()
+ *
+ * 获取的时候：
+ * @Name("key1")
+ * @Inject
+ */
 
 @Module
 public class AppModule {

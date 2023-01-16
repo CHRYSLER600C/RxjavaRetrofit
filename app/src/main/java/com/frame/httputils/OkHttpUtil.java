@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import androidx.fragment.app.Fragment;
+import dagger.Lazy;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
@@ -45,13 +46,14 @@ public class OkHttpUtil {
      * 网络请求格式定义函数
      */
     @Inject
-    public RequestService mRequestService;
+    public Lazy<RequestService> mRequestService;        //懒加载，单例
+//    public Provider<RequestService> mRequestService;  //懒加载，非单例
 
     /**
      * 实际网络请求类
      */
     @Inject
-    public OkHttpClient mOkHttpClient;
+    public Lazy<OkHttpClient> mOkHttpClient;
 
 
     //构造方法私有
@@ -77,7 +79,7 @@ public class OkHttpUtil {
      * 清空cookie
      */
     public void cleanCookie() {
-        CookieJar cookieJar = mOkHttpClient.cookieJar();
+        CookieJar cookieJar = mOkHttpClient.get().cookieJar();
         if (cookieJar instanceof MemoryCookieStore) {
             MemoryCookieStore cookieStore = (MemoryCookieStore) cookieJar;
             cookieStore.removeAll();
@@ -91,7 +93,7 @@ public class OkHttpUtil {
      * @return
      */
     public List<Cookie> getCookies(HttpUrl url) {
-        CookieJar cookieJar = mOkHttpClient.cookieJar();
+        CookieJar cookieJar = mOkHttpClient.get().cookieJar();
         if (cookieJar instanceof MemoryCookieStore) {
             MemoryCookieStore cookieStore = (MemoryCookieStore) cookieJar;
             return null == url ? cookieStore.getCookies() : cookieStore.get(url);
@@ -115,7 +117,7 @@ public class OkHttpUtil {
         try {
             // 反射获取具体方法
             if (params == null && map == null) {
-                method = mRequestService.getClass().getDeclaredMethod(methodName);
+                method = mRequestService.get().getClass().getDeclaredMethod(methodName);
             } else {
                 List<Class> classList = new ArrayList<>();
                 if (params != null && params.size() > 0) {
@@ -124,12 +126,12 @@ public class OkHttpUtil {
                 if (map != null) {
                     classList.add(map.get("POST_TYPE") == "JSON_STRING" ? RequestBody.class : Map.class);
                 }
-                method = mRequestService.getClass().getDeclaredMethod(methodName, classList.toArray(new Class[0]));
+                method = mRequestService.get().getClass().getDeclaredMethod(methodName, classList.toArray(new Class[0]));
             }
 
             method.setAccessible(true);
             if (params == null && map == null) {
-                observable = (Observable<T>) method.invoke(mRequestService);
+                observable = (Observable<T>) method.invoke(mRequestService.get());
             } else {
                 List<Object> objectList = new ArrayList<>();
                 if (params != null && params.size() > 0) objectList.addAll(params);
@@ -141,7 +143,7 @@ public class OkHttpUtil {
                         objectList.add(map);
                     }
                 }
-                observable = (Observable<T>) method.invoke(mRequestService, objectList.toArray(new Object[0]));
+                observable = (Observable<T>) method.invoke(mRequestService.get(), objectList.toArray(new Object[0]));
             }
 
             Object object = progressObserver.getObject();

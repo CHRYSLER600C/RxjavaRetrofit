@@ -17,6 +17,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Cookie;
@@ -40,7 +41,7 @@ public class OkHttpUtil2 {
     private Handler mHandler;
 
     @Inject
-    public OkHttpClient mOkHttpClient2;
+    public Lazy<OkHttpClient> mOkHttpClient2;
 
     //构造方法私有
     private OkHttpUtil2() {
@@ -66,7 +67,7 @@ public class OkHttpUtil2 {
      * 清空cookie
      */
     public void cleanCookie() {
-        CookieJar cookieJar = mOkHttpClient2.cookieJar();
+        CookieJar cookieJar = mOkHttpClient2.get().cookieJar();
         if (cookieJar instanceof MemoryCookieStore) {
             MemoryCookieStore cookieStore = (MemoryCookieStore) cookieJar;
             cookieStore.removeAll();
@@ -80,7 +81,7 @@ public class OkHttpUtil2 {
      * @return
      */
     public List<Cookie> getCookies(HttpUrl url) {
-        CookieJar cookieJar = mOkHttpClient2.cookieJar();
+        CookieJar cookieJar = mOkHttpClient2.get().cookieJar();
         if (cookieJar instanceof MemoryCookieStore) {
             MemoryCookieStore cookieStore = (MemoryCookieStore) cookieJar;
             return null == url ? cookieStore.getCookies() : cookieStore.get(url);
@@ -99,7 +100,7 @@ public class OkHttpUtil2 {
     public <T> void getGson(String url, final Class<T> t, final IRequestCallback callback, Object tag) {
         if (callback == null) return;
 
-        Call call = mOkHttpClient2.newCall(HttpUtil2.createUrlGetRequest(url, tag));
+        Call call = mOkHttpClient2.get().newCall(HttpUtil2.createUrlGetRequest(url, tag));
         call.enqueue(new Callback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
@@ -118,7 +119,7 @@ public class OkHttpUtil2 {
     private <T> void postGsonImpl(Request request, final Class<T> t, final IRequestCallback callback) {
         if (callback == null) return;
 
-        Call call = mOkHttpClient2.newCall(request);
+        Call call = mOkHttpClient2.get().newCall(request);
         call.enqueue(new Callback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
@@ -168,7 +169,7 @@ public class OkHttpUtil2 {
         if (callback == null) return;
 
         Request request = HttpUtil2.createFilePostRequest(mHandler, url, params, callback, tag);
-        Call call = mOkHttpClient2.newCall(request);
+        Call call = mOkHttpClient2.get().newCall(request);
 
         call.enqueue(new Callback() {
             @Override
@@ -196,7 +197,7 @@ public class OkHttpUtil2 {
         if (callback == null) return;
 
         Request request = HttpUtil2.createUrlGetRequest(url, tag);
-        Call call = mOkHttpClient2.newCall(request);
+        Call call = mOkHttpClient2.get().newCall(request);
 
         call.enqueue(new Callback() {
             @Override
@@ -226,7 +227,7 @@ public class OkHttpUtil2 {
         if (callback == null) return;
 
         Request request = HttpUtil2.createUrlGetRequest(url, tag);
-        Call call = mOkHttpClient2.newCall(request);
+        Call call = mOkHttpClient2.get().newCall(request);
 
         call.enqueue(new Callback() {
             @Override
@@ -270,8 +271,8 @@ public class OkHttpUtil2 {
      * @param tag 根据此标签取消请求
      */
     public void cancelRequest(Object tag) {
-        HttpUtil2.cancelCall(tag, mOkHttpClient2.dispatcher().queuedCalls());
-        HttpUtil2.cancelCall(tag, mOkHttpClient2.dispatcher().runningCalls());
+        HttpUtil2.cancelCall(tag, mOkHttpClient2.get().dispatcher().queuedCalls());
+        HttpUtil2.cancelCall(tag, mOkHttpClient2.get().dispatcher().runningCalls());
     }
 
     /**

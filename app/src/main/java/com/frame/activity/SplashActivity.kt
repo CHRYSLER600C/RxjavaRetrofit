@@ -60,7 +60,7 @@ class SplashActivity : BaseActivity() {
         map["verName"] = AppUtils.getAppVersionName()
         map["channelCode"] = CU.getAppChanel()
         map["type"] = "ANDROID"
-        val observableReq = OkHttpUtil.getInstance().mRequestService
+        val observableReq = OkHttpUtil.getInstance().mRequestService.get()
             .commonGet("https://www.yiqiyiqi.cn/app/appUpdateInfo.htm", map)?.subscribeOn(Schedulers.io())
 
         val observer = object : ProgressObserver<DataClass>(mBActivity, true) {
