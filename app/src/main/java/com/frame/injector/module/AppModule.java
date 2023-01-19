@@ -12,13 +12,13 @@ import com.frame.httputils.MyHostnameVerifier;
 import com.frame.httputils.MyTrustManager;
 import com.frame.httputils.RequestService;
 import com.frame.httputils.converter.MyGsonConverterFactory;
+import com.frame.injector.scope.AppScope;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -33,7 +33,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
  * @Name可以标识获取同一个对象的不同方法, eg.
  * @Name("key1") @Provides function1()
  * @Name("key2") @Provides function2()
- *
+ * <p>
  * 获取的时候：
  * @Name("key1")
  * @Inject
@@ -52,8 +52,8 @@ public class AppModule {
         this.context = context;
     }
 
+    @AppScope
     @Provides
-    @Singleton
     public Context provideApplicationContext() {
         return context.getApplicationContext();
     }
@@ -61,8 +61,8 @@ public class AppModule {
     /**
      * 实际网络请求类
      */
+    @AppScope
     @Provides
-    @Singleton
     OkHttpClient provideOkHttpClient(SSLSocketFactory sslSocketFactory) {
         /** 手动创建一个OkHttpClient并设置参数 */
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
@@ -87,8 +87,8 @@ public class AppModule {
     /**
      * 网络请求格式解析器
      */
+    @AppScope
     @Provides
-    @Singleton
     Retrofit provideRetrofit(OkHttpClient okHttpClient) {
         return new Retrofit.Builder()
                 .client(okHttpClient)
@@ -102,8 +102,8 @@ public class AppModule {
     /**
      * 信任https
      */
+    @AppScope
     @Provides
-    @Singleton
     SSLSocketFactory provideSSLSocketFactory(Context context) {
         SSLContext sc = null;
         try {
@@ -120,25 +120,24 @@ public class AppModule {
     /**
      * 网络请求格式定义函数
      */
+    @AppScope
     @Provides
-    @Singleton
     RequestService provideRequestService(Retrofit retrofit) {
         return retrofit.create(RequestService.class);
     }
 
 
+    @AppScope
     @Provides
-    @Singleton
     LayoutInflater provideLayoutInflater(Context context) {
         return (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
+    @AppScope
     @Provides
-    @Singleton
     NotificationManager provideNotificationManager(Context mContext) {
         return (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
     }
-
 
 
 }
