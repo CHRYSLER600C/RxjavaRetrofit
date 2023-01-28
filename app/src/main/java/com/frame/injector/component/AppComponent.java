@@ -5,6 +5,7 @@ import android.content.Context;
 import com.frame.httputils.OkHttpUtil;
 import com.frame.httputils.OkHttpUtil2;
 import com.frame.injector.module.AppModule;
+import com.frame.injector.module.SubComponentModule;
 import com.frame.injector.scope.AppScope;
 
 import dagger.Component;
@@ -26,7 +27,7 @@ import dagger.Component;
  */
 
 @AppScope
-@Component(modules = {AppModule.class})
+@Component(modules = {AppModule.class, SubComponentModule.class})
 public interface AppComponent {
 
     Context getContext();
@@ -34,4 +35,6 @@ public interface AppComponent {
     void inject(OkHttpUtil okHttpUtil); //Rxjava+Retrofit的OkHttpUtil
 
     void inject(OkHttpUtil2 okHttpUtil2); //原生态的OkHttpUtil
+
+    TestComponent.Factory testComponent();
 }

@@ -1,12 +1,16 @@
 package com.frame.activity
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.FragmentTransaction
 import com.frame.R
+import com.frame.dataclass.bean.NameValue
 import com.frame.fragment.*
+import com.frame.injector.component.ComponentHolder
 import com.frame.utils.LU
 import kotlinx.android.synthetic.main.activity_group.*
+import javax.inject.Inject
 
 class GroupActivity : BaseActivity() {
 
@@ -18,6 +22,9 @@ class GroupActivity : BaseActivity() {
 
     private var mExitTime: Long = 0
 
+//    @Inject
+//    lateinit var mNameValue: NameValue
+
     companion object {
         const val TAB1 = "tab1"
         const val TAB2 = "tab2"
@@ -28,6 +35,8 @@ class GroupActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_group)
+//        ComponentHolder.getAppComponent().testComponent().create().inject(this@GroupActivity)
+//        Log.i("TEST", "onCreate: ${mNameValue.name} ${mNameValue.value}")
         initControl()
     }
 
