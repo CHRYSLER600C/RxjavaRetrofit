@@ -6,6 +6,7 @@ import com.frame.httputils.OkHttpUtil;
 import com.frame.httputils.OkHttpUtil2;
 import com.frame.injector.module.AppModule;
 import com.frame.injector.module.SubComponentModule;
+import com.frame.injector.module.TestInterfaceModule;
 import com.frame.injector.scope.AppScope;
 
 import dagger.Component;
@@ -19,15 +20,14 @@ import dagger.Component;
  */
 
 /**
- * @Singleton是Dagger提供的一种作用域实现
- * 作用域就是用来管理Component来获取对象实例的生命周期的
+ * @Singleton是Dagger提供的一种作用域实现 作用域就是用来管理Component来获取对象实例的生命周期的
  * eg.如果你在某个Activity里面初始化的Component，那么单例的作用域就仅限于那个Activity，局部单例 VS 全局单例
- *
+ * <p>
  * module的作用域必须和Component的作用域保持一致
  */
 
 @AppScope
-@Component(modules = {AppModule.class, SubComponentModule.class})
+@Component(modules = {AppModule.class, SubComponentModule.class, TestInterfaceModule.class})
 public interface AppComponent {
 
     Context getContext();

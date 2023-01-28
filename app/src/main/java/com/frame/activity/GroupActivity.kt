@@ -8,6 +8,7 @@ import com.frame.R
 import com.frame.dataclass.bean.NameValue
 import com.frame.fragment.*
 import com.frame.injector.component.ComponentHolder
+import com.frame.injector.testInterface.AInterface
 import com.frame.utils.LU
 import kotlinx.android.synthetic.main.activity_group.*
 import javax.inject.Inject
@@ -24,6 +25,8 @@ class GroupActivity : BaseActivity() {
 
 //    @Inject
 //    lateinit var mNameValue: NameValue
+//    @Inject
+//    lateinit var mAInterface: AInterface
 
     companion object {
         const val TAB1 = "tab1"
@@ -37,6 +40,7 @@ class GroupActivity : BaseActivity() {
         setContentView(R.layout.activity_group)
 //        ComponentHolder.getAppComponent().testComponent().create().inject(this@GroupActivity)
 //        Log.i("TEST", "onCreate: ${mNameValue.name} ${mNameValue.value}")
+//        Log.i("TEST", "onCreate: $mAInterface")
         initControl()
     }
 
