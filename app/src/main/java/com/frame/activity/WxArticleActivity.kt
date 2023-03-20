@@ -46,7 +46,7 @@ class WxArticleActivity : BaseTitleActivity() {
         for (map in list) {
             mFragments.add(WxArticleDetailFragment.getInstance(map!!["id"].toString(), map["name"].toString()))
         }
-        vpCommon.adapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
+        vpCommon.adapter = object : FragmentStatePagerAdapter(supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
             override fun getItem(position: Int): Fragment {
                 return mFragments[position]
             }
